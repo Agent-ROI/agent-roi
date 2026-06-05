@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { api, type Sources } from "../lib/api";
 import { fmtUsd } from "../lib/format";
+import { ToolIcon, toolDisplayName } from "./ToolIcon";
 
 function translateNote(note: string, t: TFunction): string {
   if (note.includes("No logs found")) return t("sources.noteNotFound");
@@ -56,7 +57,12 @@ export function SourcesPanel({ reloadKey }: { reloadKey: number }) {
         <tbody>
           {data.collectors.map((c) => (
             <tr key={c.name}>
-              <td>{c.name}</td>
+              <td>
+                <span className="tool-name-cell">
+                  <ToolIcon tool={c.name} size={18} />
+                  <span>{toolDisplayName(c.name)}</span>
+                </span>
+              </td>
               <td>
                 {c.interactions > 0 ? (
                   <span className="badge exact">{t("sources.active")}</span>

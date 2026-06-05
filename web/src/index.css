@@ -850,3 +850,36 @@ tr.group-detail td.indent {
 td .muted.small {
   font-size: 0.72rem;
 }
+
+/* ── Tool icons ─────────────────────────────────────────────────────────── */
+
+.tool-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.tool-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Pie chart legend with tool icons */
+.pie-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1rem;
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  font-size: 0.78rem;
+}
+
+.pie-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+

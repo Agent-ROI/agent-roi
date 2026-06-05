@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { Rollup } from "../../lib/api";
 import { chartTooltipStyle, seriesColor } from "../../lib/chartTheme";
 import { fmtTokens } from "../../lib/format";
+import { ToolIcon, toolDisplayName } from "../ToolIcon";
 
 interface Props {
   title: string;
@@ -47,8 +48,23 @@ export function SharePieChart({ title, rows, height = 280 }: Props) {
               <Cell key={entry.name} fill={seriesColor(entry.name, i)} />
             ))}
           </Pie>
-          <Tooltip formatter={(v: number) => fmtTokens(v)} contentStyle={chartTooltipStyle} />
-          <Legend />
+          <Tooltip
+            formatter={(v: number, name: string) => [fmtTokens(v), toolDisplayName(name)]}
+            contentStyle={chartTooltipStyle}
+          />
+          <Legend
+            formatter={(value: string) => toolDisplayName(value)}
+            content={({ payload }) => (
+              <ul className="pie-legend">
+                {(payload ?? []).map((entry) => (
+                  <li key={entry.value} className="pie-legend-item">
+                    <ToolIcon tool={entry.value} size={16} />
+                    <span style={{ color: entry.color }}>{toolDisplayName(entry.value)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          />
         </PieChart>
       </ResponsiveContainer>
     </section>
