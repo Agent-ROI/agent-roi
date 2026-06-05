@@ -46,6 +46,26 @@ class Database:
         path.parent.mkdir(parents=True, exist_ok=True)
         self.engine = create_engine(f"sqlite:///{path}")
         Base.metadata.create_all(self.engine)
+        self._migrate()
+
+    def _migrate(self) -> None:
+        """Add columns introduced after a database was first created.
+
+        ``create_all`` only creates missing *tables*, never missing *columns*, so
+        a database from an older version is missing columns added later. We patch
+        them in with ``ALTER TABLE`` (SQLite supports adding columns cheaply).
+        """
+        expected = {
+            "estimated": "BOOLEAN DEFAULT 0",
+        }
+        with self.engine.begin() as conn:
+            rows = conn.exec_driver_sql("PRAGMA table_info(interactions)").fetchall()
+            existing = {row[1] for row in rows}
+            for column, ddl in expected.items():
+                if column not in existing:
+                    conn.exec_driver_sql(
+                        f"ALTER TABLE interactions ADD COLUMN {column} {ddl}"
+                    )
 
     def upsert_many(self, interactions: Iterable[Interaction]) -> int:
         """Insert or update interactions. Returns the number processed.
