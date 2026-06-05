@@ -1,6 +1,6 @@
 [project]
 name = "agent-roi-tracker"
-version = "0.1.0"
+version = "0.1.1"
 description = "Track the cost, usage, and ROI of your AI coding agents across every tool."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -50,10 +50,11 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/agent_roi"]
-# The built web UI (src/agent_roi/webui, produced by scripts/build_web.sh) lives
-# inside the package dir, but is gitignored — list it as an artifact so the build
-# backend includes it in the wheel anyway.
+# webui/ is gitignored but must land in the wheel so `agent-roi serve` works
+# after a pip/uv install. artifacts= is unreliable via uv build (sdist→wheel
+# path), so we force-include the directory explicitly.
 artifacts = ["src/agent_roi/webui"]
+include = ["src/agent_roi/webui/**"]
 
 [tool.ruff]
 line-length = 100
