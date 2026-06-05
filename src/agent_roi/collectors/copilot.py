@@ -15,6 +15,7 @@ from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote
 
 from agent_roi.collectors.base import Collector
 from agent_roi.core.models import Interaction, Tool
@@ -142,8 +143,6 @@ def _workspace_cwd(ws_dir: Path) -> str:
     project name. For remote workspaces we keep a ``ssh:<host>:`` prefix so the
     project name stays meaningful (e.g. ``repo`` on host ``100.120.0.60``).
     """
-    from urllib.parse import unquote
-
     wj = ws_dir / "workspace.json"
     try:
         data = json.loads(wj.read_text(encoding="utf-8"))
@@ -153,11 +152,11 @@ def _workspace_cwd(ws_dir: Path) -> str:
 
     if folder.startswith("file:///"):
         # file:///Users/yen/repo -> /Users/yen/repo
-        return unquote(folder[len("file://"):])
+        return unquote(folder[len("file://") :])
 
     if folder.startswith("vscode-remote://"):
         # vscode-remote://ssh-remote%2B<host>/path/to/repo
-        rest = folder[len("vscode-remote://"):]
+        rest = folder[len("vscode-remote://") :]
         slash = rest.find("/")
         if slash != -1:
             path = unquote(rest[slash:])

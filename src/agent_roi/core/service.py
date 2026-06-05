@@ -11,8 +11,10 @@ from datetime import datetime
 from agent_roi.classify import SessionDoc, get_classifier
 from agent_roi.classify.base import UNCATEGORIZED
 from agent_roi.collectors import get_collectors
-from agent_roi.core.config import Config
+from agent_roi.core.config import Config, config_path
 from agent_roi.core.models import (
+    BudgetPeriodStatus,
+    BudgetStatus,
     CollectorStatus,
     ModelPricing,
     Rollup,
@@ -22,6 +24,7 @@ from agent_roi.core.models import (
     TopicBreakdown,
 )
 from agent_roi.core.pricing import all_prices
+from agent_roi.core.timeframe import period_start
 from agent_roi.storage import Database
 
 
@@ -113,9 +116,40 @@ class Service:
         start: datetime | None = None,
         end: datetime | None = None,
         limit: int | None = None,
+        search: str | None = None,
     ) -> list[SessionSummary]:
         """Per-session breakdown, optionally scoped to one topic and window."""
-        return self.db.sessions(topic=topic, start=start, end=end, limit=limit)
+        return self.db.sessions(
+            topic=topic,
+            start=start,
+            end=end,
+            limit=limit,
+            search=search,
+        )
+
+    def get_config_info(self) -> dict[str, object]:
+        return {
+            "config_path": str(config_path()),
+            "db_path": str(self.config.db_path),
+            "classifier": self.config.classifier.model_dump(),
+            "collectors": self.config.collectors.model_dump(),
+            "budget": self.config.budget.model_dump(),
+        }
+
+    def update_config(
+        self,
+        classifier: dict[str, object] | None = None,
+        collectors: dict[str, object] | None = None,
+        budget: dict[str, object] | None = None,
+    ) -> dict[str, object]:
+        if classifier:
+            self.config.classifier = self.config.classifier.model_copy(update=classifier)
+        if collectors:
+            self.config.collectors = self.config.collectors.model_copy(update=collectors)
+        if budget is not None:
+            self.config.budget = self.config.budget.model_copy(update=budget)
+        self.config.save()
+        return self.get_config_info()
 
     def session_detail(self, session_id: str) -> SessionDetail | None:
         """One session's aggregate plus its individual interactions."""
@@ -133,6 +167,31 @@ class Service:
     def pricing(self) -> list[ModelPricing]:
         """The pricing table behind every cost figure (for verification)."""
         return all_prices()
+
+    def budget_status(self, now: datetime | None = None) -> BudgetStatus:
+        """Spend so far this day / week / month against the configured limits.
+
+        This turns raw cost tracking into a budget signal: each period reports
+        actual spend and, where a limit is set, whether you're over it. Periods
+        without a configured limit are still reported (limit ``None``) so the UI
+        can show spend even before a budget is chosen.
+        """
+        budget = self.config.budget
+        limits = {
+            "day": budget.daily_usd,
+            "week": budget.weekly_usd,
+            "month": budget.monthly_usd,
+        }
+        periods = [
+            BudgetPeriodStatus(
+                period=period,
+                start=(start := period_start(period, now=now)),
+                spent_usd=self.db.total_spend(start=start),
+                limit_usd=limit,
+            )
+            for period, limit in limits.items()
+        ]
+        return BudgetStatus(periods=periods)
 
     def sources(self) -> list[CollectorStatus]:
         """Diagnostics for every enabled collector: where it looked, what it

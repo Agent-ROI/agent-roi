@@ -1,0 +1,65 @@
+name: 🐛 Bug report
+description: Report a problem with Agent-ROI
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a report! Please redact anything
+        sensitive (paths, repo names, prompts) before pasting logs.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands run and any relevant config.
+      placeholder: |
+        1. agent-roi ingest
+        2. agent-roi report --by topic
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Agent-ROI version
+      description: Output of `agent-roi --version` (or the commit hash).
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS
+        - Windows
+        - Linux
+        - WSL2
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      description: Output of `python --version`.
+    validations:
+      required: true
+  - type: input
+    id: tools
+    attributes:
+      label: AI tools tracked
+      description: e.g. Claude Code, Codex, Copilot, Gemini, Hermes
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / output
+      description: Relevant error output (redact anything sensitive).
+      render: shell

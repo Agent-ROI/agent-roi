@@ -87,9 +87,7 @@ class Database:
             existing = {row[1] for row in rows}
             for column, ddl in expected.items():
                 if column not in existing:
-                    conn.exec_driver_sql(
-                        f"ALTER TABLE interactions ADD COLUMN {column} {ddl}"
-                    )
+                    conn.exec_driver_sql(f"ALTER TABLE interactions ADD COLUMN {column} {ddl}")
 
     def upsert_many(self, interactions: Iterable[Interaction]) -> int:
         """Insert or update interactions. Returns the number processed.
@@ -281,6 +279,7 @@ class Database:
         start: datetime | None = None,
         end: datetime | None = None,
         limit: int | None = None,
+        search: str | None = None,
     ) -> list[SessionSummary]:
         """Aggregate interactions into per-session rows (optionally one topic).
 
@@ -307,12 +306,30 @@ class Database:
             stmt = _apply_window(stmt, start, end)
             if topic is not None:
                 stmt = stmt.where(_topic_filter(topic))
+            if search:
+                pattern = f"%{search}%"
+                stmt = stmt.where(
+                    InteractionRow.summary.ilike(pattern)
+                    | InteractionRow.topic.ilike(pattern)
+                    | InteractionRow.project.ilike(pattern)
+                )
             stmt = stmt.group_by(InteractionRow.session_id).order_by(
                 func.sum(InteractionRow.cost_usd).desc()
             )
             if limit is not None:
                 stmt = stmt.limit(limit)
             return [_row_to_session(row) for row in session.execute(stmt)]
+
+    def total_spend(
+        self,
+        start: datetime | None = None,
+        end: datetime | None = None,
+    ) -> float:
+        """Total USD cost across all interactions in an optional time window."""
+        with Session(self.engine) as session:
+            stmt: Any = select(func.sum(InteractionRow.cost_usd))
+            stmt = _apply_window(stmt, start, end)
+            return float(session.execute(stmt).scalar() or 0.0)
 
     def timeseries(
         self,

@@ -59,8 +59,6 @@ void i18n
       ko: { translation: ko },
     },
     fallbackLng: "en",
-    supportedLngs: [...SUPPORTED_LANGS],
-    nonExplicitSupportedLngs: true,
     interpolation: { escapeValue: false },
     detection: {
       order: ["localStorage", "navigator"],

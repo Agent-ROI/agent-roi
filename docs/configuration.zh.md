@@ -17,7 +17,12 @@ similarity_threshold = 0.18   # 越高 = 主題越多、越細
 label_terms = 3               # 每個主題名稱用幾個詞
 
 [collectors]
-enabled = ["claude_code", "codex", "copilot", "gemini"]
+enabled = ["claude_code", "codex", "copilot", "gemini", "hermes"]
+
+[budget]
+daily_usd = 5.0      # 選填 — 省略某行即代表該區間不設預算
+weekly_usd = 25.0
+monthly_usd = 100.0
 ```
 
 ## 選項
@@ -36,7 +41,19 @@ enabled = ["claude_code", "codex", "copilot", "gemini"]
 
 | 鍵 | 預設 | 說明 |
 |----|------|------|
-| `enabled` | `["claude_code", "codex", "copilot", "gemini"]` | ingest 時要執行哪些工具採集器。 |
+| `enabled` | `["claude_code", "codex", "copilot", "gemini", "hermes"]` | ingest 時要執行哪些工具採集器。 |
+
+### `[budget]`
+
+各區間的選填花費上限（美元）。設定後，`agent-roi budget` 與儀表板的 Overview
+會顯示相對上限的花費，並在超支時標示。每個上限皆為選填——省略某行即代表該區間
+不設預算。週以週一為起點，月在每月 1 號重置。
+
+| 鍵 | 預設 | 說明 |
+|----|------|------|
+| `daily_usd` | _(無)_ | 當天的花費上限。 |
+| `weekly_usd` | _(無)_ | 本週（自週一起）的花費上限。 |
+| `monthly_usd` | _(無)_ | 當月的花費上限。 |
 
 ### 資料庫位置
 

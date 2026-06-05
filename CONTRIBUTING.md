@@ -13,15 +13,21 @@ and a React frontend (managed with npm).
 ```bash
 # Backend
 uv sync --extra dev
-uv run pytest          # run tests
-uv run ruff check src  # lint
-uv run mypy            # type-check
+uv run agent-roi serve   # API on :8000 (also serves the built web UI)
 
-# Frontend
+uv run pytest            # run tests
+uv run ruff check src    # lint
+uv run mypy              # type-check
+
+# Frontend (only needed when working on the UI)
 cd web
 npm install
-npm run build
+npm run dev              # Vite dev server on :5173 (proxies API calls to :8000)
+npm run build            # production build
 ```
+
+Run `agent-roi serve` and `npm run dev` together when developing the UI. For
+everything else, `agent-roi serve` alone is enough.
 
 ## Project layout
 

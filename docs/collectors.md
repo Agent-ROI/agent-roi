@@ -14,6 +14,7 @@ and idempotent.
 | `codex` | OpenAI Codex CLI | `~/.codex/sessions/**/*.jsonl` | exact (reported) |
 | `copilot` | GitHub Copilot Chat (VS Code) | `<VS Code User>/workspaceStorage/**/chatSessions/*` | **estimated** |
 | `gemini` | Gemini CLI | `~/.gemini/tmp/<projectHash>/chats/session-*.json{,l}` | exact (reported) |
+| `hermes` | Hermes Agent (NousResearch) | `~/.hermes/state.db` (SQLite) | exact (reported) |
 
 Under WSL, collectors also search the mounted Windows home(s) at
 `/mnt/c/Users/<name>/...`, so logs written by tools running on the Windows side
@@ -26,6 +27,17 @@ marker newer CLI versions write next to the chats, falling back to a reverse
 lookup of the hash against the cwds recorded in `~/.gemini/projects.json`. It
 reads both the older single-object `.json` and the newer line-delimited `.jsonl`
 session shapes, and folds Gemini's reasoning (`thoughts`) tokens into output.
+
+Hermes is different from the others: instead of per-session log files it keeps a
+single SQLite database (`~/.hermes/state.db`) with `sessions` and `messages`
+tables. The collector opens it read-only (`mode=ro`) and reads one interaction
+per message, attributing each message's `token_count` to input or output by its
+`role` (assistant → output, everything else → input) and taking the model from
+the owning session. Because Hermes runs models from several providers, model ids
+are provider-prefixed (e.g. `anthropic/claude-opus-4-8`); the collector strips
+the prefix so the shared pricing table still resolves the cost. Column names are
+discovered defensively (`PRAGMA table_info`) so schema shifts across Hermes
+versions don't break ingest.
 
 ### A note on estimated tokens
 

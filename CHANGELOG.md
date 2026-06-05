@@ -10,6 +10,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `scripts/install.ps1` — one-line installer for Windows (`irm … | iex`); installs `uv` if needed, then `agent-roi`, and prints the installed version.
 - README now documents the Windows install command and `agent-roi doctor`.
+- **Hermes Agent collector** — reads NousResearch Hermes sessions from its
+  SQLite store (`~/.hermes/state.db`), with real (exact) token counts. Provider-
+  prefixed model ids (`anthropic/…`, `openai/…`) are normalized so existing
+  pricing applies. Enabled by default.
+- **Budgets & ROI** — optional daily/weekly/monthly spend limits under `[budget]`
+  in config (and the web Settings page). New `agent-roi budget` command and an
+  Overview budget panel show spend vs. limit and flag over-budget periods.
+- **"vs average" column** on the Topics table — each topic's cost relative to the
+  average, so outlier-cost subjects stand out.
+- OSS project health files: `SECURITY.md`, Dependabot config, issue-template
+  chooser, and YAML issue forms.
+
+### Changed
+- Budget/vs-average i18n keys added across all 11 locales.
+- Moved trivial in-function imports to module top level; kept (and documented)
+  only the deliberate lazy imports (`uvicorn`, the scikit-learn classifier).
+
+### Fixed
+- Language switching broken in i18next v26: `supportedLngs` caused the
+  `zh-TW→zh→en` resolution chain to collapse to `[en]`, showing English for
+  all non-English locales. Fixed by removing the redundant option.
+- 210 missing translations filled across 8 locales (chart titles, nav labels,
+  page hints, date range controls).
 
 ## [0.2.2] - 2026-06-05
 

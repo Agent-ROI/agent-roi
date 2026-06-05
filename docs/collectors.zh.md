@@ -13,6 +13,7 @@
 | `codex` | OpenAI Codex CLI | `~/.codex/sessions/**/*.jsonl` | 精算（工具回報） |
 | `copilot` | GitHub Copilot Chat (VS Code) | `<VS Code User>/workspaceStorage/**/chatSessions/*` | **估算** |
 | `gemini` | Gemini CLI | `~/.gemini/tmp/<projectHash>/chats/session-*.json{,l}` | 精算（工具回報） |
+| `hermes` | Hermes Agent（NousResearch） | `~/.hermes/state.db`（SQLite） | 精算（工具回報） |
 
 在 WSL 下，採集器也會搜尋掛載的 Windows home（`/mnt/c/Users/<name>/...`），因此由
 Windows 側執行的工具所寫的 log 會被自動納入。Copilot 採集器還會透過
@@ -22,6 +23,15 @@ Gemini CLI 只記錄 `projectHash`（即 `sha256(cwd)`）而非路徑本身，�
 CLI 寫在 chats 旁的 `.project_root` 標記檔還原真實的 `project`，若不存在則改以該 hash
 反查 `~/.gemini/projects.json` 中記錄過的 cwd。它同時支援舊版單一物件 `.json` 與新版
 逐行 `.jsonl` 兩種 session 格式，並將 Gemini 的推理（`thoughts`）token 併入 output。
+
+Hermes 與其他工具不同：它不是每個 session 一個 log 檔，而是用單一 SQLite 資料庫
+（`~/.hermes/state.db`），內含 `sessions` 與 `messages` 兩張表。採集器以唯讀模式
+（`mode=ro`）開啟它，每則 message 產生一筆 interaction，並依 `role` 將該 message 的
+`token_count` 歸為 input 或 output（assistant → output，其餘 → input），model 則取自
+所屬 session。由於 Hermes 會使用多家供應商的模型，model id 帶有供應商前綴（例如
+`anthropic/claude-opus-4-8`），採集器會去掉前綴，讓共用的定價表仍能對應到成本。欄位
+名稱以 `PRAGMA table_info` 防禦性地探測，因此 Hermes 跨版本的 schema 變動不會中斷
+ingest。
 
 ### 關於估算 token
 

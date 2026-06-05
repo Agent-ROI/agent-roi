@@ -57,7 +57,7 @@ Collectors ──▶ Storage ──▶ Classifier ──▶ Storage ──▶ Re
 
 ### Pipeline stages
 
-1. **Collectors** (`collectors/`) — one `Collector` subclass per tool (Claude Code, Codex, Copilot, Gemini CLI). They parse local logs into normalized `Interaction` objects and are **read-only and idempotent**: each `Interaction.id` is stable, so re-running `ingest` upserts rather than double-counts. Collectors expose `is_available()`, `collect()`, plus diagnostics hooks (`search_paths()`, `count_files()`, `note()`) surfaced by `doctor`.
+1. **Collectors** (`collectors/`) — one `Collector` subclass per tool (Claude Code, Codex, Copilot, Gemini CLI, Hermes Agent). They parse local logs into normalized `Interaction` objects and are **read-only and idempotent**: each `Interaction.id` is stable, so re-running `ingest` upserts rather than double-counts. Collectors expose `is_available()`, `collect()`, plus diagnostics hooks (`search_paths()`, `count_files()`, `note()`) surfaced by `doctor`.
 
 2. **Storage** (`storage/db.py`, `Database`) — SQLite via SQLAlchemy. Upserts interactions, computes per-interaction USD cost at write time from the pricing table, and does all aggregation (`rollup`, `topic_breakdown`, `sessions`, `session_detail`). Topic labels are stored on rows and cleared/rebuilt by classify.
 

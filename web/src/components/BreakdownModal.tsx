@@ -103,15 +103,36 @@ function SessionsTable({
 }) {
   const { t } = useTranslation();
   const [page, setPage] = useState(0);
+  const [search, setSearch] = useState("");
   if (!sessions.length) return null;
 
-  const totalPages = Math.ceil(sessions.length / SESSIONS_PAGE_SIZE);
-  const visible = sessions.slice(page * SESSIONS_PAGE_SIZE, (page + 1) * SESSIONS_PAGE_SIZE);
+  const filtered = search
+    ? sessions.filter(
+        (s) =>
+          s.project.toLowerCase().includes(search.toLowerCase()) ||
+          s.topic.toLowerCase().includes(search.toLowerCase()) ||
+          s.tools.some((tool) => tool.toLowerCase().includes(search.toLowerCase()))
+      )
+    : sessions;
+
+  const totalPages = Math.ceil(filtered.length / SESSIONS_PAGE_SIZE);
+  const safePage = Math.min(page, Math.max(0, totalPages - 1));
+  const visible = filtered.slice(safePage * SESSIONS_PAGE_SIZE, (safePage + 1) * SESSIONS_PAGE_SIZE);
 
   return (
     <section className="card">
-      <h3>{t("breakdown.sessions", { count: sessions.length })}</h3>
+      <h3>{t("breakdown.sessions", { count: filtered.length })}</h3>
       <p className="muted small">{t("breakdown.sessionsHint")}</p>
+      <input
+        type="text"
+        className="session-search"
+        placeholder={t("settings.searchSessions")}
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(0);
+        }}
+      />
       <table>
         <thead>
           <tr>
@@ -146,7 +167,7 @@ function SessionsTable({
         </tbody>
       </table>
       {totalPages > 1 && (
-        <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+        <Pagination page={safePage} totalPages={totalPages} onChange={setPage} />
       )}
     </section>
   );
