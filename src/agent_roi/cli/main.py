@@ -202,5 +202,95 @@ def serve(
     uvicorn.run("agent_roi.api.app:create_app", host=host, port=port, factory=True)
 
 
+PACKAGE_NAME = "agent-roi-tracker"
+
+
+@app.command()
+def version() -> None:
+    """Show the installed Agent-ROI version."""
+    from agent_roi import __version__
+
+    console.print(f"agent-roi {__version__}")
+
+
+def _latest_pypi_version() -> str | None:
+    """Return the newest version of the package on PyPI, or None if unreachable."""
+    import json
+    import urllib.request
+
+    url = f"https://pypi.org/pypi/{PACKAGE_NAME}/json"
+    try:
+        with urllib.request.urlopen(url, timeout=10) as resp:  # noqa: S310
+            data = json.load(resp)
+        return str(data["info"]["version"])
+    except Exception:
+        return None
+
+
+def _installed_via_uv_tool() -> bool:
+    """True if agent-roi is managed by `uv tool` (vs a plain pip/uv pip install)."""
+    import shutil
+    import subprocess
+
+    if shutil.which("uv") is None:
+        return False
+    try:
+        out = subprocess.run(
+            ["uv", "tool", "list"],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+    except (subprocess.SubprocessError, OSError):
+        return False
+    return PACKAGE_NAME in out.stdout
+
+
+@app.command()
+def update(
+    check: bool = typer.Option(
+        False, "--check", help="Only check for a newer version; don't install it."
+    ),
+    pre: bool = typer.Option(False, "--pre", help="Include pre-release versions."),
+) -> None:
+    """Upgrade Agent-ROI to the latest release on PyPI."""
+    import subprocess
+    import sys
+
+    from agent_roi import __version__
+
+    console.print(f"Installed: [bold]{__version__}[/bold]")
+
+    latest = _latest_pypi_version()
+    if latest is None:
+        console.print("[yellow]Could not reach PyPI to check for updates.[/yellow]")
+    else:
+        console.print(f"Latest on PyPI: [bold]{latest}[/bold]")
+        if not pre and latest == __version__:
+            console.print("[green]You're already on the latest version.[/green]")
+            return
+
+    if check:
+        return
+
+    if _installed_via_uv_tool():
+        cmd = ["uv", "tool", "install", "--upgrade", "--force", PACKAGE_NAME]
+    else:
+        cmd = [sys.executable, "-m", "pip", "install", "--upgrade", PACKAGE_NAME]
+    if pre:
+        cmd.append("--prerelease=allow" if cmd[0] == "uv" else "--pre")
+
+    console.print(f"[dim]$ {' '.join(cmd)}[/dim]")
+    with console.status("Updating Agent-ROI..."):
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+    if result.returncode != 0:
+        console.print("[red]Update failed:[/red]")
+        console.print(result.stderr.strip() or result.stdout.strip())
+        raise typer.Exit(1)
+
+    console.print("[green]Updated. Run [bold]agent-roi version[/bold] to confirm.[/green]")
+
+
 if __name__ == "__main__":
     app()
