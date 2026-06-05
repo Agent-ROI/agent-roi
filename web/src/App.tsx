@@ -40,6 +40,16 @@ export default function App() {
 
   return (
     <>
+      {syncing && (
+        <div className="sync-overlay" aria-live="polite" aria-label={t("toolbar.syncing")}>
+          <div className="sync-spinner">
+            <span className="sync-dot" />
+            <span className="sync-dot" />
+            <span className="sync-dot" />
+          </div>
+          <p className="sync-label">{t("toolbar.syncing")}</p>
+        </div>
+      )}
       <AppShell
         page={page}
         onPage={setPage}
@@ -55,13 +65,14 @@ export default function App() {
             filter={filter}
             granularity={granularity}
             onDrillTopic={setDrillTopic}
+            reloadKey={version}
           />
         )}
         {page === "topics" && (
-          <TopicsPage filter={filter} onDrillTopic={setDrillTopic} />
+          <TopicsPage filter={filter} onDrillTopic={setDrillTopic} reloadKey={version} />
         )}
         {page === "trends" && (
-          <TrendsPage filter={filter} granularity={granularity} />
+          <TrendsPage filter={filter} granularity={granularity} reloadKey={version} />
         )}
         {page === "sources" && (
           <SourcesPage reloadKey={version} onRefresh={refresh} />

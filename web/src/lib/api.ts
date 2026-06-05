@@ -25,6 +25,7 @@ export interface TopicBreakdown {
 
 export interface ModelPricing {
   model: string;
+  effective_from: string;
   input: number;
   output: number;
   cache_read: number;

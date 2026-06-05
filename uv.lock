@@ -7,8 +7,8 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "agent-roi"
-version = "0.1.0"
+name = "agent-roi-tracker"
+version = "0.1.2"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },

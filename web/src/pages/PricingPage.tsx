@@ -32,6 +32,7 @@ export function PricingPage() {
             <thead>
               <tr>
                 <th>{t("pricing.model")}</th>
+                <th>{t("pricing.effectiveFrom")}</th>
                 <th className="num">{t("pricing.input")}</th>
                 <th className="num">{t("pricing.output")}</th>
                 <th className="num">{t("pricing.cacheRead")}</th>
@@ -40,8 +41,9 @@ export function PricingPage() {
             </thead>
             <tbody>
               {rows.map((p) => (
-                <tr key={p.model}>
+                <tr key={`${p.model}-${p.effective_from}`}>
                   <td>{p.model}</td>
+                  <td className="muted small">{p.effective_from}</td>
                   <td className="num">${p.input}</td>
                   <td className="num">${p.output}</td>
                   <td className="num">${p.cache_read}</td>

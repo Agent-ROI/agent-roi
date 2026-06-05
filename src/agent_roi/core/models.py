@@ -113,6 +113,7 @@ class ModelPricing(BaseModel):
     that cost = usage x these numbers."""
 
     model: str
+    effective_from: str  # ISO-8601 date; the first day this price was active
     input: float
     output: float
     cache_read: float

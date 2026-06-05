@@ -1,0 +1,234 @@
+# Agent-ROI pricing table
+#
+# Each [["model-name"]] block is one price epoch (array-of-tables).
+# When a model's price changes, add a NEW [["model-name"]] block with "from"
+# set to the date the new price took effect — do NOT edit the old block.
+# This lets Agent-ROI recompute historical cost correctly.
+#
+# Rules:
+#   - "from" is the first day the price was active (inclusive), ISO-8601 date.
+#   - The earliest epoch for a model may omit "from" (treated as 1970-01-01).
+#   - All prices are USD per 1,000,000 tokens.
+#   - Prefix matching is used for unknown variants (e.g. "claude-sonnet-4-6-20251231"
+#     resolves to "claude-sonnet-4-6"). Longest match wins.
+#   - Unknown models fall back to $0 so usage is still tracked.
+#
+# Sources (verify at providers' official pricing pages before editing):
+#   Anthropic : https://www.anthropic.com/pricing
+#   OpenAI    : https://openai.com/api/pricing/
+#   Google    : https://ai.google.dev/pricing
+
+# ── Anthropic ─────────────────────────────────────────────────────────────────
+#
+# The same Claude model is reachable from several tools (Claude Code, Copilot,
+# Codex, Gemini CLI). Tools report it slightly differently, e.g. Copilot sends
+# "copilot/claude-opus-4.6" which the collector normalizes to "claude-opus-4-6".
+# So every Opus/Sonnet/Haiku point release a user might hit needs a row here;
+# missing ones fall back to $0. Opus 4.x releases share the same list price.
+
+[["claude-opus-4-8"]]
+from         = "2025-05-22"
+input        = 15.0
+output       = 75.0
+cache_read   = 1.5
+cache_write  = 18.75
+
+[["claude-opus-4-7"]]
+from         = "2025-03-18"
+input        = 15.0
+output       = 75.0
+cache_read   = 1.5
+cache_write  = 18.75
+
+[["claude-opus-4-6"]]
+from         = "2025-01-14"
+input        = 15.0
+output       = 75.0
+cache_read   = 1.5
+cache_write  = 18.75
+
+[["claude-opus-4-5"]]
+from         = "2024-11-24"
+input        = 15.0
+output       = 75.0
+cache_read   = 1.5
+cache_write  = 18.75
+
+[["claude-opus-4-1"]]
+from         = "2024-08-05"
+input        = 15.0
+output       = 75.0
+cache_read   = 1.5
+cache_write  = 18.75
+
+[["claude-opus-4"]]
+from         = "2024-05-22"
+input        = 15.0
+output       = 75.0
+cache_read   = 1.5
+cache_write  = 18.75
+
+[["claude-sonnet-4-6"]]
+from         = "2025-04-29"
+input        = 3.0
+output       = 15.0
+cache_read   = 0.3
+cache_write  = 3.75
+
+[["claude-sonnet-4-5"]]
+from         = "2025-02-19"
+input        = 3.0
+output       = 15.0
+cache_read   = 0.3
+cache_write  = 3.75
+
+[["claude-sonnet-4"]]
+from         = "2024-05-22"
+input        = 3.0
+output       = 15.0
+cache_read   = 0.3
+cache_write  = 3.75
+
+[["claude-haiku-4-5"]]
+from         = "2025-02-24"
+input        = 0.8
+output       = 4.0
+cache_read   = 0.08
+cache_write  = 1.0
+
+# Older models — kept so logs from before the 4.x era price correctly.
+
+[["claude-3-7-sonnet"]]
+from         = "2025-02-24"
+input        = 3.0
+output       = 15.0
+cache_read   = 0.3
+cache_write  = 3.75
+
+[["claude-3-5-sonnet"]]
+from         = "2024-10-22"
+input        = 3.0
+output       = 15.0
+cache_read   = 0.3
+cache_write  = 3.75
+
+[["claude-3-5-haiku"]]
+from         = "2024-11-04"
+input        = 0.8
+output       = 4.0
+cache_read   = 0.08
+cache_write  = 1.0
+
+[["claude-3-opus"]]
+from         = "2024-03-04"
+input        = 15.0
+output       = 75.0
+cache_read   = 1.5
+cache_write  = 18.75
+
+[["claude-3-sonnet"]]
+from         = "2024-03-04"
+input        = 3.0
+output       = 15.0
+
+[["claude-3-haiku"]]
+from         = "2024-03-04"
+input        = 0.25
+output       = 1.25
+cache_read   = 0.03
+cache_write  = 0.3
+
+# ── OpenAI ────────────────────────────────────────────────────────────────────
+
+[["gpt-5-5"]]
+from         = "2025-06-01"
+input        = 1.25
+output       = 10.0
+cache_read   = 0.125
+
+[["gpt-5"]]
+from         = "2025-05-01"
+input        = 1.25
+output       = 10.0
+cache_read   = 0.125
+
+[["gpt-4o"]]
+from         = "2024-05-13"
+input        = 5.0
+output       = 15.0
+
+[["gpt-4o"]]
+from         = "2024-11-01"
+input        = 2.5
+output       = 10.0
+cache_read   = 1.25
+
+[["gpt-4o-mini"]]
+from         = "2024-07-18"
+input        = 0.15
+output       = 0.6
+cache_read   = 0.075
+
+[["gpt-4-turbo"]]
+from         = "2024-04-09"
+input        = 10.0
+output       = 30.0
+
+[["gpt-4"]]
+from         = "2023-06-13"
+input        = 30.0
+output       = 60.0
+
+[["gpt-3.5-turbo"]]
+from         = "2023-03-01"
+input        = 0.5
+output       = 1.5
+
+# ── Google Gemini ─────────────────────────────────────────────────────────────
+
+[["gemini-3-pro"]]
+from         = "2025-06-01"
+input        = 2.0
+output       = 12.0
+cache_read   = 0.2
+
+[["gemini-3-flash"]]
+from         = "2025-06-01"
+input        = 0.3
+output       = 2.5
+cache_read   = 0.03
+
+[["gemini-2.5-pro"]]
+from         = "2025-03-25"
+input        = 1.25
+output       = 10.0
+cache_read   = 0.125
+
+[["gemini-2.5-flash"]]
+from         = "2025-05-20"
+input        = 0.3
+output       = 2.5
+cache_read   = 0.03
+
+[["gemini-2.0-flash"]]
+from         = "2025-02-05"
+input        = 0.1
+output       = 0.4
+cache_read   = 0.025
+
+[["gemini-1.5-pro"]]
+from         = "2024-05-02"
+input        = 1.25
+output       = 5.0
+cache_read   = 0.3125
+
+[["gemini-1.5-flash"]]
+from         = "2024-05-24"
+input        = 0.075
+output       = 0.3
+cache_read   = 0.01875
+
+[["gemini-1.0-pro"]]
+from         = "2023-12-13"
+input        = 0.5
+output       = 1.5

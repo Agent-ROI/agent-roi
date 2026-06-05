@@ -128,7 +128,8 @@
     "input": "Invoer",
     "output": "Uitvoer",
     "cacheRead": "Kaslees",
-    "cacheWrite": "Kasskryf"
+    "cacheWrite": "Kasskryf",
+    "effectiveFrom": "Geldig vanaf"
   },
   "common": {
     "loading": "Laai…",
@@ -169,5 +170,8 @@
     "trendsHint": "Daily token, cost, and tool/model distribution over time.",
     "sourcesHint": "See which tool logs were detected and ingested.",
     "topTopics": "Top topics by cost"
+  },
+  "pagination": {
+    "pageOf": "Bladsy {{page}} van {{total}}"
   }
 }

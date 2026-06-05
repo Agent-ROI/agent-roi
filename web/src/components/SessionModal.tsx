@@ -15,6 +15,7 @@ export function SessionModal({ sessionId, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const [showRaw, setShowRaw] = useState(false);
+  const [groupsPage, setGroupsPage] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -94,32 +95,67 @@ export function SessionModal({ sessionId, onClose }: Props) {
 
             <section className="card">
               <h3>{t("session.groupsTitle", { count: groups.length })}</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>{t("session.pattern")}</th>
-                    <th className="num">{t("session.calls")}</th>
-                    <th className="num">{t("table.tokens")}</th>
-                    <th className="num">{t("table.cost")}</th>
-                    <th>{t("session.timeSpan")}</th>
-                    <th />
-                  </tr>
-                </thead>
-                <tbody>
-                  {groups.map((g) => (
-                    <GroupRows
-                      key={g.summary || "__empty__"}
-                      group={g}
-                      expanded={expandedGroup === (g.summary || "__empty__")}
-                      onToggle={() =>
-                        setExpandedGroup((cur) =>
-                          cur === (g.summary || "__empty__") ? null : g.summary || "__empty__"
-                        )
-                      }
-                    />
-                  ))}
-                </tbody>
-              </table>
+              {(() => {
+                const PAGE = 15;
+                const totalPages = Math.ceil(groups.length / PAGE);
+                const visible = groups.slice(groupsPage * PAGE, (groupsPage + 1) * PAGE);
+                return (
+                  <>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>{t("session.pattern")}</th>
+                          <th className="num">{t("session.calls")}</th>
+                          <th className="num">{t("table.tokens")}</th>
+                          <th className="num">{t("table.cost")}</th>
+                          <th>{t("session.timeSpan")}</th>
+                          <th />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {visible.map((g) => (
+                          <GroupRows
+                            key={g.summary || "__empty__"}
+                            group={g}
+                            expanded={expandedGroup === (g.summary || "__empty__")}
+                            onToggle={() =>
+                              setExpandedGroup((cur) =>
+                                cur === (g.summary || "__empty__")
+                                  ? null
+                                  : g.summary || "__empty__"
+                              )
+                            }
+                          />
+                        ))}
+                      </tbody>
+                    </table>
+                    {totalPages > 1 && (
+                      <div className="pagination">
+                        <button
+                          className="chip"
+                          disabled={groupsPage === 0}
+                          onClick={() => setGroupsPage((p) => p - 1)}
+                        >
+                          ‹
+                        </button>
+                        <span className="pagination-info">
+                          {t("pagination.pageOf", {
+                            page: groupsPage + 1,
+                            total: totalPages,
+                          })}
+                        </span>
+                        <button
+                          className="chip"
+                          disabled={groupsPage >= totalPages - 1}
+                          onClick={() => setGroupsPage((p) => p + 1)}
+                        >
+                          ›
+                        </button>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </section>
 
             <button className="chip raw-toggle" onClick={() => setShowRaw((v) => !v)}>

@@ -11,9 +11,10 @@ import { StackedAreaChart } from "../components/charts/StackedAreaChart";
 interface Props {
   filter: DateFilter;
   granularity: Granularity;
+  reloadKey?: number;
 }
 
-export function TrendsPage({ filter, granularity }: Props) {
+export function TrendsPage({ filter, granularity, reloadKey }: Props) {
   const { t } = useTranslation();
   const [series, setSeries] = useState<TimeSeriesBundle | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +37,7 @@ export function TrendsPage({ filter, granularity }: Props) {
     return () => {
       active = false;
     };
-  }, [filter, granularity, t]);
+  }, [filter, granularity, reloadKey, t]);
 
   const totals = series ? totalsChartData(series) : [];
   const byTool = series ? splitChartData(series.by_tool, series.tool_keys) : [];

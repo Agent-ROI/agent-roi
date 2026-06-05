@@ -14,9 +14,10 @@ interface Props {
   filter: DateFilter;
   granularity: Granularity;
   onDrillTopic: (topic: string) => void;
+  reloadKey?: number;
 }
 
-export function OverviewPage({ filter, granularity, onDrillTopic }: Props) {
+export function OverviewPage({ filter, granularity, onDrillTopic, reloadKey }: Props) {
   const { t } = useTranslation();
   const [topics, setTopics] = useState<Rollup[]>([]);
   const [tools, setTools] = useState<Rollup[]>([]);
@@ -53,7 +54,7 @@ export function OverviewPage({ filter, granularity, onDrillTopic }: Props) {
     return () => {
       active = false;
     };
-  }, [filter, granularity, t]);
+  }, [filter, granularity, reloadKey, t]);
 
   const chartData = series ? totalsChartData(series) : [];
 

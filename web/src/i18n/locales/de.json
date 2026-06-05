@@ -128,7 +128,8 @@
     "input": "Eingabe",
     "output": "Ausgabe",
     "cacheRead": "Cache-Lesen",
-    "cacheWrite": "Cache-Schreiben"
+    "cacheWrite": "Cache-Schreiben",
+    "effectiveFrom": "Gültig ab"
   },
   "common": {
     "loading": "Laden…",
@@ -169,5 +170,8 @@
     "trendsHint": "Daily token, cost, and tool/model distribution over time.",
     "sourcesHint": "See which tool logs were detected and ingested.",
     "topTopics": "Top topics by cost"
+  },
+  "pagination": {
+    "pageOf": "Seite {{page}} von {{total}}"
   }
 }

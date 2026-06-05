@@ -10,11 +10,12 @@ import { RollupTable } from "../components/RollupTable";
 interface Props {
   filter: DateFilter;
   onDrillTopic: (topic: string) => void;
+  reloadKey?: number;
 }
 
 const DIMENSIONS: Dimension[] = ["topic", "project", "tool", "model"];
 
-export function TopicsPage({ filter, onDrillTopic }: Props) {
+export function TopicsPage({ filter, onDrillTopic, reloadKey }: Props) {
   const { t } = useTranslation();
   const [dimension, setDimension] = useState<Dimension>("topic");
   const [rows, setRows] = useState<Rollup[]>([]);
@@ -40,7 +41,7 @@ export function TopicsPage({ filter, onDrillTopic }: Props) {
     return () => {
       active = false;
     };
-  }, [dimension, filter, t]);
+  }, [dimension, filter, reloadKey, t]);
 
   return (
     <div className="page">

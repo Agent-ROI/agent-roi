@@ -92,6 +92,8 @@ export function BreakdownModal({ topic, filter, onClose }: Props) {
   );
 }
 
+const SESSIONS_PAGE_SIZE = 10;
+
 function SessionsTable({
   sessions,
   onOpen,
@@ -100,7 +102,12 @@ function SessionsTable({
   onOpen: (id: string) => void;
 }) {
   const { t } = useTranslation();
+  const [page, setPage] = useState(0);
   if (!sessions.length) return null;
+
+  const totalPages = Math.ceil(sessions.length / SESSIONS_PAGE_SIZE);
+  const visible = sessions.slice(page * SESSIONS_PAGE_SIZE, (page + 1) * SESSIONS_PAGE_SIZE);
+
   return (
     <section className="card">
       <h3>{t("breakdown.sessions", { count: sessions.length })}</h3>
@@ -116,7 +123,7 @@ function SessionsTable({
           </tr>
         </thead>
         <tbody>
-          {sessions.map((s) => (
+          {visible.map((s) => (
             <tr
               key={s.session_id}
               className="drillable"
@@ -138,7 +145,43 @@ function SessionsTable({
           ))}
         </tbody>
       </table>
+      {totalPages > 1 && (
+        <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+      )}
     </section>
+  );
+}
+
+function Pagination({
+  page,
+  totalPages,
+  onChange,
+}: {
+  page: number;
+  totalPages: number;
+  onChange: (p: number) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="pagination">
+      <button
+        className="chip"
+        disabled={page === 0}
+        onClick={() => onChange(page - 1)}
+      >
+        ‹
+      </button>
+      <span className="pagination-info">
+        {t("pagination.pageOf", { page: page + 1, total: totalPages })}
+      </span>
+      <button
+        className="chip"
+        disabled={page >= totalPages - 1}
+        onClick={() => onChange(page + 1)}
+      >
+        ›
+      </button>
+    </div>
   );
 }
 

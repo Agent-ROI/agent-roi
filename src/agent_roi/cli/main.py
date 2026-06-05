@@ -146,13 +146,19 @@ def pricing() -> None:
     service = Service()
     table = Table(title="Model Pricing (USD per 1M tokens)")
     table.add_column("Model", style="cyan")
+    table.add_column("From", justify="right", style="dim")
     table.add_column("Input", justify="right")
     table.add_column("Output", justify="right")
     table.add_column("Cache Read", justify="right")
     table.add_column("Cache Write", justify="right")
     for p in service.pricing():
         table.add_row(
-            p.model, f"${p.input}", f"${p.output}", f"${p.cache_read}", f"${p.cache_write}"
+            p.model,
+            p.effective_from,
+            f"${p.input}",
+            f"${p.output}",
+            f"${p.cache_read}",
+            f"${p.cache_write}",
         )
     console.print(table)
     console.print("[dim]cost = (input x in + output x out + cache_read x cr + ...) / 1e6[/dim]")
