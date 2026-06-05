@@ -28,14 +28,20 @@ export function RollupChart({ rows, dimension }: Props) {
       <h2>Cost by {dimension} (top 10)</h2>
       <ResponsiveContainer width="100%" height={320}>
         <BarChart data={data} layout="vertical" margin={{ left: 24, right: 24 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" />
-          <XAxis type="number" stroke="#888" tickFormatter={(v) => fmtUsd(v)} />
-          <YAxis type="category" dataKey="key" width={140} stroke="#888" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#23252a" />
+          <XAxis type="number" stroke="#8a8f98" fontSize={12} tickFormatter={(v) => fmtUsd(v)} />
+          <YAxis type="category" dataKey="key" width={140} stroke="#8a8f98" fontSize={12} />
           <Tooltip
+            cursor={{ fill: "rgba(94,106,210,0.08)" }}
             formatter={(v: number) => fmtUsd(v)}
-            contentStyle={{ background: "#1a1a2e", border: "1px solid #333" }}
+            contentStyle={{
+              background: "#141516",
+              border: "1px solid #34343a",
+              borderRadius: 8,
+              color: "#f7f8f8",
+            }}
           />
-          <Bar dataKey="cost" fill="#7c5cff" radius={[0, 4, 4, 0]} />
+          <Bar dataKey="cost" fill="#5e6ad2" radius={[0, 4, 4, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </section>

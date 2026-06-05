@@ -33,9 +33,13 @@ src/agent_roi/
   api/          # FastAPI REST 層
   cli/          # Typer 命令列介面
 web/            # React + Vite 儀表板
+design/         # DESIGN.md 設計系統（Linear）— 改 UI 前請先閱讀
 docs/           # 英文文件 (*.md) + 中文翻譯 (*.zh.md)
 tests/          # pytest 測試
 ```
+
+前端遵循 [`design/DESIGN.md`](./design/DESIGN.md)（Linear）的設計系統。其 token 已
+鏡射為 `web/src/index.css` 的 CSS 變數；改動 UI 樣式前請先閱讀，讓外觀維持一致。
 
 ## 新增採集器
 
