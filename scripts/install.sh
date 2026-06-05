@@ -90,13 +90,13 @@ fi
 # ── 2. Install Agent-ROI ─────────────────────────────────────────────────────
 step "Installing Agent-ROI"
 spin_start "Fetching ${PACKAGE}…"
-if uv tool install --upgrade "$PACKAGE" >/dev/null 2>&1; then
+if uv tool install --upgrade --force "$PACKAGE" >/dev/null 2>&1; then
   spin_stop
   ok "agent-roi installed"
 else
   spin_stop
   err "Installation failed — re-running with output:"
-  uv tool install --upgrade "$PACKAGE"
+  uv tool install --upgrade --force "$PACKAGE"
   exit 1
 fi
 
