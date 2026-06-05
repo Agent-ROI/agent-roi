@@ -28,6 +28,7 @@ from typing import Any
 from agent_roi.collectors.base import Collector
 from agent_roi.core.models import Interaction, Tool
 from agent_roi.core.platform import find_tool_dirs
+from agent_roi.core.project import project_for
 
 
 class CodexCollector(Collector):
@@ -40,6 +41,12 @@ class CodexCollector(Collector):
     def is_available(self) -> bool:
         return bool(self.roots)
 
+    def search_paths(self) -> list[Path]:
+        return list(self.roots)
+
+    def count_files(self) -> int:
+        return sum(1 for root in self.roots for _ in root.rglob("rollout-*.jsonl"))
+
     def collect(self) -> Iterator[Interaction]:
         for root in self.roots:
             for jsonl in root.rglob("*.jsonl"):
@@ -50,7 +57,9 @@ class CodexCollector(Collector):
         session_id = path.stem.split("-")[-1] if "-" in path.stem else path.stem
 
         model = "unknown"
-        last_message = ""
+        cwd = ""
+        last_user = ""
+        last_agent = ""
         seq = 0
 
         try:
@@ -73,16 +82,25 @@ class CodexCollector(Collector):
 
             if rtype == "turn_context":
                 model = str(payload.get("model") or model)
+                cwd = str(payload.get("cwd") or cwd)
+                continue
+
+            if rtype == "session_meta":
+                cwd = str(payload.get("cwd") or cwd)
                 continue
 
             if rtype != "event_msg":
                 continue
 
             ptype = payload.get("type")
-            if ptype in ("user_message", "agent_message"):
-                text = payload.get("message") or payload.get("text") or ""
-                if isinstance(text, str) and text:
-                    last_message = text[:500]
+            if ptype == "user_message":
+                text = _event_text(payload)
+                if text:
+                    last_user = text
+            elif ptype == "agent_message":
+                text = _event_text(payload)
+                if text:
+                    last_agent = text
             elif ptype == "token_count":
                 usage = _last_usage(payload)
                 if usage is None:
@@ -100,8 +118,20 @@ class CodexCollector(Collector):
                         + int(usage.get("reasoning_output_tokens", 0))
                     ),
                     cache_read_tokens=int(usage.get("cached_input_tokens", 0)),
-                    summary=last_message,
+                    cwd=cwd,
+                    project=project_for(cwd),
+                    summary=_combine(last_user, last_agent),
                 )
+
+
+def _event_text(payload: dict[str, Any]) -> str:
+    text = payload.get("message") or payload.get("text") or ""
+    return text.strip() if isinstance(text, str) else ""
+
+
+def _combine(user_text: str, agent_text: str) -> str:
+    parts = [p for p in (user_text, agent_text) if p]
+    return " ".join(parts)[:600]
 
 
 def _last_usage(payload: dict[str, Any]) -> dict[str, Any] | None:

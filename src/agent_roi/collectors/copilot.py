@@ -19,6 +19,7 @@ from typing import Any
 from agent_roi.collectors.base import Collector
 from agent_roi.core.models import Interaction, Tool
 from agent_roi.core.platform import vscode_user_dirs
+from agent_roi.core.project import project_for
 from agent_roi.core.tokens import estimate_tokens
 
 
@@ -34,38 +35,56 @@ class CopilotCollector(Collector):
     def is_available(self) -> bool:
         return any((r / "workspaceStorage").is_dir() for r in self.roots)
 
+    def search_paths(self) -> list[Path]:
+        return list(self.roots)
+
+    def count_files(self) -> int:
+        total = 0
+        for root in self.roots:
+            ws = root / "workspaceStorage"
+            if ws.is_dir():
+                total += sum(1 for _ in ws.glob("*/chatSessions/*.json*"))
+        return total
+
     def collect(self) -> Iterator[Interaction]:
         for root in self.roots:
             ws = root / "workspaceStorage"
             if not ws.is_dir():
                 continue
-            for session in ws.glob("*/chatSessions/*.json*"):
-                yield from self._parse_file(session)
+            for ws_dir in ws.iterdir():
+                if not ws_dir.is_dir():
+                    continue
+                cwd = _workspace_cwd(ws_dir)
+                chat_dir = ws_dir / "chatSessions"
+                if not chat_dir.is_dir():
+                    continue
+                for session_file in chat_dir.glob("*.json*"):
+                    yield from self._parse_file(session_file, cwd)
 
-    def _parse_file(self, path: Path) -> Iterator[Interaction]:
+    def _parse_file(self, path: Path, cwd: str) -> Iterator[Interaction]:
         session_id = path.stem
         try:
             raw = path.read_text(encoding="utf-8")
         except OSError:
             return
         for obj in _load_objects(raw):
-            yield from self._requests_in(obj, session_id)
+            yield from self._requests_in(obj, session_id, cwd)
 
-    def _requests_in(self, obj: Any, session_id: str) -> Iterator[Interaction]:
+    def _requests_in(self, obj: Any, session_id: str, cwd: str) -> Iterator[Interaction]:
         """Walk an arbitrary JSON structure, yielding an Interaction per Copilot
         chat request found."""
         if isinstance(obj, dict):
             if obj.get("requestId") and "modelId" in obj:
-                itx = self._to_interaction(obj, session_id)
+                itx = self._to_interaction(obj, session_id, cwd)
                 if itx is not None:
                     yield itx
             for value in obj.values():
-                yield from self._requests_in(value, session_id)
+                yield from self._requests_in(value, session_id, cwd)
         elif isinstance(obj, list):
             for value in obj:
-                yield from self._requests_in(value, session_id)
+                yield from self._requests_in(value, session_id, cwd)
 
-    def _to_interaction(self, req: dict[str, Any], session_id: str) -> Interaction | None:
+    def _to_interaction(self, req: dict[str, Any], session_id: str, cwd: str) -> Interaction | None:
         request_id = req.get("requestId")
         if not request_id:
             return None
@@ -74,6 +93,7 @@ class CopilotCollector(Collector):
         response_text = _response_text(req.get("response"))
 
         model = str(req.get("modelId") or "unknown")
+        summary = " ".join(p for p in (user_text, response_text) if p)[:600]
         return Interaction(
             id=f"copilot:{request_id}",
             tool=self.tool,
@@ -82,9 +102,48 @@ class CopilotCollector(Collector):
             model=_normalize_model(model),
             input_tokens=estimate_tokens(user_text),
             output_tokens=estimate_tokens(response_text),
-            summary=user_text[:500],
+            cwd=cwd,
+            project=project_for(cwd),
+            summary=summary,
             estimated=True,
         )
+
+
+def _workspace_cwd(ws_dir: Path) -> str:
+    """Read the workspace folder from VS Code's ``workspace.json``.
+
+    VS Code writes ``workspaceStorage/<hash>/workspace.json`` with a ``folder``
+    key that is a URI such as:
+    - ``file:///Users/yen/repo``  → local path (most common)
+    - ``vscode-remote://ssh-remote%2B<host>/home/yen/repo``  → SSH remote
+
+    We convert both to the plain path portion so ``project_for`` can derive a
+    project name. For remote workspaces we keep a ``ssh:<host>:`` prefix so the
+    project name stays meaningful (e.g. ``repo`` on host ``100.120.0.60``).
+    """
+    from urllib.parse import unquote
+
+    wj = ws_dir / "workspace.json"
+    try:
+        data = json.loads(wj.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return ""
+    folder = str(data.get("folder", ""))
+
+    if folder.startswith("file:///"):
+        # file:///Users/yen/repo -> /Users/yen/repo
+        return unquote(folder[len("file://"):])
+
+    if folder.startswith("vscode-remote://"):
+        # vscode-remote://ssh-remote%2B<host>/path/to/repo
+        rest = folder[len("vscode-remote://"):]
+        slash = rest.find("/")
+        if slash != -1:
+            path = unquote(rest[slash:])
+            return path  # project_for will pick up the last meaningful segment
+        return unquote(rest)
+
+    return folder
 
 
 def _load_objects(raw: str) -> list[Any]:

@@ -23,14 +23,17 @@ APP_NAME = "agent-roi"
 
 
 class ClassifierConfig(BaseModel):
-    provider: str = "ollama"  # "ollama" | "anthropic"
-    model: str = "llama3.2"
-    # Max interactions sent to the classifier in one batch.
-    batch_size: int = 20
+    # Only "semantic" exists: model-free, offline topic discovery.
+    provider: str = "semantic"
+    # Cosine similarity at/above which two sessions are grouped into the same
+    # topic. Higher = stricter (more, smaller topics); lower = broader topics.
+    similarity_threshold: float = 0.18
+    # Number of distinctive terms used to name each discovered topic.
+    label_terms: int = 3
 
 
 class CollectorsConfig(BaseModel):
-    enabled: list[str] = ["claude_code", "codex", "copilot"]
+    enabled: list[str] = ["claude_code", "codex", "copilot", "gemini"]
 
 
 class Config(BaseModel):

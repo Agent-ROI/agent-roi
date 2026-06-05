@@ -20,6 +20,13 @@ def is_wsl() -> bool:
     return "microsoft" in _osrelease()
 
 
+def platform_label() -> str:
+    """A short human-readable label for the current OS (for diagnostics)."""
+    names = {"darwin": "macOS", "win32": "Windows", "linux": "Linux"}
+    base = names.get(sys.platform, sys.platform)
+    return f"{base} (WSL)" if is_wsl() else base
+
+
 def _osrelease() -> str:
     try:
         return Path("/proc/sys/kernel/osrelease").read_text().lower()

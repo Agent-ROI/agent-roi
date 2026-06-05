@@ -1,30 +1,44 @@
 """Topic classifier interface.
 
-A classifier reads the short ``summary`` of each interaction and assigns a
-concise topic label (e.g. "auth refactor", "ci pipeline", "bug: race condition").
-Topics are how Agent-ROI aggregates token cost per *subject* rather than per
-request, which is the whole point of measuring agent ROI.
+A classifier looks at whole *sessions* (one continuous piece of agent work) and
+groups the ones that are about the same thing, assigning each group a short topic
+label such as "auth refactor" or "ci pipeline". Topics are how Agent-ROI
+aggregates token cost per *subject* rather than per request, which is the whole
+point of measuring agent ROI.
+
+Classification is deliberately model-free: it discovers topics from the text of
+the sessions themselves (semantic similarity), so it runs fully offline, costs
+nothing, and never sends anything to an external service.
 """
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
-SYSTEM_PROMPT = (
-    "You label software-engineering chat turns with a short topic. "
-    "Reply with ONLY a 2-5 word lowercase topic describing the task or subject "
-    "(e.g. 'auth refactor', 'flaky ci test', 'pricing model bug'). "
-    "No punctuation, no quotes, no explanation."
-)
+UNCATEGORIZED = "uncategorized"
+
+
+@dataclass
+class SessionDoc:
+    """One session handed to the classifier for topic discovery.
+
+    ``summary`` is a compact, combined snippet of the session's interactions;
+    ``project`` is the coarse repo/folder grouping derived from the cwd.
+    """
+
+    session_id: str
+    project: str
+    summary: str
 
 
 class Classifier(ABC):
-    """Base class for topic classifiers."""
+    """Base class for topic classifiers.
+
+    Implementations look at all the given sessions together so they can group
+    similar ones, rather than labeling each session in isolation.
+    """
 
     @abstractmethod
-    def classify(self, summary: str) -> str:
-        """Return a short topic label for one interaction summary."""
-
-    def classify_batch(self, summaries: list[str]) -> list[str]:
-        """Classify many summaries. Default loops; providers may override."""
-        return [self.classify(s) for s in summaries]
+    def label_sessions(self, sessions: list[SessionDoc]) -> dict[str, str]:
+        """Return a ``{session_id: topic}`` mapping for the given sessions."""

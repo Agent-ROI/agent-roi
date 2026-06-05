@@ -8,10 +8,19 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from agent_roi.classify import get_classifier
+from agent_roi.classify import SessionDoc, get_classifier
+from agent_roi.classify.base import UNCATEGORIZED
 from agent_roi.collectors import get_collectors
 from agent_roi.core.config import Config
-from agent_roi.core.models import ModelPricing, Rollup, TopicBreakdown
+from agent_roi.core.models import (
+    CollectorStatus,
+    ModelPricing,
+    Rollup,
+    SessionDetail,
+    SessionSummary,
+    TimeSeriesBundle,
+    TopicBreakdown,
+)
 from agent_roi.core.pricing import all_prices
 from agent_roi.storage import Database
 
@@ -34,19 +43,51 @@ class Service:
             total += self.db.upsert_many(collector.collect())
         return total
 
-    def classify(self, limit: int | None = None) -> int:
-        """Assign topics to interactions that don't have one yet.
+    def classify(self, limit: int | None = None, reclassify: bool = True) -> int:
+        """Group whole sessions into topics and apply them.
 
-        Returns the number newly classified.
+        A session is one continuous piece of work, so we classify sessions as a
+        unit (not each interaction) and apply the discovered topic to all of a
+        session's rows. The classifier looks at all sessions together so it can
+        group the ones about the same kind of work — e.g. several sessions across
+        different repos that are all "auth refactor" — into one topic.
+
+        With ``reclassify`` (the default) every session is re-labeled, which keeps
+        the clustering globally consistent. Set it to False to only label sessions
+        that have no topic yet.
+
+        Returns the number of interactions newly classified.
         """
-        rows = self.db.unclassified(limit=limit)
-        if not rows:
+        if reclassify:
+            self.db.clear_topics()
+        sessions = (
+            self.db.all_sessions(limit=limit)
+            if reclassify
+            else self.db.unclassified_sessions(limit=limit)
+        )
+        if not sessions:
             return 0
         classifier = get_classifier(self.config.classifier)
-        for row in rows:
-            topic = classifier.classify(row.summary)
-            self.db.set_topic(row.id, topic)
-        return len(rows)
+        docs = [
+            SessionDoc(session_id=s.session_id, project=s.project, summary=s.summary)
+            for s in sessions
+        ]
+        labels = classifier.label_sessions(docs)
+        updated = 0
+        for sess in sessions:
+            topic = labels.get(sess.session_id, UNCATEGORIZED)
+            updated += self.db.set_session_topic(sess.session_id, topic)
+        return updated
+
+    def refresh(self) -> dict[str, int]:
+        """Ingest fresh logs and re-classify everything in one step.
+
+        This is the one-button flow for the dashboard: pull new interactions from
+        every tool, then rebuild topics across the whole corpus.
+        """
+        ingested = self.ingest()
+        classified = self.classify()
+        return {"ingested": ingested, "classified": classified}
 
     def report(
         self,
@@ -66,6 +107,65 @@ class Service:
         """Drill into one topic: how its tokens split across tools and models."""
         return self.db.topic_breakdown(topic, start=start, end=end)
 
+    def sessions(
+        self,
+        topic: str | None = None,
+        start: datetime | None = None,
+        end: datetime | None = None,
+        limit: int | None = None,
+    ) -> list[SessionSummary]:
+        """Per-session breakdown, optionally scoped to one topic and window."""
+        return self.db.sessions(topic=topic, start=start, end=end, limit=limit)
+
+    def session_detail(self, session_id: str) -> SessionDetail | None:
+        """One session's aggregate plus its individual interactions."""
+        return self.db.session_detail(session_id)
+
+    def timeseries(
+        self,
+        start: datetime | None = None,
+        end: datetime | None = None,
+    ) -> TimeSeriesBundle:
+        """Daily usage trends for charts."""
+        return self.db.timeseries(start=start, end=end)
+
     def pricing(self) -> list[ModelPricing]:
         """The pricing table behind every cost figure (for verification)."""
         return all_prices()
+
+    def sources(self) -> list[CollectorStatus]:
+        """Diagnostics for every enabled collector: where it looked, what it
+        found on disk, and how much is already in the database.
+
+        This is what makes detection transparent — users can see exactly why a
+        tool shows up (or doesn't) instead of guessing.
+        """
+        by_tool = {r.key: r for r in self.db.rollup("tool")}
+        statuses: list[CollectorStatus] = []
+        for collector in get_collectors(self.config.collectors.enabled):
+            available = collector.is_available()
+            files = collector.count_files()
+            roll = by_tool.get(collector.tool.value)
+            interactions = roll.interactions if roll else 0
+
+            note = collector.note()
+            if not note:
+                if not available:
+                    note = "No logs found on this machine."
+                elif files and interactions == 0:
+                    note = "Logs found but not ingested yet — run a refresh."
+
+            statuses.append(
+                CollectorStatus(
+                    name=collector.name,
+                    tool=collector.tool.value,
+                    available=available,
+                    search_paths=[str(p) for p in collector.search_paths()],
+                    log_files=files,
+                    interactions=interactions,
+                    tokens=roll.total_tokens if roll else 0,
+                    cost_usd=roll.cost_usd if roll else 0.0,
+                    note=note,
+                )
+            )
+        return statuses

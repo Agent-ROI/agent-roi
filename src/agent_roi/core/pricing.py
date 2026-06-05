@@ -31,6 +31,14 @@ PRICES: dict[str, ModelPrice] = {
     # your plan (see docs/configuration — pricing is user-verifiable).
     "gpt-5-5": ModelPrice(input=1.25, output=10.0, cache_read=0.125),
     "gpt-5": ModelPrice(input=1.25, output=10.0, cache_read=0.125),
+    # Gemini API list prices. Edit to match your plan; prefix-matched, so
+    # "gemini-2.5-pro" / "gemini-3-flash-preview" resolve to the right tier.
+    "gemini-3-pro": ModelPrice(input=2.0, output=12.0, cache_read=0.2),
+    "gemini-3-flash": ModelPrice(input=0.3, output=2.5, cache_read=0.03),
+    "gemini-2.5-pro": ModelPrice(input=1.25, output=10.0, cache_read=0.125),
+    "gemini-2.5-flash": ModelPrice(input=0.3, output=2.5, cache_read=0.03),
+    "gemini-2.0-flash": ModelPrice(input=0.1, output=0.4, cache_read=0.025),
+    "gemini": ModelPrice(input=0.3, output=2.5, cache_read=0.03),
 }
 
 _UNKNOWN = ModelPrice(input=0.0, output=0.0)

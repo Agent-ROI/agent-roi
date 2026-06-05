@@ -8,6 +8,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from agent_roi.core.platform import platform_label
 from agent_roi.core.service import Service
 from agent_roi.core.timeframe import parse_since
 
@@ -29,35 +30,43 @@ def _parse_since(value: str) -> datetime | None:
 
 
 @app.command()
-def ingest() -> None:
-    """Collect interactions from all enabled tools into the local database."""
+def ingest(
+    classify: bool = typer.Option(
+        True, help="Also discover topics after ingesting (recommended)."
+    ),
+) -> None:
+    """Collect interactions from all enabled tools, then discover topics."""
     service = Service()
     with console.status("Ingesting logs..."):
         count = service.ingest()
     console.print(f"[green]Ingested {count} interactions.[/green]")
+    if classify:
+        with console.status("Discovering topics..."):
+            labeled = service.classify()
+        console.print(f"[green]Classified {labeled} interactions into topics.[/green]")
 
 
 @app.command()
 def classify(
-    limit: int = typer.Option(0, help="Max interactions to classify (0 = all)."),
+    limit: int = typer.Option(0, help="Max sessions to classify (0 = all)."),
 ) -> None:
-    """Assign a topic to interactions that don't have one yet."""
+    """Re-discover topics across all sessions."""
     service = Service()
-    with console.status("Classifying topics..."):
+    with console.status("Discovering topics..."):
         count = service.classify(limit=limit or None)
     console.print(f"[green]Classified {count} interactions.[/green]")
 
 
 @app.command()
 def report(
-    by: str = typer.Option("topic", help="Grouping dimension: topic | tool | model."),
+    by: str = typer.Option("topic", help="Grouping dimension: topic | tool | model | project."),
     since: str = typer.Option(
         "", help="Time window start: a date (YYYY-MM-DD) or shorthand like 7d, 24h, today."
     ),
 ) -> None:
     """Show a token/cost breakdown, grouped and optionally time-windowed."""
-    if by not in ("topic", "tool", "model"):
-        console.print(f"[red]Unsupported grouping: {by} (use topic|tool|model)[/red]")
+    if by not in ("topic", "tool", "model", "project"):
+        console.print(f"[red]Unsupported grouping: {by} (use topic|tool|model|project)[/red]")
         raise typer.Exit(1)
 
     start = _parse_since(since)
@@ -147,6 +156,33 @@ def pricing() -> None:
         )
     console.print(table)
     console.print("[dim]cost = (input x in + output x out + cache_read x cr + ...) / 1e6[/dim]")
+
+
+@app.command()
+def doctor() -> None:
+    """Show which tools were detected, where Agent-ROI looked, and what it found."""
+    service = Service()
+    console.print(f"[bold]Platform:[/bold] {platform_label()}")
+    table = Table(title="Data Sources")
+    table.add_column("Tool", style="cyan")
+    table.add_column("Detected", justify="center")
+    table.add_column("Log Files", justify="right")
+    table.add_column("Interactions", justify="right")
+    table.add_column("Cost (USD)", justify="right", style="green")
+    table.add_column("Notes")
+    for s in service.sources():
+        table.add_row(
+            s.name,
+            "[green]yes[/green]" if s.available else "[red]no[/red]",
+            str(s.log_files),
+            f"{s.interactions:,}",
+            f"${s.cost_usd:,.2f}",
+            s.note,
+        )
+    console.print(table)
+    for s in service.sources():
+        if s.search_paths:
+            console.print(f"[dim]{s.name} searched:[/dim] {', '.join(s.search_paths)}")
 
 
 @app.command()

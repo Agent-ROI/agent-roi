@@ -74,3 +74,22 @@ def test_topic_breakdown_splits_by_tool_and_model(tmp_path):
     assert tools == {"claude_code", "copilot"}
     assert models == {"claude-opus-4-8", "claude-haiku-4-5"}
     assert bd.total.estimated is True  # one of the two is estimated
+
+
+def test_timeseries_daily_buckets(tmp_path):
+    db = Database(tmp_path / "t.db")
+    db.upsert_many(
+        [
+            _itx("a", ts=datetime(2026, 6, 1, 10, tzinfo=timezone.utc), topic="auth"),
+            _itx("b", ts=datetime(2026, 6, 1, 12, tzinfo=timezone.utc), topic="auth"),
+            _itx("c", ts=datetime(2026, 6, 2, 10, tzinfo=timezone.utc), topic="ci"),
+        ]
+    )
+    bundle = db.timeseries()
+    assert len(bundle.totals) == 2
+    assert bundle.totals[0].date == "2026-06-01"
+    assert bundle.totals[0].interactions == 2
+    assert bundle.totals[0].total_tokens == 2000
+    assert bundle.totals[1].interactions == 1
+    assert bundle.tool_keys == ["claude_code"]
+    assert bundle.by_tool[0].values["claude_code"] == 2000

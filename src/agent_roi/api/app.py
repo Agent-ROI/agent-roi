@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from agent_roi import __version__
+from agent_roi.core.platform import platform_label
 from agent_roi.core.service import Service
 from agent_roi.core.timeframe import parse_since
 
@@ -40,7 +41,7 @@ def create_app(service: Service | None = None) -> FastAPI:
         since: str = "",
     ) -> list[dict[str, object]]:
         """Usage/cost grouped by 'topic' | 'tool' | 'model', optionally windowed."""
-        if group_by not in ("topic", "tool", "model"):
+        if group_by not in ("topic", "tool", "model", "project"):
             raise HTTPException(400, f"Invalid group_by: {group_by}")
         start = _since(since)
         return [
@@ -60,10 +61,53 @@ def create_app(service: Service | None = None) -> FastAPI:
             "by_model": [r.model_dump() | {"total_tokens": r.total_tokens} for r in bd.by_model],
         }
 
+    @app.get("/api/sessions")
+    def sessions(topic: str = "", since: str = "") -> list[dict[str, object]]:
+        """Per-session rows, optionally scoped to one topic and time window."""
+        start = _since(since)
+        rows = svc.sessions(topic=topic or None, start=start)
+        return [s.model_dump() | {"total_tokens": s.total_tokens} for s in rows]
+
+    @app.get("/api/sessions/{session_id}")
+    def session_detail(session_id: str) -> dict[str, object]:
+        """One session's aggregate plus the interactions (conversation turns)."""
+        detail = svc.session_detail(session_id)
+        if detail is None:
+            raise HTTPException(404, f"No session {session_id!r}")
+        return {
+            "session": detail.session.model_dump()
+            | {"total_tokens": detail.session.total_tokens},
+            "interactions": [
+                i.model_dump() | {"total_tokens": i.total_tokens}
+                for i in detail.interactions
+            ],
+        }
+
+    @app.get("/api/timeseries")
+    def timeseries(since: str = "") -> dict[str, object]:
+        """Daily token/cost trends plus splits by tool and model."""
+        start = _since(since)
+        bundle = svc.timeseries(start=start)
+        return {
+            "totals": [p.model_dump() | {"total_tokens": p.total_tokens} for p in bundle.totals],
+            "by_tool": [r.model_dump() for r in bundle.by_tool],
+            "by_model": [r.model_dump() for r in bundle.by_model],
+            "tool_keys": bundle.tool_keys,
+            "model_keys": bundle.model_keys,
+        }
+
     @app.get("/api/pricing")
     def pricing() -> list[dict[str, object]]:
         """The pricing table behind every cost figure."""
         return [p.model_dump() for p in svc.pricing()]
+
+    @app.get("/api/sources")
+    def sources() -> dict[str, object]:
+        """Collector diagnostics: which tools were detected and where."""
+        return {
+            "platform": platform_label(),
+            "collectors": [s.model_dump() for s in svc.sources()],
+        }
 
     @app.post("/api/ingest")
     def ingest() -> dict[str, int]:
@@ -72,6 +116,11 @@ def create_app(service: Service | None = None) -> FastAPI:
     @app.post("/api/classify")
     def classify() -> dict[str, int]:
         return {"classified": svc.classify()}
+
+    @app.post("/api/refresh")
+    def refresh() -> dict[str, int]:
+        """Ingest new logs and re-discover topics in one step."""
+        return svc.refresh()
 
     _mount_web_ui(app)
     return app

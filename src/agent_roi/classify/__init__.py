@@ -2,22 +2,25 @@
 
 from __future__ import annotations
 
-from agent_roi.classify.base import Classifier
+from agent_roi.classify.base import Classifier, SessionDoc
 from agent_roi.core.config import ClassifierConfig
 
 
 def get_classifier(config: ClassifierConfig) -> Classifier:
-    """Build the classifier described by config. Imports lazily so an unused
-    provider's dependencies/credentials are never required."""
-    if config.provider == "ollama":
-        from agent_roi.classify.ollama import OllamaClassifier
+    """Build the classifier described by config.
 
-        return OllamaClassifier(model=config.model)
-    if config.provider == "anthropic":
-        from agent_roi.classify.anthropic import AnthropicClassifier
+    Only the model-free ``semantic`` provider exists: it discovers topics locally
+    from session text, so there is nothing to install, no server to run, and no
+    tokens to spend.
+    """
+    if config.provider == "semantic":
+        from agent_roi.classify.semantic import SemanticClassifier
 
-        return AnthropicClassifier(model=config.model)
+        return SemanticClassifier(
+            similarity_threshold=config.similarity_threshold,
+            label_terms=config.label_terms,
+        )
     raise ValueError(f"Unknown classifier provider: {config.provider!r}")
 
 
-__all__ = ["Classifier", "get_classifier"]
+__all__ = ["Classifier", "SessionDoc", "get_classifier"]
