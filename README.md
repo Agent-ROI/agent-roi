@@ -23,10 +23,16 @@ When you use multiple AI coding tools — Claude Code, Codex CLI, GitHub Copilot
 
 ## Install
 
-One line (macOS / Linux / WSL):
+**macOS / Linux / WSL:**
 
 ```bash
 curl -LsSf https://raw.githubusercontent.com/Agent-ROI/agent-roi/main/scripts/install.sh | sh
+```
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/Agent-ROI/agent-roi/main/scripts/install.ps1 | iex
 ```
 
 Installs `uv` if needed, then the `agent-roi` command. No Python version management needed.
@@ -50,6 +56,7 @@ Set `AGENT_ROI_FROM_GIT=1` before running the install script to get the latest f
 agent-roi ingest                          # parse logs from all detected tools
 agent-roi report --by topic --since 7d   # cost per topic this week
 agent-roi serve                           # web dashboard on http://127.0.0.1:8000
+agent-roi doctor                          # see which tools were detected and why
 ```
 
 ## Features

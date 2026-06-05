@@ -23,10 +23,16 @@
 
 ## 安裝
 
-一行搞定（macOS / Linux / WSL）：
+**macOS / Linux / WSL：**
 
 ```bash
 curl -LsSf https://raw.githubusercontent.com/Agent-ROI/agent-roi/main/scripts/install.sh | sh
+```
+
+**Windows（PowerShell）：**
+
+```powershell
+irm https://raw.githubusercontent.com/Agent-ROI/agent-roi/main/scripts/install.ps1 | iex
 ```
 
 需要時會自動安裝 `uv`，接著安裝 `agent-roi` 指令，不需管理 Python 版本。
@@ -50,6 +56,7 @@ uv tool install agent-roi-tracker
 agent-roi ingest                          # 從所有偵測到的工具匯入 log
 agent-roi report --by topic --since 7d   # 本週各主題成本
 agent-roi serve                           # 開啟 http://127.0.0.1:8000 Web 儀表板
+agent-roi doctor                          # 查看哪些工具被偵測到及原因
 ```
 
 ## 功能特色
