@@ -17,7 +17,7 @@ from pydantic import BaseModel
 if sys.version_info >= (3, 11):
     import tomllib
 else:  # pragma: no cover
-    import tomli as tomllib  # type: ignore
+    import tomli as tomllib  # noqa: PLC0415
 
 APP_NAME = "agent-roi"
 
