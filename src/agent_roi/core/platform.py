@@ -63,7 +63,11 @@ def _windows_homes_from_wsl() -> list[Path]:
     win_user = os.environ.get("WIN_USER") or os.environ.get("USER")
     skip = {"Default", "Default User", "Public", "All Users", "desktop.ini"}
     for entry in users_dir.iterdir():
-        if entry.name in skip or not entry.is_dir():
+        try:
+            is_dir = entry.is_dir()
+        except PermissionError:
+            continue
+        if entry.name in skip or not is_dir:
             continue
         if win_user and entry.name.lower() == win_user.lower():
             homes.insert(0, entry)
@@ -78,8 +82,11 @@ def find_tool_dirs(*relative_parts: str) -> list[Path]:
     found: list[Path] = []
     for home in home_candidates():
         candidate = home.joinpath(*relative_parts)
-        if candidate.is_dir():
-            found.append(candidate)
+        try:
+            if candidate.is_dir():
+                found.append(candidate)
+        except PermissionError:
+            pass
     return found
 
 
@@ -108,6 +115,9 @@ def vscode_user_dirs() -> list[Path]:
             for app in apps:
                 parts = tuple(p.replace("{app}", app) for p in template)
                 candidate = home.joinpath(*parts)
-                if candidate.is_dir():
-                    found.append(candidate)
+                try:
+                    if candidate.is_dir():
+                        found.append(candidate)
+                except PermissionError:
+                    pass
     return found
