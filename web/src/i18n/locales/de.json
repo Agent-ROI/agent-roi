@@ -1,0 +1,140 @@
+{
+  "app": {
+    "title": "Agent-ROI",
+    "subtitle": "Token-Kosten & ROI Ihrer KI-Coding-Agenten",
+    "viewPricing": "Preise anzeigen",
+    "failedToLoad": "Laden fehlgeschlagen",
+    "noData": "Noch keine Daten. Klicken Sie auf „↻ Daten synchronisieren“, um Logs zu laden und Themen zu erstellen.",
+    "drillTip": "Tipp: Klicken Sie auf ein Thema, um zu Sessions zu navigieren, dann auf eine Session für die einzelnen Turns."
+  },
+  "stats": {
+    "totalCost": "Gesamtkosten",
+    "totalTokens": "Gesamt-Tokens",
+    "interactions": "Interaktionen",
+    "includesEstimates": "enthält Schätzungen"
+  },
+  "dimension": {
+    "topic": "Thema",
+    "project": "Projekt",
+    "tool": "Tool",
+    "model": "Modell",
+    "all": "Alle {{name}}",
+    "count": "{{name}}"
+  },
+  "toolbar": {
+    "syncData": "↻ Daten synchronisieren",
+    "syncing": "Synchronisiere…",
+    "ingestOnly": "Nur importieren",
+    "ingesting": "Importiere…",
+    "reclassify": "Neu klassifizieren",
+    "classifying": "Klassifiziere…",
+    "refreshView": "Ansicht aktualisieren",
+    "ingested": "importiert",
+    "classified": "klassifiziert",
+    "error": "Fehler"
+  },
+  "controls": {
+    "groupBy": "Gruppieren nach",
+    "range": "Zeitraum",
+    "allTime": "Gesamt",
+    "today": "Heute",
+    "days7": "7 Tage",
+    "days30": "30 Tage"
+  },
+  "sources": {
+    "title": "Datenquellen",
+    "activeCount": "{{detected}}/{{total}} aktiv",
+    "tool": "Tool",
+    "status": "Status",
+    "logFiles": "Log-Dateien",
+    "interactions": "Interaktionen",
+    "cost": "Kosten",
+    "searched": "Durchsucht",
+    "active": "aktiv",
+    "needsSync": "Sync nötig",
+    "notFound": "nicht gefunden",
+    "noteNotFound": "Keine Logs auf diesem Rechner gefunden.",
+    "noteNeedsSync": "Logs gefunden, aber noch nicht importiert — Sync ausführen."
+  },
+  "table": {
+    "interactions": "Interaktionen",
+    "input": "Eingabe",
+    "output": "Ausgabe",
+    "totalTokens": "Gesamt-Tokens",
+    "cost": "Kosten",
+    "source": "Quelle",
+    "tokens": "Tokens",
+    "share": "Anteil",
+    "project": "Projekt",
+    "tools": "Tools",
+    "calls": "Aufrufe",
+    "when": "Zeit",
+    "toolModel": "Tool / Modell",
+    "snippet": "Auszug",
+    "drillBreakdown": "Tool/Modell-Aufschlüsselung anzeigen",
+    "openSession": "Session öffnen — Aufrufe werden nach Muster gruppiert"
+  },
+  "chart": {
+    "costByTop": "Kosten nach {{dimension}} (Top 10)"
+  },
+  "breakdown": {
+    "summary": "{{interactions}} Interaktionen · {{sessions}} Sessions · {{tokens}} Tokens · {{cost}}",
+    "includesEstimates": "enthält Schätzungen",
+    "byTool": "Nach Tool",
+    "byModel": "Nach Modell",
+    "sessions": "Sessions ({{count}})",
+    "sessionsHint": "Jede Session ist ein zusammenhängendes Stück Arbeit. Klicken zeigt Aufrufmuster, kein Chat.",
+    "tool": "Tool",
+    "model": "Modell"
+  },
+  "session": {
+    "title": "Session",
+    "meta": "{{calls}} Aufrufe · {{tokens}} Tokens · {{cost}}",
+    "explainer": "Jede Zeile gruppiert gleich aussehende Modellaufrufe. Eine Gruppe kann Dutzende Abrechnungen sein (typisch: denken → Tool → wieder denken). Das ist eine Kostenaufschlüsselung, kein Chat.",
+    "classificationTitle": "So wurde diese Session klassifiziert",
+    "classificationHint": "Das Thema nutzte bis zu 8 Snippets wie diese aus dieser Session.",
+    "groupsTitle": "Aufrufmuster ({{count}} Gruppen)",
+    "pattern": "Muster",
+    "calls": "Aufrufe",
+    "callsUnit": "Aufrufe",
+    "timeSpan": "Zeitspanne",
+    "showIndividual": "Alle {{count}} Einzelaufrufe anzeigen",
+    "hideIndividual": "Einzelaufrufe ausblenden",
+    "rawTitle": "Alle Einzelaufrufe ({{count}})",
+    "noSnippet": "(kein Text erfasst)"
+  },
+  "pricing": {
+    "title": "Modellpreise",
+    "subtitle": "USD pro 1.000.000 Tokens. Kosten = Nutzung × Einheitspreise.",
+    "model": "Modell",
+    "input": "Eingabe",
+    "output": "Ausgabe",
+    "cacheRead": "Cache-Lesen",
+    "cacheWrite": "Cache-Schreiben"
+  },
+  "common": {
+    "loading": "Laden…",
+    "unknown": "unbekannt",
+    "estimated": "geschätzt",
+    "exact": "exakt",
+    "failed": "Fehlgeschlagen",
+    "dash": "—"
+  },
+  "errors": {
+    "backendDown": "Agent-ROI-Backend nicht erreichbar. Starten Sie `agent-roi serve` oder öffnen Sie http://127.0.0.1:8000 statt des Dev-Servers."
+  },
+  "lang": {
+    "en": "English",
+    "zh-CN": "简体中文",
+    "zh-TW": "繁體中文",
+    "ja": "日本語",
+    "de": "Deutsch",
+    "es": "Español",
+    "fr": "Français",
+    "tr": "Türkçe",
+    "uk": "Українська",
+    "af": "Afrikaans",
+    "ko": "한국어",
+    "label": "Sprache"
+  }
+}

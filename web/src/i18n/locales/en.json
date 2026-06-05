@@ -1,0 +1,144 @@
+{
+  "app": {
+    "title": "Agent-ROI",
+    "subtitle": "Token cost & ROI across your AI coding agents",
+    "viewPricing": "View pricing",
+    "failedToLoad": "Failed to load",
+    "noData": "No data yet. Click “↻ Sync data” to pull logs and build topics.",
+    "drillTip": "Tip: click a topic to drill into its sessions, then into each session’s turns."
+  },
+  "stats": {
+    "totalCost": "Total Cost",
+    "totalTokens": "Total Tokens",
+    "interactions": "Interactions",
+    "includesEstimates": "includes estimates"
+  },
+  "dimension": {
+    "topic": "topic",
+    "project": "project",
+    "tool": "tool",
+    "model": "model",
+    "all": "All {{name}}s",
+    "count": "{{name}}s"
+  },
+  "toolbar": {
+    "syncData": "↻ Sync data",
+    "syncing": "Syncing…",
+    "ingestOnly": "Ingest only",
+    "ingesting": "Ingesting…",
+    "reclassify": "Re-classify",
+    "classifying": "Classifying…",
+    "refreshView": "Refresh view",
+    "ingested": "ingested",
+    "classified": "classified",
+    "sync": "sync",
+    "error": "Error"
+  },
+  "controls": {
+    "groupBy": "Group by",
+    "range": "Range",
+    "allTime": "All time",
+    "hours24": "24h",
+    "today": "Today",
+    "days7": "7 days",
+    "days30": "30 days",
+    "days90": "90 days",
+    "fromDate": "From"
+  },
+  "sources": {
+    "title": "Data sources",
+    "activeCount": "{{detected}}/{{total}} active",
+    "tool": "Tool",
+    "status": "Status",
+    "logFiles": "Log files",
+    "interactions": "Interactions",
+    "cost": "Cost",
+    "searched": "Searched",
+    "active": "active",
+    "needsSync": "needs sync",
+    "notFound": "not found",
+    "noteNotFound": "No logs found on this machine.",
+    "noteNeedsSync": "Logs found but not ingested yet — run a sync."
+  },
+  "table": {
+    "interactions": "Interactions",
+    "input": "Input",
+    "output": "Output",
+    "totalTokens": "Total Tokens",
+    "cost": "Cost",
+    "source": "Source",
+    "tokens": "Tokens",
+    "share": "Share",
+    "project": "Project",
+    "tools": "Tools",
+    "calls": "Calls",
+    "when": "When",
+    "toolModel": "Tool / Model",
+    "snippet": "Snippet",
+    "drillBreakdown": "Click to see tool/model breakdown",
+    "openSession": "Open session — calls are grouped by pattern inside"
+  },
+  "chart": {
+    "costByTop": "Cost by {{dimension}} (top 10)"
+  },
+  "breakdown": {
+    "summary": "{{interactions}} interactions · {{sessions}} sessions · {{tokens}} tokens · {{cost}}",
+    "includesEstimates": "includes estimates",
+    "byTool": "By tool",
+    "byModel": "By model",
+    "sessions": "Sessions ({{count}})",
+    "sessionsHint": "Each session is one stretch of work. Click to see call patterns, not a chat log.",
+    "tool": "tool",
+    "model": "model"
+  },
+  "session": {
+    "title": "Session",
+    "meta": "{{calls}} calls · {{tokens}} tokens · {{cost}}",
+    "explainer": "Each row groups model calls that looked the same to the collector. A single group may be dozens of billed API requests — typical when an agent loops (think → run a tool → think again). This is a cost breakdown, not a chat transcript.",
+    "classificationTitle": "How this session was classified",
+    "classificationHint": "The topic label used up to 8 snippets like these from this session.",
+    "groupsTitle": "Call patterns ({{count}} groups)",
+    "pattern": "Pattern",
+    "calls": "Calls",
+    "callsUnit": "calls",
+    "timeSpan": "Time span",
+    "showIndividual": "Show all {{count}} individual calls",
+    "hideIndividual": "Hide individual calls",
+    "rawTitle": "All individual calls ({{count}})",
+    "noSnippet": "(no text captured)"
+  },
+  "pricing": {
+    "title": "Model pricing",
+    "subtitle": "USD per 1,000,000 tokens. Cost = usage × these unit prices.",
+    "model": "Model",
+    "input": "Input",
+    "output": "Output",
+    "cacheRead": "Cache read",
+    "cacheWrite": "Cache write"
+  },
+  "common": {
+    "loading": "Loading…",
+    "unknown": "unknown",
+    "estimated": "estimated",
+    "exact": "exact",
+    "failed": "Failed",
+    "dash": "—"
+  },
+  "errors": {
+    "backendDown": "Can't reach the Agent-ROI backend. Start it with `agent-roi serve`, or open the app it serves at http://127.0.0.1:8000 instead of the dev server."
+  },
+  "lang": {
+    "en": "English",
+    "zh-CN": "简体中文",
+    "zh-TW": "繁體中文",
+    "ja": "日本語",
+    "de": "Deutsch",
+    "es": "Español",
+    "fr": "Français",
+    "tr": "Türkçe",
+    "uk": "Українська",
+    "af": "Afrikaans",
+    "ko": "한국어",
+    "label": "Language"
+  }
+}

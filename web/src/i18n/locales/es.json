@@ -1,0 +1,140 @@
+{
+  "app": {
+    "title": "Agent-ROI",
+    "subtitle": "Costo de tokens y ROI de tus agentes de código con IA",
+    "viewPricing": "Ver precios",
+    "failedToLoad": "Error al cargar",
+    "noData": "Sin datos aún. Haz clic en «↻ Sincronizar datos» para obtener logs y crear temas.",
+    "drillTip": "Consejo: haz clic en un tema para ver sus sesiones y luego en cada sesión para ver sus turnos."
+  },
+  "stats": {
+    "totalCost": "Costo total",
+    "totalTokens": "Tokens totales",
+    "interactions": "Interacciones",
+    "includesEstimates": "incluye estimaciones"
+  },
+  "dimension": {
+    "topic": "tema",
+    "project": "proyecto",
+    "tool": "herramienta",
+    "model": "modelo",
+    "all": "Todos los {{name}}",
+    "count": "{{name}}"
+  },
+  "toolbar": {
+    "syncData": "↻ Sincronizar datos",
+    "syncing": "Sincronizando…",
+    "ingestOnly": "Solo importar",
+    "ingesting": "Importando…",
+    "reclassify": "Reclasificar",
+    "classifying": "Clasificando…",
+    "refreshView": "Actualizar vista",
+    "ingested": "importados",
+    "classified": "clasificados",
+    "error": "Error"
+  },
+  "controls": {
+    "groupBy": "Agrupar por",
+    "range": "Período",
+    "allTime": "Todo",
+    "today": "Hoy",
+    "days7": "7 días",
+    "days30": "30 días"
+  },
+  "sources": {
+    "title": "Fuentes de datos",
+    "activeCount": "{{detected}}/{{total}} activas",
+    "tool": "Herramienta",
+    "status": "Estado",
+    "logFiles": "Archivos log",
+    "interactions": "Interacciones",
+    "cost": "Costo",
+    "searched": "Rutas buscadas",
+    "active": "activa",
+    "needsSync": "necesita sync",
+    "notFound": "no encontrada",
+    "noteNotFound": "No se encontraron logs en esta máquina.",
+    "noteNeedsSync": "Logs encontrados pero no importados — ejecuta una sincronización."
+  },
+  "table": {
+    "interactions": "Interacciones",
+    "input": "Entrada",
+    "output": "Salida",
+    "totalTokens": "Tokens totales",
+    "cost": "Costo",
+    "source": "Fuente",
+    "tokens": "Tokens",
+    "share": "Porcentaje",
+    "project": "Proyecto",
+    "tools": "Herramientas",
+    "calls": "Llamadas",
+    "when": "Cuándo",
+    "toolModel": "Herramienta / Modelo",
+    "snippet": "Fragmento",
+    "drillBreakdown": "Ver desglose por herramienta/modelo",
+    "openSession": "Abrir sesión — las llamadas se agrupan por patrón"
+  },
+  "chart": {
+    "costByTop": "Costo por {{dimension}} (top 10)"
+  },
+  "breakdown": {
+    "summary": "{{interactions}} interacciones · {{sessions}} sesiones · {{tokens}} tokens · {{cost}}",
+    "includesEstimates": "incluye estimaciones",
+    "byTool": "Por herramienta",
+    "byModel": "Por modelo",
+    "sessions": "Sesiones ({{count}})",
+    "sessionsHint": "Cada sesión es un bloque de trabajo. Haz clic para ver patrones de llamada, no un chat.",
+    "tool": "herramienta",
+    "model": "modelo"
+  },
+  "session": {
+    "title": "Sesión",
+    "meta": "{{calls}} llamadas · {{tokens}} tokens · {{cost}}",
+    "explainer": "Cada fila agrupa llamadas al modelo que parecían iguales. Un grupo puede ser docenas de cargos (bucle típico: pensar → herramienta → pensar). Es un desglose de costos, no un chat.",
+    "classificationTitle": "Cómo se clasificó esta sesión",
+    "classificationHint": "El tema usó hasta 8 fragmentos como estos de esta sesión.",
+    "groupsTitle": "Patrones de llamada ({{count}} grupos)",
+    "pattern": "Patrón",
+    "calls": "Llamadas",
+    "callsUnit": "llamadas",
+    "timeSpan": "Intervalo",
+    "showIndividual": "Mostrar las {{count}} llamadas individuales",
+    "hideIndividual": "Ocultar llamadas individuales",
+    "rawTitle": "Todas las llamadas individuales ({{count}})",
+    "noSnippet": "(sin texto capturado)"
+  },
+  "pricing": {
+    "title": "Precios de modelos",
+    "subtitle": "USD por 1.000.000 tokens. Costo = uso × precios unitarios.",
+    "model": "Modelo",
+    "input": "Entrada",
+    "output": "Salida",
+    "cacheRead": "Lectura caché",
+    "cacheWrite": "Escritura caché"
+  },
+  "common": {
+    "loading": "Cargando…",
+    "unknown": "desconocido",
+    "estimated": "estimado",
+    "exact": "exacto",
+    "failed": "Falló",
+    "dash": "—"
+  },
+  "errors": {
+    "backendDown": "No se puede conectar al backend de Agent-ROI. Ejecuta `agent-roi serve` o abre http://127.0.0.1:8000 en lugar del servidor de desarrollo."
+  },
+  "lang": {
+    "en": "English",
+    "zh-CN": "简体中文",
+    "zh-TW": "繁體中文",
+    "ja": "日本語",
+    "de": "Deutsch",
+    "es": "Español",
+    "fr": "Français",
+    "tr": "Türkçe",
+    "uk": "Українська",
+    "af": "Afrikaans",
+    "ko": "한국어",
+    "label": "Idioma"
+  }
+}

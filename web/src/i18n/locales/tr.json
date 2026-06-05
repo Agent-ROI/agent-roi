@@ -1,0 +1,140 @@
+{
+  "app": {
+    "title": "Agent-ROI",
+    "subtitle": "Yapay zeka kodlama ajanlarınızın token maliyeti ve ROI'si",
+    "viewPricing": "Fiyatlandırmayı gör",
+    "failedToLoad": "Yükleme başarısız",
+    "noData": "Henüz veri yok. Logları çekmek ve konular oluşturmak için «↻ Verileri senkronize et»e tıklayın.",
+    "drillTip": "İpucu: bir konuya tıklayarak oturumlara, ardından her oturumun turlarına inebilirsiniz."
+  },
+  "stats": {
+    "totalCost": "Toplam Maliyet",
+    "totalTokens": "Toplam Token",
+    "interactions": "Etkileşimler",
+    "includesEstimates": "tahminler dahil"
+  },
+  "dimension": {
+    "topic": "konu",
+    "project": "proje",
+    "tool": "araç",
+    "model": "model",
+    "all": "Tüm {{name}}",
+    "count": "{{name}}"
+  },
+  "toolbar": {
+    "syncData": "↻ Verileri senkronize et",
+    "syncing": "Senkronize ediliyor…",
+    "ingestOnly": "Yalnızca içe aktar",
+    "ingesting": "İçe aktarılıyor…",
+    "reclassify": "Yeniden sınıflandır",
+    "classifying": "Sınıflandırılıyor…",
+    "refreshView": "Görünümü yenile",
+    "ingested": "içe aktarıldı",
+    "classified": "sınıflandırıldı",
+    "error": "Hata"
+  },
+  "controls": {
+    "groupBy": "Grupla",
+    "range": "Dönem",
+    "allTime": "Tümü",
+    "today": "Bugün",
+    "days7": "7 gün",
+    "days30": "30 gün"
+  },
+  "sources": {
+    "title": "Veri kaynakları",
+    "activeCount": "{{detected}}/{{total}} aktif",
+    "tool": "Araç",
+    "status": "Durum",
+    "logFiles": "Log dosyaları",
+    "interactions": "Etkileşimler",
+    "cost": "Maliyet",
+    "searched": "Aranan yollar",
+    "active": "aktif",
+    "needsSync": "senkron gerekli",
+    "notFound": "bulunamadı",
+    "noteNotFound": "Bu makinede log bulunamadı.",
+    "noteNeedsSync": "Loglar bulundu ancak henüz içe aktarılmadı — senkronize edin."
+  },
+  "table": {
+    "interactions": "Etkileşimler",
+    "input": "Girdi",
+    "output": "Çıktı",
+    "totalTokens": "Toplam Token",
+    "cost": "Maliyet",
+    "source": "Kaynak",
+    "tokens": "Token",
+    "share": "Pay",
+    "project": "Proje",
+    "tools": "Araçlar",
+    "calls": "Çağrı",
+    "when": "Zaman",
+    "toolModel": "Araç / Model",
+    "snippet": "Özet",
+    "drillBreakdown": "Araç/model dağılımını gör",
+    "openSession": "Oturumu aç — çağrılar kalıba göre gruplanır"
+  },
+  "chart": {
+    "costByTop": "{{dimension}} bazında maliyet (ilk 10)"
+  },
+  "breakdown": {
+    "summary": "{{interactions}} etkileşim · {{sessions}} oturum · {{tokens}} token · {{cost}}",
+    "includesEstimates": "tahminler dahil",
+    "byTool": "Araça göre",
+    "byModel": "Modele göre",
+    "sessions": "Oturumlar ({{count}})",
+    "sessionsHint": "Her oturum bir iş bloğudur. Tıklayınca çağrı kalıpları görünür, sohbet değil.",
+    "tool": "araç",
+    "model": "model"
+  },
+  "session": {
+    "title": "Oturum",
+    "meta": "{{calls}} çağrı · {{tokens}} token · {{cost}}",
+    "explainer": "Her satır aynı görünen model çağrılarını gruplar. Bir grup onlarca faturalandırmayı temsil edebilir (düşün → araç çalıştır → tekrar düşün). Bu bir maliyet dökümü, sohbet değil.",
+    "classificationTitle": "Bu oturum nasıl sınıflandırıldı",
+    "classificationHint": "Konu etiketi bu oturumdan en fazla 8 snippet kullandı.",
+    "groupsTitle": "Çağrı kalıpları ({{count}} grup)",
+    "pattern": "Kalıp",
+    "calls": "Çağrı",
+    "callsUnit": "çağrı",
+    "timeSpan": "Zaman aralığı",
+    "showIndividual": "Tüm {{count}} ayrı çağrıyı göster",
+    "hideIndividual": "Ayrı çağrıları gizle",
+    "rawTitle": "Tüm ayrı çağrılar ({{count}})",
+    "noSnippet": "(metin yakalanmadı)"
+  },
+  "pricing": {
+    "title": "Model fiyatlandırması",
+    "subtitle": "1.000.000 token başına USD. Maliyet = kullanım × birim fiyatlar.",
+    "model": "Model",
+    "input": "Girdi",
+    "output": "Çıktı",
+    "cacheRead": "Önbellek okuma",
+    "cacheWrite": "Önbellek yazma"
+  },
+  "common": {
+    "loading": "Yükleniyor…",
+    "unknown": "bilinmiyor",
+    "estimated": "tahmini",
+    "exact": "kesin",
+    "failed": "Başarısız",
+    "dash": "—"
+  },
+  "errors": {
+    "backendDown": "Agent-ROI arka ucuna ulaşılamıyor. `agent-roi serve` çalıştırın veya dev sunucusu yerine http://127.0.0.1:8000 adresini açın."
+  },
+  "lang": {
+    "en": "English",
+    "zh-CN": "简体中文",
+    "zh-TW": "繁體中文",
+    "ja": "日本語",
+    "de": "Deutsch",
+    "es": "Español",
+    "fr": "Français",
+    "tr": "Türkçe",
+    "uk": "Українська",
+    "af": "Afrikaans",
+    "ko": "한국어",
+    "label": "Dil"
+  }
+}

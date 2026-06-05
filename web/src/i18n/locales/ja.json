@@ -1,0 +1,140 @@
+{
+  "app": {
+    "title": "Agent-ROI",
+    "subtitle": "AI コーディングエージェントのトークンコストと ROI を追跡",
+    "viewPricing": "料金表を見る",
+    "failedToLoad": "読み込みに失敗しました",
+    "noData": "データがありません。「↻ データ同期」をクリックしてログを取得し、トピックを作成してください。",
+    "drillTip": "ヒント：トピックをクリックしてセッションにドリルダウンし、各セッションのターンを確認できます。"
+  },
+  "stats": {
+    "totalCost": "総コスト",
+    "totalTokens": "総トークン",
+    "interactions": "インタラクション",
+    "includesEstimates": "推定値を含む"
+  },
+  "dimension": {
+    "topic": "トピック",
+    "project": "プロジェクト",
+    "tool": "ツール",
+    "model": "モデル",
+    "all": "すべての{{name}}",
+    "count": "{{name}}数"
+  },
+  "toolbar": {
+    "syncData": "↻ データ同期",
+    "syncing": "同期中…",
+    "ingestOnly": "取り込みのみ",
+    "ingesting": "取り込み中…",
+    "reclassify": "再分類",
+    "classifying": "分類中…",
+    "refreshView": "表示を更新",
+    "ingested": "取り込み済み",
+    "classified": "分類済み",
+    "error": "エラー"
+  },
+  "controls": {
+    "groupBy": "グループ化",
+    "range": "期間",
+    "allTime": "全期間",
+    "today": "今日",
+    "days7": "7 日間",
+    "days30": "30 日間"
+  },
+  "sources": {
+    "title": "データソース",
+    "activeCount": "{{detected}}/{{total}} 件が有効",
+    "tool": "ツール",
+    "status": "ステータス",
+    "logFiles": "ログファイル",
+    "interactions": "インタラクション",
+    "cost": "コスト",
+    "searched": "検索パス",
+    "active": "有効",
+    "needsSync": "同期が必要",
+    "notFound": "見つかりません",
+    "noteNotFound": "このマシンにログが見つかりません。",
+    "noteNeedsSync": "ログは見つかりましたが、まだ取り込まれていません — 同期を実行してください。"
+  },
+  "table": {
+    "interactions": "インタラクション",
+    "input": "入力",
+    "output": "出力",
+    "totalTokens": "総トークン",
+    "cost": "コスト",
+    "source": "ソース",
+    "tokens": "トークン",
+    "share": "割合",
+    "project": "プロジェクト",
+    "tools": "ツール",
+    "calls": "呼び出し",
+    "when": "日時",
+    "toolModel": "ツール / モデル",
+    "snippet": "スニペット",
+    "drillBreakdown": "ツール/モデルの内訳を表示",
+    "openSession": "セッションを開く — 内部でパターン別にグループ化"
+  },
+  "chart": {
+    "costByTop": "{{dimension}}別コスト（上位 10）"
+  },
+  "breakdown": {
+    "summary": "{{interactions}} 件のインタラクション · {{sessions}} セッション · {{tokens}} トークン · {{cost}}",
+    "includesEstimates": "推定値を含む",
+    "byTool": "ツール別",
+    "byModel": "モデル別",
+    "sessions": "セッション（{{count}}）",
+    "sessionsHint": "各セッションは一連の作業です。クリックすると呼び出しパターンが見えます（チャットではありません）。",
+    "tool": "ツール",
+    "model": "モデル"
+  },
+  "session": {
+    "title": "セッション",
+    "meta": "{{calls}} 回の呼び出し · {{tokens}} トークン · {{cost}}",
+    "explainer": "各行はコレクターから見て同じモデル呼び出しをグループ化したものです。1グループが何十回もの課金を表すことがあります（思考 → ツール実行 → 再思考のループ）。コスト内訳であり、チャット履歴ではありません。",
+    "classificationTitle": "このセッションの分類方法",
+    "classificationHint": "トピックラベルはこのセッションから最大8つのスニペットを使用しました。",
+    "groupsTitle": "呼び出しパターン（{{count}} グループ）",
+    "pattern": "パターン",
+    "calls": "回数",
+    "callsUnit": "回",
+    "timeSpan": "時間範囲",
+    "showIndividual": "全 {{count}} 件の個別呼び出しを表示",
+    "hideIndividual": "個別呼び出しを隠す",
+    "rawTitle": "全個別呼び出し（{{count}}）",
+    "noSnippet": "（テキストなし）"
+  },
+  "pricing": {
+    "title": "モデル料金",
+    "subtitle": "100 万トークンあたりの USD。コスト = 使用量 × 単価。",
+    "model": "モデル",
+    "input": "入力",
+    "output": "出力",
+    "cacheRead": "キャッシュ読み取り",
+    "cacheWrite": "キャッシュ書き込み"
+  },
+  "common": {
+    "loading": "読み込み中…",
+    "unknown": "不明",
+    "estimated": "推定",
+    "exact": "正確",
+    "failed": "失敗",
+    "dash": "—"
+  },
+  "errors": {
+    "backendDown": "Agent-ROI バックエンドに接続できません。`agent-roi serve` を起動するか、dev server ではなく http://127.0.0.1:8000 を開いてください。"
+  },
+  "lang": {
+    "en": "English",
+    "zh-CN": "简体中文",
+    "zh-TW": "繁體中文",
+    "ja": "日本語",
+    "de": "Deutsch",
+    "es": "Español",
+    "fr": "Français",
+    "tr": "Türkçe",
+    "uk": "Українська",
+    "af": "Afrikaans",
+    "ko": "한국어",
+    "label": "言語"
+  }
+}

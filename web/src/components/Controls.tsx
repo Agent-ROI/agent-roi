@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { Dimension } from "../lib/api";
 
 interface Props {
@@ -7,42 +8,56 @@ interface Props {
   onSince: (s: string) => void;
 }
 
-const DIMENSIONS: Dimension[] = ["topic", "tool", "model"];
-const RANGES: { label: string; value: string }[] = [
-  { label: "All time", value: "" },
-  { label: "Today", value: "today" },
-  { label: "7 days", value: "7d" },
-  { label: "30 days", value: "30d" },
-];
+const DIMENSIONS: Dimension[] = ["topic", "project", "tool", "model"];
+const RANGES = [
+  { key: "allTime", value: "" },
+  { key: "hours24", value: "24h" },
+  { key: "today", value: "today" },
+  { key: "days7", value: "7d" },
+  { key: "days30", value: "30d" },
+  { key: "days90", value: "90d" },
+] as const;
 
-// Lets the user choose the grouping dimension and the time window. These drive
-// every figure on the dashboard, so the numbers are always scoped explicitly.
 export function Controls({ dimension, onDimension, since, onSince }: Props) {
+  const { t } = useTranslation();
+  const isCustomDate = /^\d{4}-\d{2}-\d{2}$/.test(since);
+  const customDateValue = isCustomDate ? since : "";
+
   return (
     <div className="controls">
       <div className="control-group">
-        <span className="control-label">Group by</span>
+        <span className="control-label">{t("controls.groupBy")}</span>
         {DIMENSIONS.map((d) => (
           <button
             key={d}
             className={d === dimension ? "chip active" : "chip"}
             onClick={() => onDimension(d)}
           >
-            {d}
+            {t(`dimension.${d}`)}
           </button>
         ))}
       </div>
       <div className="control-group">
-        <span className="control-label">Range</span>
+        <span className="control-label">{t("controls.range")}</span>
         {RANGES.map((r) => (
           <button
             key={r.value}
             className={r.value === since ? "chip active" : "chip"}
             onClick={() => onSince(r.value)}
           >
-            {r.label}
+            {t(`controls.${r.key}`, { defaultValue: r.value || "All time" })}
           </button>
         ))}
+        <label className="date-filter">
+          <span className="control-label">{t("controls.fromDate", { defaultValue: "From" })}</span>
+          <input
+            className="date-input"
+            type="date"
+            value={customDateValue}
+            onChange={(e) => onSince(e.target.value)}
+            aria-label={t("controls.fromDate", { defaultValue: "From date" })}
+          />
+        </label>
       </div>
     </div>
   );

@@ -1,0 +1,144 @@
+{
+  "app": {
+    "title": "Agent-ROI",
+    "subtitle": "追蹤 AI 程式開發代理的權杖花費與投資報酬",
+    "viewPricing": "查看定價",
+    "failedToLoad": "載入失敗",
+    "noData": "尚無資料。點擊「↻ 同步資料」以拉取日誌並建立主題。",
+    "drillTip": "提示：點擊主題可下鑽至工作階段，再點工作階段查看呼叫明細。"
+  },
+  "stats": {
+    "totalCost": "總花費",
+    "totalTokens": "總權杖數",
+    "interactions": "互動次數",
+    "includesEstimates": "含估算值"
+  },
+  "dimension": {
+    "topic": "主題",
+    "project": "專案",
+    "tool": "工具",
+    "model": "模型",
+    "all": "所有{{name}}",
+    "count": "{{name}}數"
+  },
+  "toolbar": {
+    "syncData": "↻ 同步資料",
+    "syncing": "同步中…",
+    "ingestOnly": "僅匯入",
+    "ingesting": "匯入中…",
+    "reclassify": "重新分類",
+    "classifying": "分類中…",
+    "refreshView": "重新整理",
+    "ingested": "已匯入",
+    "classified": "已分類",
+    "sync": "同步",
+    "error": "錯誤"
+  },
+  "controls": {
+    "groupBy": "分組依據",
+    "range": "時間範圍",
+    "allTime": "全部",
+    "hours24": "24 小時",
+    "today": "今天",
+    "days7": "7 天",
+    "days30": "30 天",
+    "days90": "90 天",
+    "fromDate": "起始日"
+  },
+  "sources": {
+    "title": "資料來源",
+    "activeCount": "{{detected}}/{{total}} 個已啟用",
+    "tool": "工具",
+    "status": "狀態",
+    "logFiles": "日誌檔案",
+    "interactions": "互動次數",
+    "cost": "花費",
+    "searched": "搜尋路徑",
+    "active": "已啟用",
+    "needsSync": "需同步",
+    "notFound": "未找到",
+    "noteNotFound": "此機器上找不到日誌。",
+    "noteNeedsSync": "已找到日誌但尚未匯入 — 請執行同步。"
+  },
+  "table": {
+    "interactions": "互動次數",
+    "input": "輸入",
+    "output": "輸出",
+    "totalTokens": "總權杖數",
+    "cost": "花費",
+    "source": "來源",
+    "tokens": "權杖",
+    "share": "佔比",
+    "project": "專案",
+    "tools": "工具",
+    "calls": "呼叫次數",
+    "when": "時間",
+    "toolModel": "工具 / 模型",
+    "snippet": "摘要",
+    "drillBreakdown": "點擊查看工具/模型分解",
+    "openSession": "開啟工作階段 — 內部會依模式合併呼叫"
+  },
+  "chart": {
+    "costByTop": "依{{dimension}}的花費（前 10）"
+  },
+  "breakdown": {
+    "summary": "{{interactions}} 次互動 · {{sessions}} 個工作階段 · {{tokens}} 權杖 · {{cost}}",
+    "includesEstimates": "含估算值",
+    "byTool": "依工具",
+    "byModel": "依模型",
+    "sessions": "工作階段（{{count}}）",
+    "sessionsHint": "每個工作階段是一段連續工作。點進去看呼叫模式，不是聊天紀錄。",
+    "tool": "工具",
+    "model": "模型"
+  },
+  "session": {
+    "title": "工作階段",
+    "meta": "{{calls}} 次呼叫 · {{tokens}} 權杖 · {{cost}}",
+    "explainer": "每一列是把「看起來一樣的模型呼叫」合併成一群。同一群可能代表很多次計費（代理程式常見循環：思考 → 跑工具 → 再思考）。這是成本明細，不是聊天紀錄。",
+    "classificationTitle": "此工作階段如何被分類",
+    "classificationHint": "系統從此工作階段挑選最多 8 段像這樣的摘要，歸成上方的主題。",
+    "groupsTitle": "呼叫模式（{{count}} 群）",
+    "pattern": "模式",
+    "calls": "次數",
+    "callsUnit": "次",
+    "timeSpan": "時間範圍",
+    "showIndividual": "展開全部 {{count}} 次個別呼叫",
+    "hideIndividual": "收合個別呼叫",
+    "rawTitle": "全部個別呼叫（{{count}}）",
+    "noSnippet": "（無擷取文字）"
+  },
+  "pricing": {
+    "title": "模型定價",
+    "subtitle": "每百萬權杖的美元價格。花費 = 用量 × 單價。",
+    "model": "模型",
+    "input": "輸入",
+    "output": "輸出",
+    "cacheRead": "快取讀取",
+    "cacheWrite": "快取寫入"
+  },
+  "common": {
+    "loading": "載入中…",
+    "unknown": "未知",
+    "estimated": "估算",
+    "exact": "精確",
+    "failed": "失敗",
+    "dash": "—"
+  },
+  "errors": {
+    "backendDown": "無法連線至 Agent-ROI 後端。請執行 `agent-roi serve`，或改開啟 http://127.0.0.1:8000，而非開發伺服器。"
+  },
+  "lang": {
+    "en": "English",
+    "zh-CN": "简体中文",
+    "zh-TW": "繁體中文",
+    "ja": "日本語",
+    "de": "Deutsch",
+    "es": "Español",
+    "fr": "Français",
+    "tr": "Türkçe",
+    "uk": "Українська",
+    "af": "Afrikaans",
+    "ko": "한국어",
+    "label": "語言"
+  }
+}

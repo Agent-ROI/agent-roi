@@ -1,0 +1,144 @@
+{
+  "app": {
+    "title": "Agent-ROI",
+    "subtitle": "追踪 AI 编程代理的令牌花费与投资回报率",
+    "viewPricing": "查看定价",
+    "failedToLoad": "加载失败",
+    "noData": "尚无数据。点击「↻ 同步数据」以拉取日志并建立主题。",
+    "drillTip": "提示：点击主题可下钻至会话，再点会话查看调用明细。"
+  },
+  "stats": {
+    "totalCost": "总花费",
+    "totalTokens": "总令牌数",
+    "interactions": "交互次数",
+    "includesEstimates": "含估算值"
+  },
+  "dimension": {
+    "topic": "主题",
+    "project": "项目",
+    "tool": "工具",
+    "model": "模型",
+    "all": "所有{{name}}",
+    "count": "{{name}}数"
+  },
+  "toolbar": {
+    "syncData": "↻ 同步数据",
+    "syncing": "同步中…",
+    "ingestOnly": "仅导入",
+    "ingesting": "导入中…",
+    "reclassify": "重新分类",
+    "classifying": "分类中…",
+    "refreshView": "刷新视图",
+    "ingested": "已导入",
+    "classified": "已分类",
+    "sync": "同步",
+    "error": "错误"
+  },
+  "controls": {
+    "groupBy": "分组依据",
+    "range": "时间范围",
+    "allTime": "全部",
+    "hours24": "24 小时",
+    "today": "今天",
+    "days7": "7 天",
+    "days30": "30 天",
+    "days90": "90 天",
+    "fromDate": "起始日"
+  },
+  "sources": {
+    "title": "数据来源",
+    "activeCount": "{{detected}}/{{total}} 个已启用",
+    "tool": "工具",
+    "status": "状态",
+    "logFiles": "日志文件",
+    "interactions": "交互次数",
+    "cost": "花费",
+    "searched": "搜索路径",
+    "active": "已启用",
+    "needsSync": "需同步",
+    "notFound": "未找到",
+    "noteNotFound": "此机器上找不到日志。",
+    "noteNeedsSync": "已找到日志但尚未导入 — 请执行同步。"
+  },
+  "table": {
+    "interactions": "交互次数",
+    "input": "输入",
+    "output": "输出",
+    "totalTokens": "总令牌数",
+    "cost": "花费",
+    "source": "来源",
+    "tokens": "令牌",
+    "share": "占比",
+    "project": "项目",
+    "tools": "工具",
+    "calls": "调用次数",
+    "when": "时间",
+    "toolModel": "工具 / 模型",
+    "snippet": "摘要",
+    "drillBreakdown": "点击查看工具/模型分解",
+    "openSession": "打开会话 — 内部会按模式合并调用"
+  },
+  "chart": {
+    "costByTop": "按{{dimension}}的花费（前 10）"
+  },
+  "breakdown": {
+    "summary": "{{interactions}} 次交互 · {{sessions}} 个会话 · {{tokens}} 令牌 · {{cost}}",
+    "includesEstimates": "含估算值",
+    "byTool": "按工具",
+    "byModel": "按模型",
+    "sessions": "会话（{{count}}）",
+    "sessionsHint": "每个会话是一段连续工作。点进去看调用模式，不是聊天记录。",
+    "tool": "工具",
+    "model": "模型"
+  },
+  "session": {
+    "title": "会话",
+    "meta": "{{calls}} 次调用 · {{tokens}} 令牌 · {{cost}}",
+    "explainer": "每一行将「看起来一样的模型调用」合并为一组。同一组可能代表很多次计费（代理程序常见循环：思考 → 跑工具 → 再思考）。这是成本明细，不是聊天记录。",
+    "classificationTitle": "此会话如何被分类",
+    "classificationHint": "系统从此会话挑选最多 8 段这样的摘要，归成上方的主题。",
+    "groupsTitle": "调用模式（{{count}} 组）",
+    "pattern": "模式",
+    "calls": "次数",
+    "callsUnit": "次",
+    "timeSpan": "时间范围",
+    "showIndividual": "展开全部 {{count}} 次单独调用",
+    "hideIndividual": "收起单独调用",
+    "rawTitle": "全部单独调用（{{count}}）",
+    "noSnippet": "（无截取文字）"
+  },
+  "pricing": {
+    "title": "模型定价",
+    "subtitle": "每百万令牌的美元价格。花费 = 用量 × 单价。",
+    "model": "模型",
+    "input": "输入",
+    "output": "输出",
+    "cacheRead": "缓存读取",
+    "cacheWrite": "缓存写入"
+  },
+  "common": {
+    "loading": "加载中…",
+    "unknown": "未知",
+    "estimated": "估算",
+    "exact": "精确",
+    "failed": "失败",
+    "dash": "—"
+  },
+  "errors": {
+    "backendDown": "无法连接至 Agent-ROI 后端。请运行 `agent-roi serve`，或改打开 http://127.0.0.1:8000，而非开发服务器。"
+  },
+  "lang": {
+    "en": "English",
+    "zh-CN": "简体中文",
+    "zh-TW": "繁體中文",
+    "ja": "日本語",
+    "de": "Deutsch",
+    "es": "Español",
+    "fr": "Français",
+    "tr": "Türkçe",
+    "uk": "Українська",
+    "af": "Afrikaans",
+    "ko": "한국어",
+    "label": "语言"
+  }
+}

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api, type ModelPricing } from "../lib/api";
 
 interface Props {
   onClose: () => void;
 }
 
-// Shows the pricing table behind every cost figure, so users can verify that
-// cost = usage x these unit prices.
 export function PricingModal({ onClose }: Props) {
+  const { t } = useTranslation();
   const [prices, setPrices] = useState<ModelPricing[] | null>(null);
 
   useEffect(() => {
@@ -22,24 +22,24 @@ export function PricingModal({ onClose }: Props) {
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Model pricing</h2>
+          <h2>{t("pricing.title")}</h2>
           <button className="chip" onClick={onClose}>
             ✕
           </button>
         </div>
-        <p className="muted">USD per 1,000,000 tokens. Cost = usage × these unit prices.</p>
+        <p className="muted">{t("pricing.subtitle")}</p>
         {!prices ? (
-          <p className="muted">Loading…</p>
+          <p className="muted">{t("common.loading")}</p>
         ) : (
           <section className="card">
             <table>
               <thead>
                 <tr>
-                  <th>Model</th>
-                  <th className="num">Input</th>
-                  <th className="num">Output</th>
-                  <th className="num">Cache read</th>
-                  <th className="num">Cache write</th>
+                  <th>{t("pricing.model")}</th>
+                  <th className="num">{t("pricing.input")}</th>
+                  <th className="num">{t("pricing.output")}</th>
+                  <th className="num">{t("pricing.cacheRead")}</th>
+                  <th className="num">{t("pricing.cacheWrite")}</th>
                 </tr>
               </thead>
               <tbody>

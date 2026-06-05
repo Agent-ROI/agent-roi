@@ -1,12 +1,13 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { api } from "../lib/api";
 
 interface Props {
   onRefresh: () => Promise<void>;
 }
 
-// Runs ingest/classify against the backend, then refreshes the dashboard.
 export function Toolbar({ onRefresh }: Props) {
+  const { t } = useTranslation();
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
 
@@ -15,11 +16,13 @@ export function Toolbar({ onRefresh }: Props) {
     setNote(null);
     try {
       const result = (await fn()) as Record<string, number>;
-      const [[key, value]] = Object.entries(result);
-      setNote(`${key}: ${value}`);
+      const summary = Object.entries(result)
+        .map(([k, v]) => `${t(`toolbar.${k}`, { defaultValue: k })}: ${v}`)
+        .join(" · ");
+      setNote(summary);
       await onRefresh();
     } catch (e) {
-      setNote(e instanceof Error ? e.message : "Error");
+      setNote(e instanceof Error ? e.message : t("toolbar.error"));
     } finally {
       setBusy(null);
     }
@@ -27,14 +30,17 @@ export function Toolbar({ onRefresh }: Props) {
 
   return (
     <div className="toolbar">
-      <button disabled={!!busy} onClick={() => run("ingest", api.ingest)}>
-        {busy === "ingest" ? "Ingesting…" : "Ingest"}
+      <button disabled={!!busy} onClick={() => run("sync", api.refresh)}>
+        {busy === "sync" ? t("toolbar.syncing") : t("toolbar.syncData")}
       </button>
-      <button disabled={!!busy} onClick={() => run("classify", api.classify)}>
-        {busy === "classify" ? "Classifying…" : "Classify"}
+      <button className="ghost" disabled={!!busy} onClick={() => run("ingest", api.ingest)}>
+        {busy === "ingest" ? t("toolbar.ingesting") : t("toolbar.ingestOnly")}
       </button>
-      <button disabled={!!busy} onClick={() => void onRefresh()}>
-        Refresh
+      <button className="ghost" disabled={!!busy} onClick={() => run("classify", api.classify)}>
+        {busy === "classify" ? t("toolbar.classifying") : t("toolbar.reclassify")}
+      </button>
+      <button className="ghost" disabled={!!busy} onClick={() => void onRefresh()}>
+        {t("toolbar.refreshView")}
       </button>
       {note && <span className="note">{note}</span>}
     </div>

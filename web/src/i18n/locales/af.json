@@ -1,0 +1,140 @@
+{
+  "app": {
+    "title": "Agent-ROI",
+    "subtitle": "Tokenkoste en ROI oor jou KI-kodeeragente",
+    "viewPricing": "Bekyk pryse",
+    "failedToLoad": "Kon nie laai nie",
+    "noData": "Nog geen data nie. Klik «↻ Sinkroniseer data» om logs te trek en onderwerpe te bou.",
+    "drillTip": "Wenk: klik op 'n onderwerp om na sessies te gaan, dan op 'n sessie vir elke beurt."
+  },
+  "stats": {
+    "totalCost": "Totale koste",
+    "totalTokens": "Totale tokens",
+    "interactions": "Interaksies",
+    "includesEstimates": "sluit skattings in"
+  },
+  "dimension": {
+    "topic": "onderwerp",
+    "project": "projek",
+    "tool": "nutsgoed",
+    "model": "model",
+    "all": "Alle {{name}}",
+    "count": "{{name}}"
+  },
+  "toolbar": {
+    "syncData": "↻ Sinkroniseer data",
+    "syncing": "Sinkroniseer…",
+    "ingestOnly": "Slegs invoer",
+    "ingesting": "Voer in…",
+    "reclassify": "Herklassifiseer",
+    "classifying": "Klassifiseer…",
+    "refreshView": "Verfris aansig",
+    "ingested": "ingevoer",
+    "classified": "geklassifiseer",
+    "error": "Fout"
+  },
+  "controls": {
+    "groupBy": "Groepeer volgens",
+    "range": "Tydperk",
+    "allTime": "Alle tyd",
+    "today": "Vandag",
+    "days7": "7 dae",
+    "days30": "30 dae"
+  },
+  "sources": {
+    "title": "Databronne",
+    "activeCount": "{{detected}}/{{total}} aktief",
+    "tool": "Nutsgoed",
+    "status": "Status",
+    "logFiles": "Loglêers",
+    "interactions": "Interaksies",
+    "cost": "Koste",
+    "searched": "Deursoekte paaie",
+    "active": "aktief",
+    "needsSync": "sink nodig",
+    "notFound": "nie gevind nie",
+    "noteNotFound": "Geen logs op hierdie masjien gevind nie.",
+    "noteNeedsSync": "Logs gevind maar nog nie ingevoer nie — voer sinkronisering uit."
+  },
+  "table": {
+    "interactions": "Interaksies",
+    "input": "Invoer",
+    "output": "Uitvoer",
+    "totalTokens": "Totale tokens",
+    "cost": "Koste",
+    "source": "Bron",
+    "tokens": "Tokens",
+    "share": "Aandeel",
+    "project": "Projek",
+    "tools": "Nutsgoed",
+    "calls": "Oproepe",
+    "when": "Wanneer",
+    "toolModel": "Nutsgoed / Model",
+    "snippet": "Uittreksel",
+    "drillBreakdown": "Bekyk nutsgoed/model-uiteensetting",
+    "openSession": "Maak sessie oop — oproepe word volgens patroon gegroepeer"
+  },
+  "chart": {
+    "costByTop": "Koste per {{dimension}} (top 10)"
+  },
+  "breakdown": {
+    "summary": "{{interactions}} interaksies · {{sessions}} sessies · {{tokens}} tokens · {{cost}}",
+    "includesEstimates": "sluit skattings in",
+    "byTool": "Volgens nutsgoed",
+    "byModel": "Volgens model",
+    "sessions": "Sessies ({{count}})",
+    "sessionsHint": "Elke sessie is een stuk werk. Klik om oproeppatrone te sien, nie 'n klets nie.",
+    "tool": "nutsgoed",
+    "model": "model"
+  },
+  "session": {
+    "title": "Sessie",
+    "meta": "{{calls}} oproepe · {{tokens}} tokens · {{cost}}",
+    "explainer": "Elke ry groepeer dieselfde model-oproepe. Een groep kan dosyne faktureringe wees (agent-lus: dink → hulpmiddel → dink weer). Dit is 'n koste-uiteensetting, nie 'n klets nie.",
+    "classificationTitle": "Hoe hierdie sessie geklassifiseer is",
+    "classificationHint": "Die onderwerp het tot 8 uittreksels soos hierdie uit hierdie sessie gebruik.",
+    "groupsTitle": "Oproeppatrone ({{count}} groepe)",
+    "pattern": "Patroon",
+    "calls": "Oproepe",
+    "callsUnit": "oproepe",
+    "timeSpan": "Tydsbestek",
+    "showIndividual": "Wys alle {{count}} individuele oproepe",
+    "hideIndividual": "Versteek individuele oproepe",
+    "rawTitle": "Alle individuele oproepe ({{count}})",
+    "noSnippet": "(geen teks vasgelê)"
+  },
+  "pricing": {
+    "title": "Modelpryse",
+    "subtitle": "USD per 1 000 000 tokens. Koste = gebruik × eenheidpryse.",
+    "model": "Model",
+    "input": "Invoer",
+    "output": "Uitvoer",
+    "cacheRead": "Kaslees",
+    "cacheWrite": "Kasskryf"
+  },
+  "common": {
+    "loading": "Laai…",
+    "unknown": "onbekend",
+    "estimated": "geskat",
+    "exact": "presies",
+    "failed": "Misluk",
+    "dash": "—"
+  },
+  "errors": {
+    "backendDown": "Kan nie Agent-ROI-agterkant bereik nie. Begin `agent-roi serve` of maak http://127.0.0.1:8000 oop in plaas van die dev-bediener."
+  },
+  "lang": {
+    "en": "English",
+    "zh-CN": "简体中文",
+    "zh-TW": "繁體中文",
+    "ja": "日本語",
+    "de": "Deutsch",
+    "es": "Español",
+    "fr": "Français",
+    "tr": "Türkçe",
+    "uk": "Українська",
+    "af": "Afrikaans",
+    "ko": "한국어",
+    "label": "Taal"
+  }
+}

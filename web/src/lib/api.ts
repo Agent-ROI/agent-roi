@@ -1,6 +1,8 @@
+import i18n from "../i18n";
+
 // Typed client for the Agent-ROI REST API.
 
-export type Dimension = "topic" | "tool" | "model";
+export type Dimension = "topic" | "tool" | "model" | "project";
 
 export interface Rollup {
   key: string;
@@ -29,9 +31,86 @@ export interface ModelPricing {
   cache_write: number;
 }
 
-const BACKEND_DOWN =
-  "Can't reach the Agent-ROI backend. Start it with `agent-roi serve`, " +
-  "or open the app it serves at http://127.0.0.1:8000 instead of the dev server.";
+export interface SessionSummary {
+  session_id: string;
+  topic: string;
+  project: string;
+  tools: string[];
+  models: string[];
+  started: string;
+  ended: string;
+  interactions: number;
+  input_tokens: number;
+  output_tokens: number;
+  cache_read_tokens: number;
+  cache_write_tokens: number;
+  total_tokens: number;
+  cost_usd: number;
+  estimated: boolean;
+}
+
+export interface InteractionView {
+  id: string;
+  tool: string;
+  model: string;
+  timestamp: string;
+  total_tokens: number;
+  cost_usd: number;
+  estimated: boolean;
+  summary: string;
+}
+
+export interface SessionDetail {
+  session: SessionSummary;
+  interactions: InteractionView[];
+}
+
+export interface CollectorStatus {
+  name: string;
+  tool: string;
+  available: boolean;
+  search_paths: string[];
+  log_files: number;
+  interactions: number;
+  tokens: number;
+  cost_usd: number;
+  note: string;
+}
+
+export interface Sources {
+  platform: string;
+  collectors: CollectorStatus[];
+}
+
+export interface TimeSeriesPoint {
+  date: string;
+  interactions: number;
+  input_tokens: number;
+  output_tokens: number;
+  cache_read_tokens: number;
+  cache_write_tokens: number;
+  cost_usd: number;
+  total_tokens: number;
+}
+
+export interface TimeSeriesSplitRow {
+  date: string;
+  values: Record<string, number>;
+  cost_usd: number;
+  interactions: number;
+}
+
+export interface TimeSeriesBundle {
+  totals: TimeSeriesPoint[];
+  by_tool: TimeSeriesSplitRow[];
+  by_model: TimeSeriesSplitRow[];
+  tool_keys: string[];
+  model_keys: string[];
+}
+
+function backendDownMessage(): string {
+  return i18n.t("errors.backendDown");
+}
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   let res: Response;
@@ -39,11 +118,11 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
     res = await fetch(url, init);
   } catch {
     // Network-level failure (e.g. dev server can't reach the API backend).
-    throw new Error(BACKEND_DOWN);
+    throw new Error(backendDownMessage());
   }
   if (res.status >= 500) {
     // The proxy returns 500 when the backend isn't running.
-    throw new Error(BACKEND_DOWN);
+    throw new Error(backendDownMessage());
   }
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
@@ -68,6 +147,19 @@ export const api = {
 
   pricing: () => request<ModelPricing[]>("/api/pricing"),
 
+  sessions: (topic: string, since: string) =>
+    request<SessionSummary[]>(`/api/sessions${qs({ topic, since })}`),
+
+  session: (id: string) =>
+    request<SessionDetail>(`/api/sessions/${encodeURIComponent(id)}`),
+
+  sources: () => request<Sources>("/api/sources"),
+
+  timeseries: (since: string) =>
+    request<TimeSeriesBundle>(`/api/timeseries${qs({ since })}`),
+
   ingest: () => request<{ ingested: number }>("/api/ingest", { method: "POST" }),
   classify: () => request<{ classified: number }>("/api/classify", { method: "POST" }),
+  refresh: () =>
+    request<{ ingested: number; classified: number }>("/api/refresh", { method: "POST" }),
 };
