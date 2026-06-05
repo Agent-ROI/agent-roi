@@ -13,11 +13,19 @@ and idempotent.
 | `claude_code` | Claude Code | `~/.claude/projects/**/<session>.jsonl` | exact (reported) |
 | `codex` | OpenAI Codex CLI | `~/.codex/sessions/**/*.jsonl` | exact (reported) |
 | `copilot` | GitHub Copilot Chat (VS Code) | `<VS Code User>/workspaceStorage/**/chatSessions/*` | **estimated** |
+| `gemini` | Gemini CLI | `~/.gemini/tmp/<projectHash>/chats/session-*.json{,l}` | exact (reported) |
 
 Under WSL, collectors also search the mounted Windows home(s) at
 `/mnt/c/Users/<name>/...`, so logs written by tools running on the Windows side
 are picked up automatically. The Copilot collector additionally searches VS Code
 forks (Insiders, VSCodium, Cursor) via `core.platform.vscode_user_dirs()`.
+
+The Gemini CLI logs only a `projectHash` (which is `sha256(cwd)`), not the path
+itself, so the collector recovers a real `project` from the `.project_root`
+marker newer CLI versions write next to the chats, falling back to a reverse
+lookup of the hash against the cwds recorded in `~/.gemini/projects.json`. It
+reads both the older single-object `.json` and the newer line-delimited `.jsonl`
+session shapes, and folds Gemini's reasoning (`thoughts`) tokens into output.
 
 ### A note on estimated tokens
 
@@ -67,7 +75,7 @@ with an `estimated` / `exact` badge so the two are never silently mixed. See
   formats change across versions.
 - **Use a stable `id`.** Prefer the tool's own message id so re-ingest is
   idempotent. Fall back to `<session>:<sequence>` if none exists.
-- **Keep `summary` short.** It feeds the classifier and may be sent to a cloud
-  model — never put full prompt bodies in it.
+- **Keep `summary` short.** It feeds the classifier (used to discover topics) —
+  keep it to a concise snippet, never full prompt bodies.
 - **Use `find_tool_dirs`.** This is what makes collectors work across Windows,
   macOS, Linux, and WSL.

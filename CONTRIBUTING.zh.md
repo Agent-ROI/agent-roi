@@ -27,7 +27,7 @@ npm run build
 ```
 src/agent_roi/
   collectors/   # 解析各工具的本地 log -> Interaction
-  classify/     # 可插拔的小模型主題分類器
+  classify/     # 免模型的語意主題歸納（TF-IDF + 餘弦相似度分群）
   storage/      # SQLite 持久化 + 彙總
   core/         # 領域模型、設定、定價、平台、服務
   api/          # FastAPI REST 層

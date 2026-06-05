@@ -13,32 +13,31 @@ Override the path with the `AGENT_ROI_CONFIG` environment variable.
 
 ```toml
 [classifier]
-provider = "ollama"     # "ollama" (local) | "anthropic" (cloud Haiku)
-model = "llama3.2"
-batch_size = 20
+similarity_threshold = 0.18   # higher = more, smaller topics
+label_terms = 3               # words used to name each topic
 
 [collectors]
-enabled = ["claude_code", "codex", "copilot"]
+enabled = ["claude_code", "codex", "copilot", "gemini"]
 ```
 
 ## Options
 
 ### `[classifier]`
 
+The classifier is model-free: it groups sessions by semantic similarity using
+TF-IDF vectors and cosine distance. No model, no API key, no network access
+required.
+
 | Key | Default | Description |
 |-----|---------|-------------|
-| `provider` | `"ollama"` | `ollama` runs a local model (offline, private). `anthropic` uses Claude Haiku via the API. |
-| `model` | `"llama3.2"` | Model name for the chosen provider (e.g. `qwen2.5`, `claude-haiku-4-5`). |
-| `batch_size` | `20` | Max interactions classified per batch. |
-
-For `provider = "anthropic"`, set the `ANTHROPIC_API_KEY` environment variable.
-Only short summaries are sent — never full prompt bodies.
+| `similarity_threshold` | `0.18` | Cosine similarity at or above which two sessions are merged into one topic. Raise to get more, narrower topics; lower to get fewer, broader ones. |
+| `label_terms` | `3` | Number of distinctive words used to name each discovered topic. |
 
 ### `[collectors]`
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `enabled` | `["claude_code", "codex", "copilot"]` | Which tool collectors to run during ingest. |
+| `enabled` | `["claude_code", "codex", "copilot", "gemini"]` | Which tool collectors to run during ingest. |
 
 ### Database location
 
@@ -51,5 +50,4 @@ config if needed.
 | Variable | Purpose |
 |----------|---------|
 | `AGENT_ROI_CONFIG` | Path to a custom config file. |
-| `ANTHROPIC_API_KEY` | Required when `classifier.provider = "anthropic"`. |
 | `WIN_USER` | (WSL) Windows username, to locate Windows-side tool logs. |

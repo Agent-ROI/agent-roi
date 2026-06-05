@@ -9,7 +9,7 @@ Agent-ROI 是一條 local-first 的處理流程，將你的 AI coding 工具本�
 
 ```
 Collectors ──▶ Storage ──▶ Classifier ──▶ Storage ──▶ 報表 (CLI / API / Web)
- (解析 log)     (SQLite)    (小模型)        (主題)
+ (解析 log)     (SQLite)    (語意分群)      (主題)
 ```
 
 1. **Collectors（採集器）** 讀取各工具的本地 session log，將每一次請求／回應
@@ -18,9 +18,9 @@ Collectors ──▶ Storage ──▶ Classifier ──▶ Storage ──▶ �
 2. **Storage（儲存層）** 以穩定的 id 為鍵將 interaction upsert 進 SQLite，因此重複
    執行 ingest 是冪等的（不會重複計算）。每筆 interaction 的美金成本會在寫入時依
    定價表計算。
-3. **Classifier（分類器）** 讀取每筆 interaction 的簡短 `summary`，指派一個精簡的
-   **主題**（例如 `auth refactor`、`flaky ci test`）。這正是讓成本能「依主題」而非
-   「依請求」彙總的關鍵 — 也是衡量 ROI 的核心。
+3. **Classifier（分類器）** 以整個 *session* 為單位，一次看所有 session，把語意
+   相近的 session 歸入同一個**主題**（例如 `auth jwt session`、`ci pipeline test`）。
+   使用 TF-IDF 向量與餘弦相似度分群 — 不需模型、不需 API 金鑰、完全離線。
 4. **報表** 依主題彙總，並透過 CLI、REST API 與 React web 儀表板呈現。
 
 ## 元件
@@ -28,7 +28,7 @@ Collectors ──▶ Storage ──▶ Classifier ──▶ Storage ──▶ �
 | 層級 | 模組 | 職責 |
 |------|------|------|
 | Collectors | `agent_roi.collectors` | 解析工具 log → `Interaction` |
-| Classifier | `agent_roi.classify` | 可插拔的小模型主題標註 |
+| Classifier | `agent_roi.classify` | 免模型的語意主題歸納 |
 | Storage | `agent_roi.storage` | SQLite 持久化 + 彙總 |
 | Core | `agent_roi.core` | 模型、設定、定價、平台、服務 |
 | API | `agent_roi.api` | FastAPI REST 層 + 靜態 web 託管 |
@@ -37,12 +37,12 @@ Collectors ──▶ Storage ──▶ Classifier ──▶ Storage ──▶ �
 
 ## 關鍵設計決策
 
-- **Local-first。** 所有資料都存在使用者本機的單一 SQLite 檔。雲端分類是選用的，
-  而且只會送出簡短摘要，絕不送出完整的 prompt 內容。
+- **Local-first。** 所有資料都存在使用者本機的單一 SQLite 檔。分類完全離線，
+  絕不向外傳送任何資料。
 - **以 collector 達成工具無關。** 支援新工具只需寫一個 `Collector` 子類 — 不需更動
   系統其他部分。
-- **可插拔分類器。** 小模型由設定決定：本地 Ollama（預設，完全離線）或雲端
-  Anthropic Haiku。
+- **免模型分類器。** 主題直接從 session 文本以 TF-IDF 向量與餘弦相似度分群歸納。
+  不需模型、不需 API 金鑰、不需額外依賴，開箱即用。
 - **冪等的 ingest。** 穩定的 interaction id 讓你可以隨意重複執行 `ingest`；分類結果
   會在重複 ingest 間被保留。
 - **跨平台。** Log 探索會處理 Windows、macOS、Linux 與 WSL（工具可能跑在 Windows

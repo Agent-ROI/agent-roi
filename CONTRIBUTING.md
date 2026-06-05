@@ -28,7 +28,7 @@ npm run build
 ```
 src/agent_roi/
   collectors/   # parse each tool's local logs -> Interaction
-  classify/     # pluggable small-model topic classifiers
+  classify/     # model-free semantic topic discovery (TF-IDF + cosine clustering)
   storage/      # SQLite persistence + aggregation
   core/         # domain models, config, pricing, platform, service
   api/          # FastAPI REST layer

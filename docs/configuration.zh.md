@@ -13,32 +13,30 @@ Agent-ROI 在零設定下即可運作。若要自訂，請在以下位置建立�
 
 ```toml
 [classifier]
-provider = "ollama"     # "ollama"（本地） | "anthropic"（雲端 Haiku）
-model = "llama3.2"
-batch_size = 20
+similarity_threshold = 0.18   # 越高 = 主題越多、越細
+label_terms = 3               # 每個主題名稱用幾個詞
 
 [collectors]
-enabled = ["claude_code", "codex", "copilot"]
+enabled = ["claude_code", "codex", "copilot", "gemini"]
 ```
 
 ## 選項
 
 ### `[classifier]`
 
+分類器是免模型的：它以 TF-IDF 向量與餘弦相似度將 session 依語意分群。不需要任何
+模型、API 金鑰或網路連線。
+
 | 鍵 | 預設 | 說明 |
 |----|------|------|
-| `provider` | `"ollama"` | `ollama` 跑本地模型（離線、隱私）。`anthropic` 透過 API 使用 Claude Haiku。 |
-| `model` | `"llama3.2"` | 所選 provider 的模型名稱（例如 `qwen2.5`、`claude-haiku-4-5`）。 |
-| `batch_size` | `20` | 每批分類的最大 interaction 數。 |
-
-當 `provider = "anthropic"` 時，需設定環境變數 `ANTHROPIC_API_KEY`。只會送出簡短摘要 —
-絕不送出完整的 prompt 內容。
+| `similarity_threshold` | `0.18` | 兩個 session 的餘弦相似度達到此值以上，即歸為同一主題。調高得到更多、更細的主題；調低得到更少、更廣的主題。 |
+| `label_terms` | `3` | 每個自動歸納的主題名稱包含幾個關鍵詞。 |
 
 ### `[collectors]`
 
 | 鍵 | 預設 | 說明 |
 |----|------|------|
-| `enabled` | `["claude_code", "codex", "copilot"]` | ingest 時要執行哪些工具採集器。 |
+| `enabled` | `["claude_code", "codex", "copilot", "gemini"]` | ingest 時要執行哪些工具採集器。 |
 
 ### 資料庫位置
 
@@ -50,5 +48,4 @@ enabled = ["claude_code", "codex", "copilot"]
 | 變數 | 用途 |
 |------|------|
 | `AGENT_ROI_CONFIG` | 自訂設定檔的路徑。 |
-| `ANTHROPIC_API_KEY` | 當 `classifier.provider = "anthropic"` 時必須設定。 |
 | `WIN_USER` | （WSL）Windows 使用者名稱，用以定位 Windows 側的工具 log。 |

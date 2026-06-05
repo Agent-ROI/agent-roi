@@ -12,10 +12,16 @@
 | `claude_code` | Claude Code | `~/.claude/projects/**/<session>.jsonl` | 精算（工具回報） |
 | `codex` | OpenAI Codex CLI | `~/.codex/sessions/**/*.jsonl` | 精算（工具回報） |
 | `copilot` | GitHub Copilot Chat (VS Code) | `<VS Code User>/workspaceStorage/**/chatSessions/*` | **估算** |
+| `gemini` | Gemini CLI | `~/.gemini/tmp/<projectHash>/chats/session-*.json{,l}` | 精算（工具回報） |
 
 在 WSL 下，採集器也會搜尋掛載的 Windows home（`/mnt/c/Users/<name>/...`），因此由
 Windows 側執行的工具所寫的 log 會被自動納入。Copilot 採集器還會透過
 `core.platform.vscode_user_dirs()` 搜尋 VS Code 的分支（Insiders、VSCodium、Cursor）。
+
+Gemini CLI 只記錄 `projectHash`（即 `sha256(cwd)`）而非路徑本身，因此採集器會從新版
+CLI 寫在 chats 旁的 `.project_root` 標記檔還原真實的 `project`，若不存在則改以該 hash
+反查 `~/.gemini/projects.json` 中記錄過的 cwd。它同時支援舊版單一物件 `.json` 與新版
+逐行 `.jsonl` 兩種 session 格式，並將 Gemini 的推理（`thoughts`）token 併入 output。
 
 ### 關於估算 token
 
@@ -63,7 +69,7 @@ Windows 側執行的工具所寫的 log 會被自動納入。Copilot 採集器�
 - **要防禦性。** 遇到不認得的記錄就跳過，而非拋出例外；工具的 log 格式會隨版本改變。
 - **使用穩定的 `id`。** 優先採用工具本身的 message id，讓重複 ingest 冪等。若沒有，
   則退而使用 `<session>:<sequence>`。
-- **`summary` 保持簡短。** 它會餵給分類器，也可能被送往雲端模型 — 絕不要把完整的
-  prompt 內容放進去。
+- **`summary` 保持簡短。** 它會餵給分類器（用來歸納主題）— 維持精簡片段即可，
+  絕不要把完整的 prompt 內容放進去。
 - **使用 `find_tool_dirs`。** 這是讓採集器能跨 Windows、macOS、Linux 與 WSL 運作的
   關鍵。

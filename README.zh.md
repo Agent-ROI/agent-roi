@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![CI](https://github.com/your-org/agent-roi/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/agent-roi/actions/workflows/ci.yml)
+[![CI](https://github.com/Agent-ROI/agent-roi/actions/workflows/ci.yml/badge.svg)](https://github.com/Agent-ROI/agent-roi/actions/workflows/ci.yml)
 
 [English](./README.md) · [繁體中文](./README.zh.md)
 
@@ -19,33 +19,33 @@
 當你同時使用多個 AI coding 工具 — Claude Code、Codex CLI、GitHub Copilot、Cursor
 等 — 你的 token 花費四散各處、難以評估。**Agent-ROI** 把這一切統一起來。
 
-它讀取每個工具本來就會寫下的本地 session log，使用一個**小型分類模型**（本地 Ollama
-或雲端 Haiku）標註每次互動是關於**什麼主題／任務**，接著呈現**每個主題消耗了多少
-token** — 讓你能衡量 agent 的**投資報酬率（ROI）**，而不只是看原始 token 數。
+它讀取每個工具本來就會寫下的本地 session log，使用**免模型的語意分類器**從 session
+對話中自動歸納**主題／任務**，接著呈現**每個主題消耗了多少 token** — 讓你能衡量
+agent 的**投資報酬率（ROI）**，而不只是看原始 token 數。
 
 > Agent-ROI 要回答的核心問題：*「為了這個功能／bug／主題，我的 agent 燒了多少
 > token — 值得嗎？」*
 
 ## 功能特色
 
-- 🔌 **工具無關的採集器** — 解析 Claude Code、Codex CLI 與 GitHub Copilot 的本地 log
+- 🔌 **工具無關的採集器** — 解析 Claude Code、Codex CLI、GitHub Copilot 與 Gemini CLI 的本地 log
   （不需 proxy、不改變使用流程）。
-- 🧠 **主題分類** — 可插拔的小模型依主題分組互動，讓你看到**每個主題**的成本，而非
-  每個請求。
+- 🧠 **主題分類** — 免模型的語意分類器依主題將 session 分群，讓你看到**每個主題**的
+  成本，而非每個請求。完全離線、不花費 token、不需任何外部服務。
 - 💰 **花費與 ROI 追蹤** — token 用量對應到各模型定價，可依**主題、工具或模型**彙總，
   並套用**自訂時間區間**。
 - 🔎 **下鑽與可信度** — 點任一主題即可看到它的 token 來自哪些工具與模型；每個數字都有
   **可檢視的定價表**佐證，估算值與精算值以標章清楚區分。
 - 🖥️ **CLI** — 終端機直接執行 `report`、主題下鑽、與 `pricing` 指令。
 - 🌐 **Web UI** — 現代化的 React 儀表板，含維度／時間控制、分解與下鑽。
-- 🗄️ **Local-first** — 所有資料留在你的機器上（SQLite）；完全離線；雲端分類為選用。
+- 🗄️ **Local-first** — 所有資料留在你的機器上（SQLite）；完全離線；分類器絕不向外傳送任何資料。
 
 ## 架構
 
 ```
 ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
 │  採集器       │──▶│  分類器       │──▶│   儲存層      │
-│ (解析 log)    │   │ (小模型)      │   │  (SQLite)    │
+│ (解析 log)    │   │  (語意分群)   │   │  (SQLite)    │
 └──────────────┘   └──────────────┘   └──────┬───────┘
                                              │
                           ┌──────────────────┼──────────────────┐
@@ -62,7 +62,7 @@ token** — 讓你能衡量 agent 的**投資報酬率（ROI）**，而不只是
 一行搞定（macOS / Linux / WSL）。需要時會自動安裝 `uv`，接著安裝 `agent-roi` 指令：
 
 ```bash
-curl -LsSf https://raw.githubusercontent.com/your-org/agent-roi/main/scripts/install.sh | sh
+curl -LsSf https://raw.githubusercontent.com/Agent-ROI/agent-roi/main/scripts/install.sh | sh
 ```
 
 <details>
@@ -82,13 +82,10 @@ uv tool install agent-roi
 ## 快速開始
 
 ```bash
-# 拉取一個本地分類模型（選用，建議）
-ollama pull llama3.2
-
 # 從所有偵測到的工具匯入 log
 agent-roi ingest
 
-# 將互動分類成主題（使用小模型）
+# 從 session 對話中自動歸納主題（免模型，完全本地）
 agent-roi classify
 
 # 成本分解 — 依主題、工具或模型彙總，並套用時間區間
@@ -114,11 +111,11 @@ Agent-ROI 會於 `~/.config/agent-roi/config.toml` 尋找設定。詳見
 
 ```toml
 [classifier]
-provider = "ollama"     # 或 "anthropic"
-model = "llama3.2"
+similarity_threshold = 0.18   # 越高 = 主題越多、越細
+label_terms = 3               # 每個主題名稱用幾個詞
 
 [collectors]
-enabled = ["claude_code", "codex", "copilot"]
+enabled = ["claude_code", "codex", "copilot", "gemini"]
 ```
 
 ## 文件

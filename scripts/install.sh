@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Agent-ROI one-line installer.
 #
-#   curl -LsSf https://raw.githubusercontent.com/your-org/agent-roi/main/scripts/install.sh | sh
+#   curl -LsSf https://raw.githubusercontent.com/Agent-ROI/agent-roi/main/scripts/install.sh | sh
 #
 # It installs `uv` if needed, then installs Agent-ROI as a uv tool so the
 # `agent-roi` command is available on your PATH. Works on macOS, Linux, and WSL.
 set -eu
 
-REPO="${AGENT_ROI_REPO:-https://github.com/your-org/agent-roi}"
+REPO="${AGENT_ROI_REPO:-https://github.com/Agent-ROI/agent-roi}"
 # Install from PyPI by default; set AGENT_ROI_FROM_GIT=1 to install from source.
 PACKAGE="agent-roi"
 if [ "${AGENT_ROI_FROM_GIT:-0}" = "1" ]; then
