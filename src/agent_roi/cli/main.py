@@ -186,46 +186,6 @@ def doctor() -> None:
 
 
 @app.command()
-def update() -> None:
-    """Upgrade Agent-ROI to the latest version from PyPI."""
-    import subprocess
-    import sys
-
-    console.print("Checking for updates…")
-    result = subprocess.run(
-        ["uv", "tool", "upgrade", "agent-roi-tracker"],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode == 0:
-        output = (result.stdout + result.stderr).strip()
-        if "already up-to-date" in output.lower() or "nothing to upgrade" in output.lower():
-            console.print("[green]Already up-to-date.[/green]")
-        else:
-            console.print("[green]Updated successfully.[/green]")
-            if output:
-                console.print(f"[dim]{output}[/dim]")
-    else:
-        # uv not available or failed — try pip
-        result2 = subprocess.run(
-            [sys.executable, "-m", "pip", "install", "--upgrade", "agent-roi-tracker"],
-            capture_output=True,
-            text=True,
-        )
-        if result2.returncode == 0:
-            console.print("[green]Updated successfully.[/green]")
-        else:
-            console.print("[red]Update failed.[/red]")
-            console.print(f"[dim]{result.stderr or result2.stderr}[/dim]")
-            console.print(
-                "\nTry manually:\n"
-                "  uv tool upgrade agent-roi-tracker\n"
-                "  pipx upgrade agent-roi-tracker"
-            )
-            raise typer.Exit(1)
-
-
-@app.command()
 def serve(
     host: str = typer.Option("127.0.0.1", help="Bind host."),
     port: int = typer.Option(8000, help="Bind port."),
