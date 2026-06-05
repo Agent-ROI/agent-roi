@@ -22,6 +22,15 @@ from agent_roi.core.platform import vscode_user_dirs
 from agent_roi.core.project import project_for
 from agent_roi.core.tokens import estimate_tokens
 
+# Copilot's log records the user's typed message but NOT the rest of what is
+# actually sent to the model. To estimate input tokens realistically we add:
+#   1. attached file context (the editor "working set" sent with the request),
+#   2. the running conversation history (earlier turns are re-sent each request),
+#   3. a fixed overhead for the agent system prompt + tool definitions.
+# Without these the estimate counts only the user's sentence and badly
+# undercounts real usage. All estimates stay flagged estimated=True.
+_SYSTEM_PROMPT_OVERHEAD_TOKENS = 2400
+
 
 class CopilotCollector(Collector):
     tool = Tool.COPILOT
@@ -67,40 +76,52 @@ class CopilotCollector(Collector):
             raw = path.read_text(encoding="utf-8")
         except OSError:
             return
+        # Collect all requests first so we can process them in conversation order
+        # and accumulate history — earlier turns are re-sent on each request, so
+        # input cost grows down the session.
+        requests: list[dict[str, Any]] = []
         for obj in _load_objects(raw):
-            yield from self._requests_in(obj, session_id, cwd)
+            _collect_requests(obj, requests)
+        requests.sort(key=lambda r: _ts_value(r.get("timestamp")))
 
-    def _requests_in(self, obj: Any, session_id: str, cwd: str) -> Iterator[Interaction]:
-        """Walk an arbitrary JSON structure, yielding an Interaction per Copilot
-        chat request found."""
-        if isinstance(obj, dict):
-            if obj.get("requestId") and "modelId" in obj:
-                itx = self._to_interaction(obj, session_id, cwd)
-                if itx is not None:
-                    yield itx
-            for value in obj.values():
-                yield from self._requests_in(value, session_id, cwd)
-        elif isinstance(obj, list):
-            for value in obj:
-                yield from self._requests_in(value, session_id, cwd)
+        history_text = ""  # running transcript of prior turns in this session
+        for req in requests:
+            itx = self._to_interaction(req, session_id, cwd, history_text)
+            if itx is None:
+                continue
+            yield itx
+            user_text = _message_text(req.get("message"))
+            response_text = _response_text(req.get("response"))
+            history_text += user_text + "\n" + response_text + "\n"
 
-    def _to_interaction(self, req: dict[str, Any], session_id: str, cwd: str) -> Interaction | None:
+    def _to_interaction(
+        self, req: dict[str, Any], session_id: str, cwd: str, history_text: str
+    ) -> Interaction | None:
         request_id = req.get("requestId")
         if not request_id:
             return None
 
         user_text = _message_text(req.get("message"))
         response_text = _response_text(req.get("response"))
+        context_text = _attached_context_text(req)
 
         model = str(req.get("modelId") or "unknown")
         summary = " ".join(p for p in (user_text, response_text) if p)[:600]
+
+        # Real input = system prompt + tools + attached files + history + this turn.
+        input_tokens = (
+            _SYSTEM_PROMPT_OVERHEAD_TOKENS
+            + estimate_tokens(context_text)
+            + estimate_tokens(history_text)
+            + estimate_tokens(user_text)
+        )
         return Interaction(
             id=f"copilot:{request_id}",
             tool=self.tool,
             session_id=session_id,
             timestamp=_parse_ts(req.get("timestamp")),
             model=_normalize_model(model),
-            input_tokens=estimate_tokens(user_text),
+            input_tokens=input_tokens,
             output_tokens=estimate_tokens(response_text),
             cwd=cwd,
             project=project_for(cwd),
@@ -144,6 +165,65 @@ def _workspace_cwd(ws_dir: Path) -> str:
         return unquote(rest)
 
     return folder
+
+
+def _collect_requests(obj: Any, out: list[dict[str, Any]]) -> None:
+    """Walk an arbitrary JSON structure, collecting every Copilot chat request."""
+    if isinstance(obj, dict):
+        if obj.get("requestId") and "modelId" in obj:
+            out.append(obj)
+        for value in obj.values():
+            _collect_requests(value, out)
+    elif isinstance(obj, list):
+        for value in obj:
+            _collect_requests(value, out)
+
+
+def _ts_value(raw: Any) -> float:
+    """Sortable numeric timestamp; preserves log order when timestamps are absent."""
+    if isinstance(raw, (int, float)):
+        return float(raw)
+    if isinstance(raw, str):
+        try:
+            return _parse_ts(raw).timestamp()
+        except (ValueError, OverflowError):
+            return 0.0
+    return 0.0
+
+
+def _attached_context_text(req: dict[str, Any]) -> str:
+    """Text of files attached to the request (the editor working set + variables).
+
+    Copilot sends the content of attached/open files to the model as context but
+    does not log token counts, so we recover the raw text and estimate from it.
+    """
+    parts: list[str] = []
+
+    result = req.get("result")
+    if isinstance(result, dict):
+        edits = result.get("metadata", {})
+        edits = edits.get("edits", {}) if isinstance(edits, dict) else {}
+        working_set = edits.get("workingSet", []) if isinstance(edits, dict) else []
+        if isinstance(working_set, list):
+            for entry in working_set:
+                if isinstance(entry, dict) and isinstance(entry.get("text"), str):
+                    parts.append(entry["text"])
+
+    # variableData can also embed file snippets/selections under nested "value".
+    _collect_variable_text(req.get("variableData"), parts)
+    return "\n".join(parts)
+
+
+def _collect_variable_text(obj: Any, out: list[str]) -> None:
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            if key in ("text", "value") and isinstance(value, str) and len(value) > 40:
+                out.append(value)
+            else:
+                _collect_variable_text(value, out)
+    elif isinstance(obj, list):
+        for value in obj:
+            _collect_variable_text(value, out)
 
 
 def _load_objects(raw: str) -> list[Any]:

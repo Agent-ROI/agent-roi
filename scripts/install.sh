@@ -100,6 +100,8 @@ printf "${DIM}  ─────────────────────�
 
 # ── 3. Next steps ────────────────────────────────────────────────────────────
 if command -v agent-roi >/dev/null 2>&1; then
+  INSTALLED_VERSION="$(agent-roi --version 2>/dev/null | awk '{print $NF}')"
+  [ -n "$INSTALLED_VERSION" ] && ok "agent-roi ${INSTALLED_VERSION}"
   printf "${GREEN}${BOLD}  Done!${RESET}  Run:\n\n"
 else
   printf "${GREEN}${BOLD}  Done!${RESET}  Restart your shell (or run ${BOLD}uv tool update-shell${RESET}), then:\n\n"

@@ -21,6 +21,28 @@ app = typer.Typer(
 console = Console()
 
 
+def _version_callback(value: bool) -> None:
+    if value:
+        from agent_roi import __version__
+
+        console.print(f"agent-roi {__version__}")
+        raise typer.Exit()
+
+
+@app.callback()
+def _main(
+    version: bool = typer.Option(
+        False,
+        "--version",
+        "-V",
+        help="Show the installed version and exit.",
+        callback=_version_callback,
+        is_eager=True,
+    ),
+) -> None:
+    """Track the cost, usage, and ROI of your AI coding agents across every tool."""
+
+
 def _parse_since(value: str) -> datetime | None:
     try:
         return parse_since(value)
@@ -227,6 +249,33 @@ def _latest_pypi_version() -> str | None:
         return None
 
 
+def _installed_version() -> str | None:
+    """Read the freshly-installed version by querying the package metadata on disk.
+
+    The current process still has the old version imported, so we shell out to a
+    fresh interpreter to read the up-to-date installed distribution metadata.
+    """
+    import subprocess
+    import sys
+
+    try:
+        out = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                "from importlib.metadata import version;"
+                f"print(version('{PACKAGE_NAME}'))",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+    except (subprocess.SubprocessError, OSError):
+        return None
+    version = out.stdout.strip()
+    return version or None
+
+
 def _installed_via_uv_tool() -> bool:
     """True if agent-roi is managed by `uv tool` (vs a plain pip/uv pip install)."""
     import shutil
@@ -289,7 +338,11 @@ def update(
         console.print(result.stderr.strip() or result.stdout.strip())
         raise typer.Exit(1)
 
-    console.print("[green]Updated. Run [bold]agent-roi version[/bold] to confirm.[/green]")
+    new_version = _installed_version() or latest or "?"
+    if new_version == __version__:
+        console.print(f"[green]Already up to date at {__version__}.[/green]")
+    else:
+        console.print(f"[green]Updated {__version__} → [bold]{new_version}[/bold].[/green]")
 
 
 if __name__ == "__main__":
