@@ -62,10 +62,10 @@ curl -LsSf https://raw.githubusercontent.com/Agent-ROI/agent-roi/main/scripts/in
 
 ```bash
 # With pipx
-pipx install agent-roi
+pipx install agent-roi-tracker
 
 # With uv
-uv tool install agent-roi
+uv tool install agent-roi-tracker
 ```
 
 To install the latest from source before a release is published, set

@@ -70,10 +70,10 @@ curl -LsSf https://raw.githubusercontent.com/Agent-ROI/agent-roi/main/scripts/in
 
 ```bash
 # 使用 pipx
-pipx install agent-roi
+pipx install agent-roi-tracker
 
 # 使用 uv
-uv tool install agent-roi
+uv tool install agent-roi-tracker
 ```
 
 若要在尚未發佈前直接從原始碼安裝，執行安裝腳本前設定 `AGENT_ROI_FROM_GIT=1`。

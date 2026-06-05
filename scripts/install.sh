@@ -9,7 +9,7 @@ set -eu
 
 REPO="${AGENT_ROI_REPO:-https://github.com/Agent-ROI/agent-roi}"
 # Install from PyPI by default; set AGENT_ROI_FROM_GIT=1 to install from source.
-PACKAGE="agent-roi"
+PACKAGE="agent-roi-tracker"
 if [ "${AGENT_ROI_FROM_GIT:-0}" = "1" ]; then
   PACKAGE="git+${REPO}.git"
 fi
