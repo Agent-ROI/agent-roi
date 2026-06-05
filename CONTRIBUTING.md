@@ -40,8 +40,18 @@ tests/          # pytest suite
 ```
 
 The frontend follows the design system in [`design/DESIGN.md`](./design/DESIGN.md)
-(Linear). Its tokens are mirrored as CSS variables in `web/src/index.css`; read
+(Notion). Its tokens are mirrored as CSS variables in `web/src/index.css`; read
 it before changing UI styles so the look stays consistent.
+
+### Building a release
+
+The web UI is bundled into the Python package so `agent-roi serve` works after a
+plain install. Before building a wheel:
+
+```bash
+./scripts/build_web.sh   # builds web/ and copies it into src/agent_roi/webui
+uv build                 # produces the wheel/sdist (includes the web UI)
+```
 
 ## Adding a collector
 

@@ -85,6 +85,23 @@ def _since(value: str) -> datetime | None:
 
 
 def _mount_web_ui(app: FastAPI) -> None:
-    dist = Path(__file__).resolve().parents[3] / "web" / "dist"
-    if dist.is_dir():
+    dist = _web_dist()
+    if dist is not None:
         app.mount("/", StaticFiles(directory=str(dist), html=True), name="web")
+
+
+def _web_dist() -> Path | None:
+    """Locate the built web UI.
+
+    Prefers the copy bundled inside the installed package (so a pip/uv install
+    can serve the dashboard), then falls back to the dev build at ``web/dist``.
+    """
+    here = Path(__file__).resolve()
+    candidates = [
+        here.parent.parent / "webui",  # packaged: src/agent_roi/webui
+        here.parents[3] / "web" / "dist",  # dev checkout
+    ]
+    for candidate in candidates:
+        if candidate.is_dir():
+            return candidate
+    return None

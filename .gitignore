@@ -17,6 +17,9 @@ web/dist/
 web/*.tsbuildinfo
 *.log
 
+# Web UI bundled into the package at build time
+src/agent_roi/webui/
+
 # Local data & config
 *.db
 .env

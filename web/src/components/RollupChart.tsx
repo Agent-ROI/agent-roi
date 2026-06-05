@@ -28,20 +28,21 @@ export function RollupChart({ rows, dimension }: Props) {
       <h2>Cost by {dimension} (top 10)</h2>
       <ResponsiveContainer width="100%" height={320}>
         <BarChart data={data} layout="vertical" margin={{ left: 24, right: 24 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#23252a" />
-          <XAxis type="number" stroke="#8a8f98" fontSize={12} tickFormatter={(v) => fmtUsd(v)} />
-          <YAxis type="category" dataKey="key" width={140} stroke="#8a8f98" fontSize={12} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e3df" />
+          <XAxis type="number" stroke="#787671" fontSize={12} tickFormatter={(v) => fmtUsd(v)} />
+          <YAxis type="category" dataKey="key" width={140} stroke="#787671" fontSize={12} />
           <Tooltip
-            cursor={{ fill: "rgba(94,106,210,0.08)" }}
+            cursor={{ fill: "rgba(86,69,212,0.06)" }}
             formatter={(v: number) => fmtUsd(v)}
             contentStyle={{
-              background: "#141516",
-              border: "1px solid #34343a",
+              background: "#ffffff",
+              border: "1px solid #e5e3df",
               borderRadius: 8,
-              color: "#f7f8f8",
+              color: "#1a1a1a",
+              boxShadow: "rgba(15, 15, 15, 0.08) 0px 4px 12px 0px",
             }}
           />
-          <Bar dataKey="cost" fill="#5e6ad2" radius={[0, 4, 4, 0]} />
+          <Bar dataKey="cost" fill="#5645d4" radius={[0, 4, 4, 0]} isAnimationActive={false} />
         </BarChart>
       </ResponsiveContainer>
     </section>

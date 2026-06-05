@@ -49,35 +49,56 @@ It reads the local session logs each tool already writes, uses a **small classif
 
 See [docs/architecture.md](./docs/architecture.md) for details.
 
-## Quick Start
+## Install
 
-This project uses [uv](https://docs.astral.sh/uv/) for Python dependency management.
+One line (macOS / Linux / WSL). Installs `uv` if needed, then the `agent-roi` command:
 
 ```bash
-# Install dependencies into a managed virtualenv
-uv sync --extra dev
+curl -LsSf https://raw.githubusercontent.com/your-org/agent-roi/main/scripts/install.sh | sh
+```
 
+<details>
+<summary>Other ways to install</summary>
+
+```bash
+# With pipx
+pipx install agent-roi
+
+# With uv
+uv tool install agent-roi
+```
+
+To install the latest from source before a release is published, set
+`AGENT_ROI_FROM_GIT=1` before running the install script.
+</details>
+
+## Quick Start
+
+```bash
 # Pull a local classifier model (optional, recommended)
 ollama pull llama3.2
 
 # Ingest logs from all detected tools
-uv run agent-roi ingest
+agent-roi ingest
 
 # Classify interactions into topics (uses the small model)
-uv run agent-roi classify
+agent-roi classify
 
 # Cost breakdown — group by topic, tool, or model, over a time window
-uv run agent-roi report --by tool --since 7d
+agent-roi report --by tool --since 7d
 
 # Drill into one topic: which tools/models did its tokens come from?
-uv run agent-roi topic "auth refactor"
+agent-roi topic "auth refactor"
 
 # Inspect the pricing table behind every cost figure
-uv run agent-roi pricing
+agent-roi pricing
 
-# Launch the web dashboard (API + React UI)
-uv run agent-roi serve
+# Launch the web dashboard (API + React UI), then open http://127.0.0.1:8000
+agent-roi serve
 ```
+
+> Developing Agent-ROI itself? See [CONTRIBUTING.md](./CONTRIBUTING.md) — local
+> dev uses `uv` and runs the frontend on a separate Vite dev server.
 
 ## Configuration
 

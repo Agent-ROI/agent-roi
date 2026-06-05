@@ -29,7 +29,22 @@ export interface ModelPricing {
   cache_write: number;
 }
 
-async function json<T>(res: Response): Promise<T> {
+const BACKEND_DOWN =
+  "Can't reach the Agent-ROI backend. Start it with `agent-roi serve`, " +
+  "or open the app it serves at http://127.0.0.1:8000 instead of the dev server.";
+
+async function request<T>(url: string, init?: RequestInit): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(url, init);
+  } catch {
+    // Network-level failure (e.g. dev server can't reach the API backend).
+    throw new Error(BACKEND_DOWN);
+  }
+  if (res.status >= 500) {
+    // The proxy returns 500 when the backend isn't running.
+    throw new Error(BACKEND_DOWN);
+  }
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
     throw new Error(detail || `${res.status} ${res.statusText}`);
@@ -46,15 +61,13 @@ const qs = (params: Record<string, string>) => {
 
 export const api = {
   report: (groupBy: Dimension, since: string) =>
-    fetch(`/api/report${qs({ group_by: groupBy, since })}`).then(json<Rollup[]>),
+    request<Rollup[]>(`/api/report${qs({ group_by: groupBy, since })}`),
 
   topic: (topic: string, since: string) =>
-    fetch(`/api/report/topic/${encodeURIComponent(topic)}${qs({ since })}`).then(
-      json<TopicBreakdown>
-    ),
+    request<TopicBreakdown>(`/api/report/topic/${encodeURIComponent(topic)}${qs({ since })}`),
 
-  pricing: () => fetch("/api/pricing").then(json<ModelPricing[]>),
+  pricing: () => request<ModelPricing[]>("/api/pricing"),
 
-  ingest: () => fetch("/api/ingest", { method: "POST" }).then(json<{ ingested: number }>),
-  classify: () => fetch("/api/classify", { method: "POST" }).then(json<{ classified: number }>),
+  ingest: () => request<{ ingested: number }>("/api/ingest", { method: "POST" }),
+  classify: () => request<{ classified: number }>("/api/classify", { method: "POST" }),
 };

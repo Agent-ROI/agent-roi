@@ -38,8 +38,17 @@ docs/           # 英文文件 (*.md) + 中文翻譯 (*.zh.md)
 tests/          # pytest 測試
 ```
 
-前端遵循 [`design/DESIGN.md`](./design/DESIGN.md)（Linear）的設計系統。其 token 已
+前端遵循 [`design/DESIGN.md`](./design/DESIGN.md)（Notion）的設計系統。其 token 已
 鏡射為 `web/src/index.css` 的 CSS 變數；改動 UI 樣式前請先閱讀，讓外觀維持一致。
+
+### 建置發佈版本
+
+web UI 會被打包進 Python 套件，讓一般安裝後 `agent-roi serve` 也能運作。建置 wheel 前：
+
+```bash
+./scripts/build_web.sh   # 建置 web/ 並複製進 src/agent_roi/webui
+uv build                 # 產生 wheel/sdist（含 web UI）
+```
 
 ## 新增採集器
 

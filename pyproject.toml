@@ -50,6 +50,10 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/agent_roi"]
+# The built web UI (src/agent_roi/webui, produced by scripts/build_web.sh) lives
+# inside the package dir, but is gitignored — list it as an artifact so the build
+# backend includes it in the wheel anyway.
+artifacts = ["src/agent_roi/webui"]
 
 [tool.ruff]
 line-length = 100

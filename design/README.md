@@ -1,6 +1,6 @@
 # Design system
 
-The web UI follows a design system derived from **Linear**.
+The web UI follows a design system derived from **Notion**.
 
 - [`DESIGN.md`](./DESIGN.md) is the source-of-truth design spec (color tokens,
   typography, spacing, radii, component styles). AI agents and contributors
@@ -14,5 +14,5 @@ a token to one, add it to the other.
 
 `DESIGN.md` is adapted from the
 [VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md)
-collection (`design-md/linear.app/DESIGN.md`). It is an analysis of Linear's
+collection (`design-md/notion/DESIGN.md`). It is an analysis of Notion's
 public marketing design system, used here purely as a styling reference.

@@ -57,35 +57,55 @@ token** — 讓你能衡量 agent 的**投資報酬率（ROI）**，而不只是
 
 詳見 [docs/architecture.zh.md](./docs/architecture.zh.md)。
 
-## 快速開始
+## 安裝
 
-本專案使用 [uv](https://docs.astral.sh/uv/) 管理 Python 相依套件。
+一行搞定（macOS / Linux / WSL）。需要時會自動安裝 `uv`，接著安裝 `agent-roi` 指令：
 
 ```bash
-# 將相依套件安裝進受管理的虛擬環境
-uv sync --extra dev
+curl -LsSf https://raw.githubusercontent.com/your-org/agent-roi/main/scripts/install.sh | sh
+```
 
+<details>
+<summary>其他安裝方式</summary>
+
+```bash
+# 使用 pipx
+pipx install agent-roi
+
+# 使用 uv
+uv tool install agent-roi
+```
+
+若要在尚未發佈前直接從原始碼安裝，執行安裝腳本前設定 `AGENT_ROI_FROM_GIT=1`。
+</details>
+
+## 快速開始
+
+```bash
 # 拉取一個本地分類模型（選用，建議）
 ollama pull llama3.2
 
 # 從所有偵測到的工具匯入 log
-uv run agent-roi ingest
+agent-roi ingest
 
 # 將互動分類成主題（使用小模型）
-uv run agent-roi classify
+agent-roi classify
 
 # 成本分解 — 依主題、工具或模型彙總，並套用時間區間
-uv run agent-roi report --by tool --since 7d
+agent-roi report --by tool --since 7d
 
 # 下鑽單一主題：它的 token 來自哪些工具／模型？
-uv run agent-roi topic "auth refactor"
+agent-roi topic "auth refactor"
 
 # 檢視每個成本數字背後的定價表
-uv run agent-roi pricing
+agent-roi pricing
 
-# 啟動 web 儀表板（API + React UI）
-uv run agent-roi serve
+# 啟動 web 儀表板（API + React UI），接著開啟 http://127.0.0.1:8000
+agent-roi serve
 ```
+
+> 要開發 Agent-ROI 本身？請見 [CONTRIBUTING.zh.md](./CONTRIBUTING.zh.md) —— 本地開發
+> 使用 `uv`，前端跑在獨立的 Vite dev server。
 
 ## 設定
 

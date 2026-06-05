@@ -27,6 +27,10 @@ PRICES: dict[str, ModelPrice] = {
     "claude-haiku-4-5": ModelPrice(input=0.8, output=4.0, cache_read=0.08, cache_write=1.0),
     "gpt-4o": ModelPrice(input=2.5, output=10.0),
     "gpt-4o-mini": ModelPrice(input=0.15, output=0.6),
+    # Codex normalizes "gpt-5.5" -> "gpt-5-5". Pricing is approximate; edit to match
+    # your plan (see docs/configuration — pricing is user-verifiable).
+    "gpt-5-5": ModelPrice(input=1.25, output=10.0, cache_read=0.125),
+    "gpt-5": ModelPrice(input=1.25, output=10.0, cache_read=0.125),
 }
 
 _UNKNOWN = ModelPrice(input=0.0, output=0.0)

@@ -1,9 +1,20 @@
 """Collector for OpenAI Codex CLI.
 
-Codex CLI stores rollout/session logs as JSONL under ``~/.codex/sessions``.
-Token usage is reported in ``token_count`` / ``usage`` events. Formats have
-shifted across Codex versions, so this parser is defensive and skips records it
-does not recognize rather than failing the whole ingest.
+Codex CLI stores one rollout log per session as JSONL under
+``~/.codex/sessions/<YYYY>/<MM>/<DD>/rollout-*.jsonl``. Each line is a typed
+record. The shapes we care about:
+
+- ``session_meta``  — session id and start time.
+- ``turn_context``  — carries the active ``model`` for subsequent turns.
+- ``event_msg`` with ``payload.type == "token_count"`` — per-turn token usage in
+  ``info.last_token_usage`` (input/cached/output/reasoning tokens).
+- ``event_msg`` with ``payload.type in {"user_message","agent_message"}`` — text
+  we keep a short snippet of for the classifier.
+
+We emit one :class:`Interaction` per ``token_count`` event, using
+``last_token_usage`` (the delta for that turn) so usage isn't double-counted from
+the running ``total_token_usage``. The parser is defensive: unknown records are
+skipped rather than failing the whole ingest.
 """
 
 from __future__ import annotations
@@ -35,12 +46,18 @@ class CodexCollector(Collector):
                 yield from self._parse_file(jsonl)
 
     def _parse_file(self, path: Path) -> Iterator[Interaction]:
-        session_id = path.stem
+        # Session id is the uuid at the end of the filename if present, else stem.
+        session_id = path.stem.split("-")[-1] if "-" in path.stem else path.stem
+
+        model = "unknown"
+        last_message = ""
+        seq = 0
+
         try:
             lines = path.read_text(encoding="utf-8").splitlines()
         except OSError:
             return
-        seq = 0
+
         for line in lines:
             line = line.strip()
             if not line:
@@ -49,33 +66,56 @@ class CodexCollector(Collector):
                 record = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            usage = _find_usage(record)
-            if usage is None:
+
+            rtype = record.get("type")
+            payload = record.get("payload")
+            payload = payload if isinstance(payload, dict) else {}
+
+            if rtype == "turn_context":
+                model = str(payload.get("model") or model)
                 continue
-            seq += 1
-            yield Interaction(
-                id=f"{session_id}:{seq}",
-                tool=self.tool,
-                session_id=session_id,
-                timestamp=_parse_ts(record.get("timestamp")),
-                model=str(record.get("model") or usage.get("model") or "unknown"),
-                input_tokens=int(usage.get("input_tokens", usage.get("prompt_tokens", 0))),
-                output_tokens=int(usage.get("output_tokens", usage.get("completion_tokens", 0))),
-                cache_read_tokens=int(usage.get("cached_input_tokens", 0)),
-                summary=str(record.get("summary", ""))[:500],
-            )
+
+            if rtype != "event_msg":
+                continue
+
+            ptype = payload.get("type")
+            if ptype in ("user_message", "agent_message"):
+                text = payload.get("message") or payload.get("text") or ""
+                if isinstance(text, str) and text:
+                    last_message = text[:500]
+            elif ptype == "token_count":
+                usage = _last_usage(payload)
+                if usage is None:
+                    continue
+                seq += 1
+                yield Interaction(
+                    id=f"codex:{session_id}:{seq}",
+                    tool=self.tool,
+                    session_id=session_id,
+                    timestamp=_parse_ts(record.get("timestamp")),
+                    model=_normalize_model(model),
+                    input_tokens=int(usage.get("input_tokens", 0)),
+                    output_tokens=(
+                        int(usage.get("output_tokens", 0))
+                        + int(usage.get("reasoning_output_tokens", 0))
+                    ),
+                    cache_read_tokens=int(usage.get("cached_input_tokens", 0)),
+                    summary=last_message,
+                )
 
 
-def _find_usage(record: dict[str, Any]) -> dict[str, Any] | None:
-    """Locate a usage/token_count dict in the various shapes Codex emits."""
-    for key in ("usage", "token_count", "token_usage"):
-        value = record.get(key)
-        if isinstance(value, dict):
-            return value
-    payload = record.get("payload")
-    if isinstance(payload, dict):
-        return _find_usage(payload)
-    return None
+def _last_usage(payload: dict[str, Any]) -> dict[str, Any] | None:
+    """Pull the per-turn token usage from a token_count event payload."""
+    info = payload.get("info")
+    if not isinstance(info, dict):
+        return None
+    usage = info.get("last_token_usage") or info.get("total_token_usage")
+    return usage if isinstance(usage, dict) else None
+
+
+def _normalize_model(model: str) -> str:
+    # Codex reports e.g. "gpt-5.5"; normalize dots to dashes for pricing lookup.
+    return model.replace(".", "-")
 
 
 def _parse_ts(raw: object) -> datetime:
