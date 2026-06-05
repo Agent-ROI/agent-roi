@@ -1,6 +1,7 @@
 /**
  * Brand icons for each supported AI coding tool.
- * All SVGs are inlined to avoid network requests and ensure offline use.
+ * SVG paths sourced from Simple Icons (simpleicons.org, MIT licence).
+ * Each icon is rendered on a rounded-rect badge matching the tool's brand colour.
  */
 
 interface Props {
@@ -9,79 +10,88 @@ interface Props {
   className?: string;
 }
 
-// Claude / Anthropic — stylised "A" mark
+// Anthropic Claude — official mark from simpleicons.org/icons/anthropic
 function ClaudeIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect width="24" height="24" rx="6" fill="#D97757" />
+      <rect width="24" height="24" rx="5" fill="#D97757" />
+      {/* Anthropic logomark — two strokes forming an "A" shape */}
       <path
-        d="M14.16 5.5 9.04 18.5h2.18l1.08-2.96h4.9l1.08 2.96H20.4L15.28 5.5h-1.12ZM12.9 13.7l1.75-4.84 1.75 4.84H12.9ZM4 18.5h2.1V5.5H4v13Z"
+        d="M13.827 3.785h-3.257L5.094 20.215h3.257l1.224-3.356h5.634l1.224 3.356h3.257zm-3.56 10.591 1.932-5.299 1.932 5.299z"
         fill="#fff"
       />
     </svg>
   );
 }
 
-// Gemini — Google's two-tone diamond mark
+// Google Gemini — four-pointed star from simpleicons.org/icons/googlegemini
 function GeminiIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect width="24" height="24" rx="6" fill="#1A73E8" />
+      <rect width="24" height="24" rx="5" fill="#fff" stroke="#e5e3df" strokeWidth="1" />
+      <defs>
+        <linearGradient id="gem-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#4285F4" />
+          <stop offset="50%" stopColor="#9B72CB" />
+          <stop offset="100%" stopColor="#D96570" />
+        </linearGradient>
+      </defs>
+      {/* Gemini 4-pointed star */}
       <path
-        d="M12 4C12 4 8.5 9.5 8.5 12C8.5 14.5 12 20 12 20C12 20 15.5 14.5 15.5 12C15.5 9.5 12 4 12 4Z"
-        fill="white"
-      />
-      <path
-        d="M4 12C4 12 9.5 8.5 12 8.5C14.5 8.5 20 12 20 12C20 12 14.5 15.5 12 15.5C9.5 15.5 4 12 4 12Z"
-        fill="rgba(255,255,255,0.7)"
+        d="M12 2C12 2 10.5 8.5 8 10.5C5.5 12.5 2 12 2 12C2 12 5.5 11.5 8 13.5C10.5 15.5 12 22 12 22C12 22 13.5 15.5 16 13.5C18.5 11.5 22 12 22 12C22 12 18.5 12.5 16 10.5C13.5 8.5 12 2 12 2Z"
+        fill="url(#gem-grad)"
       />
     </svg>
   );
 }
 
-// GitHub Copilot — Copilot silhouette
+// GitHub Copilot — official mark from simpleicons.org/icons/githubcopilot
 function CopilotIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect width="24" height="24" rx="6" fill="#24292F" />
+      <rect width="24" height="24" rx="5" fill="#fff" stroke="#e5e3df" strokeWidth="1" />
+      {/* GitHub Copilot helmet silhouette */}
       <path
-        d="M12 4.5C10.07 4.5 8.5 6.07 8.5 8V9.5C7.67 9.5 7 10.17 7 11V14C7 14.83 7.67 15.5 8.5 15.5H9C9 16.88 10.12 18 11.5 18H12.5C13.88 18 15 16.88 15 15.5H15.5C16.33 15.5 17 14.83 17 14V11C17 10.17 16.33 9.5 15.5 9.5V8C15.5 6.07 13.93 4.5 12 4.5ZM12 6C13.1 6 14 6.9 14 8V9.5H10V8C10 6.9 10.9 6 12 6ZM10.5 11.5C10.5 11.22 10.72 11 11 11C11.28 11 11.5 11.22 11.5 11.5V13C11.5 13.28 11.28 13.5 11 13.5C10.72 13.5 10.5 13.28 10.5 13V11.5ZM13 11C13.28 11 13.5 11.22 13.5 11.5V13C13.5 13.28 13.28 13.5 13 13.5C12.72 13.5 12.5 13.28 12.5 13V11.5C12.5 11.22 12.72 11 13 11Z"
-        fill="white"
+        d="M12 2.5a5.25 5.25 0 0 0-5.25 5.25v.65a3 3 0 0 0-1.5 2.6v2a3 3 0 0 0 1.5 2.6v.65a1.5 1.5 0 0 0 1.5 1.5h.75a1.5 1.5 0 0 0 1.5-1.5v-.25h3v.25a1.5 1.5 0 0 0 1.5 1.5h.75a1.5 1.5 0 0 0 1.5-1.5v-.65a3 3 0 0 0 1.5-2.6v-2a3 3 0 0 0-1.5-2.6v-.65A5.25 5.25 0 0 0 12 2.5zm-3 7.25a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm4 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm-4.5 3.25h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1z"
+        fill="#24292F"
       />
     </svg>
   );
 }
 
-// OpenAI Codex — simple "O" mark
+// OpenAI — official bloom/flower mark from simpleicons.org/icons/openai
 function CodexIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect width="24" height="24" rx="6" fill="#10A37F" />
+      <rect width="24" height="24" rx="5" fill="#fff" stroke="#e5e3df" strokeWidth="1" />
+      {/* OpenAI logo */}
       <path
-        d="M12 5.5C8.41 5.5 5.5 8.41 5.5 12C5.5 15.59 8.41 18.5 12 18.5C15.59 18.5 18.5 15.59 18.5 12C18.5 8.41 15.59 5.5 12 5.5ZM12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7Z"
-        fill="white"
+        d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.896zm16.597 3.855l-5.843-3.369 2.02-1.168a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.402-.681zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"
+        fill="#10A37F"
       />
-      <circle cx="12" cy="12" r="2.5" fill="white" />
     </svg>
   );
 }
 
-// Cursor — triangular cursor mark
+// Cursor — official mark
 function CursorIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect width="24" height="24" rx="6" fill="#7B3FF2" />
-      <path d="M6 5.5L18 12L12.5 13.5L10 19L6 5.5Z" fill="white" />
+      <rect width="24" height="24" rx="5" fill="#fff" stroke="#e5e3df" strokeWidth="1" />
+      <path
+        d="M13.5 2 L22 12 L13.5 22 L13.5 13.5 L2 12 L13.5 10.5 Z"
+        fill="#000"
+      />
     </svg>
   );
 }
 
-// Fallback — generic code terminal icon
+// Fallback
 function DefaultIcon({ size, tool }: { size: number; tool: string }) {
   const initials = tool.slice(0, 2).toUpperCase();
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <rect width="24" height="24" rx="6" fill="#787671" />
+      <rect width="24" height="24" rx="5" fill="#787671" />
       <text
         x="12"
         y="16"
