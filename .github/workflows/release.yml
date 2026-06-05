@@ -1,0 +1,70 @@
+name: Release
+
+# Publish to PyPI when a version tag is pushed, e.g.:
+#   git tag v0.2.3 && git push origin v0.2.3
+#
+# Uses PyPI Trusted Publishing (OIDC) — no API token is stored anywhere.
+# One-time setup on PyPI: project → Settings → Publishing → add a trusted
+# publisher for repo Agent-ROI/agent-roi, workflow release.yml, environment pypi.
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Build web UI into the package
+        run: ./scripts/build_web.sh
+
+      - name: Verify tag matches package version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(uv run python -c 'import tomllib,pathlib; print(tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"])')"
+          echo "tag=$TAG package=$PKG"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::Tag v$TAG does not match pyproject version $PKG"
+            exit 1
+          fi
+
+      # --wheel (not plain `uv build`): the web UI bundle is gitignored, so the
+      # sdist->wheel path drops it. Building the wheel directly bundles it.
+      - name: Build wheel
+        run: uv build --wheel
+
+      - name: Verify the wheel bundles the web UI
+        run: |
+          unzip -l dist/*.whl | grep -q "agent_roi/webui/index.html" \
+            || { echo "::error::wheel is missing the web UI"; exit 1; }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write # required for Trusted Publishing (OIDC)
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
