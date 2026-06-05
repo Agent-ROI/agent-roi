@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, type Dimension, type Rollup } from "../lib/api";
+import type { DateFilter } from "../lib/dateFilter";
+import { rangeInvalid } from "../lib/dateFilter";
 import { StatsCards } from "../components/StatsCards";
 import { RollupChart } from "../components/RollupChart";
 import { RollupTable } from "../components/RollupTable";
 
 interface Props {
-  since: string;
+  filter: DateFilter;
   onDrillTopic: (topic: string) => void;
 }
 
 const DIMENSIONS: Dimension[] = ["topic", "project", "tool", "model"];
 
-export function TopicsPage({ since, onDrillTopic }: Props) {
+export function TopicsPage({ filter, onDrillTopic }: Props) {
   const { t } = useTranslation();
   const [dimension, setDimension] = useState<Dimension>("topic");
   const [rows, setRows] = useState<Rollup[]>([]);
@@ -22,18 +24,23 @@ export function TopicsPage({ since, onDrillTopic }: Props) {
   const dimLabel = t(`dimension.${dimension}`);
 
   useEffect(() => {
+    if (rangeInvalid(filter)) {
+      setLoading(false);
+      setRows([]);
+      return;
+    }
     let active = true;
     setLoading(true);
     setError(null);
     api
-      .report(dimension, since)
+      .report(dimension, { since: filter.since, until: filter.until })
       .then((data) => active && setRows(data))
       .catch((e) => active && setError(e instanceof Error ? e.message : t("common.failed")))
       .finally(() => active && setLoading(false));
     return () => {
       active = false;
     };
-  }, [dimension, since, t]);
+  }, [dimension, filter, t]);
 
   return (
     <div className="page">

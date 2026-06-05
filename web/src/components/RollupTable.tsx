@@ -9,7 +9,7 @@ interface Props {
   title?: string;
 }
 
-export function RollupTable({ rows, dimension, onDrill }: Props) {
+export function RollupTable({ rows, dimension, onDrill, title }: Props) {
   const { t } = useTranslation();
   const sorted = rows.slice().sort((a, b) => b.cost_usd - a.cost_usd);
   const drillable = dimension === "topic" && !!onDrill;
@@ -17,7 +17,7 @@ export function RollupTable({ rows, dimension, onDrill }: Props) {
 
   return (
     <section className="card">
-      <h2>{t("dimension.all", { name: dimLabel })}</h2>
+      <h2>{title ?? t("dimension.all", { name: dimLabel })}</h2>
       <table>
         <thead>
           <tr>

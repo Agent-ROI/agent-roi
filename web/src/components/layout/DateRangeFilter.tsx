@@ -1,49 +1,79 @@
 import { useTranslation } from "react-i18next";
+import type { DateFilter } from "../../lib/dateFilter";
+import { ISO_DATE, isCustomRange } from "../../lib/dateFilter";
 
 interface Props {
-  since: string;
-  onSince: (value: string) => void;
+  filter: DateFilter;
+  onFilter: (filter: DateFilter) => void;
   compact?: boolean;
 }
 
-const RANGES = [
-  { key: "allTime", value: "" },
-  { key: "hours24", value: "24h" },
-  { key: "today", value: "today" },
-  { key: "days7", value: "7d" },
-  { key: "days30", value: "30d" },
-  { key: "days90", value: "90d" },
+const PRESETS = [
+  { key: "allTime", since: "", until: "" },
+  { key: "hours24", since: "24h", until: "" },
+  { key: "today", since: "today", until: "" },
+  { key: "days7", since: "7d", until: "" },
+  { key: "days30", since: "30d", until: "" },
+  { key: "days90", since: "90d", until: "" },
 ] as const;
 
-export function DateRangeFilter({ since, onSince, compact }: Props) {
+function presetActive(filter: DateFilter, since: string, until: string): boolean {
+  return filter.since === since && filter.until === until;
+}
+
+export function DateRangeFilter({ filter, onFilter, compact }: Props) {
   const { t } = useTranslation();
-  const isCustomDate = /^\d{4}-\d{2}-\d{2}$/.test(since);
+  const custom = isCustomRange(filter);
+  const fromValue = ISO_DATE.test(filter.since) ? filter.since : "";
+  const toValue = ISO_DATE.test(filter.until) ? filter.until : "";
+  const invalid = fromValue && toValue && fromValue > toValue;
 
   return (
     <div className={`date-range-filter${compact ? " compact" : ""}`}>
       <span className="filter-title">{t("controls.range")}</span>
       <div className="range-chips">
-        {RANGES.map((r) => (
+        {PRESETS.map((p) => (
           <button
-            key={r.value || "all"}
+            key={p.key}
             type="button"
-            className={r.value === since ? "chip active" : "chip"}
-            onClick={() => onSince(r.value)}
+            className={
+              !custom && presetActive(filter, p.since, p.until) ? "chip active" : "chip"
+            }
+            onClick={() => onFilter({ since: p.since, until: p.until })}
           >
-            {t(`controls.${r.key}`)}
+            {t(`controls.${p.key}`)}
           </button>
         ))}
       </div>
-      <label className="date-filter">
-        <span className="control-label">{t("controls.fromDate")}</span>
-        <input
-          className="date-input"
-          type="date"
-          value={isCustomDate ? since : ""}
-          onChange={(e) => onSince(e.target.value)}
-          aria-label={t("controls.fromDate")}
-        />
-      </label>
+      <div className="date-range-inputs">
+        <label className="date-filter">
+          <span className="control-label">{t("controls.fromDate")}</span>
+          <input
+            className="date-input"
+            type="date"
+            value={fromValue}
+            onChange={(e) =>
+              onFilter({ since: e.target.value, until: filter.until })
+            }
+            aria-label={t("controls.fromDate")}
+          />
+        </label>
+        <label className="date-filter">
+          <span className="control-label">{t("controls.toDate")}</span>
+          <input
+            className="date-input"
+            type="date"
+            value={toValue}
+            onChange={(e) =>
+              onFilter({ since: filter.since, until: e.target.value })
+            }
+            aria-label={t("controls.toDate")}
+          />
+        </label>
+      </div>
+      {invalid && (
+        <p className="range-error">{t("controls.rangeInvalid")}</p>
+      )}
     </div>
   );
 }

@@ -31,6 +31,7 @@
     "refreshView": "Оновити вигляд",
     "ingested": "імпортовано",
     "classified": "класифіковано",
+    "sync": "синхронізувати",
     "error": "Помилка"
   },
   "controls": {
@@ -39,7 +40,16 @@
     "allTime": "Увесь час",
     "today": "Сьогодні",
     "days7": "7 днів",
-    "days30": "30 днів"
+    "days30": "30 днів",
+    "hours24": "24h",
+    "days90": "90 days",
+    "fromDate": "From",
+    "toDate": "To",
+    "rangeInvalid": "Start date must be before end date",
+    "granularity": "Chart granularity",
+    "granularity_day": "Daily",
+    "granularity_week": "Weekly",
+    "granularity_month": "Monthly"
   },
   "sources": {
     "title": "Джерела даних",
@@ -75,7 +85,15 @@
     "openSession": "Відкрити сесію — виклики згруповані за патерном"
   },
   "chart": {
-    "costByTop": "Вартість за {{dimension}} (топ 10)"
+    "costByTop": "Вартість за {{dimension}} (топ 10)",
+    "tokenTrend": "Token usage over time",
+    "costTrend": "Daily cost trend",
+    "ioTrend": "Input vs output tokens",
+    "interactionsTrend": "Daily interactions",
+    "toolShare": "Token share by tool",
+    "tokensByTool": "Tokens by tool (stacked)",
+    "tokensByModel": "Tokens by model (stacked)",
+    "other": "Other"
   },
   "breakdown": {
     "summary": "{{interactions}} взаємодій · {{sessions}} сесій · {{tokens}} токенів · {{cost}}",
@@ -136,5 +154,20 @@
     "af": "Afrikaans",
     "ko": "한국어",
     "label": "Мова"
+  },
+  "nav": {
+    "label": "Navigation",
+    "overview": "Overview",
+    "topics": "Topics",
+    "trends": "Trends",
+    "sources": "Sources",
+    "pricing": "Pricing"
+  },
+  "pages": {
+    "overviewHint": "At-a-glance cost, token usage, and tool share.",
+    "topicsHint": "Group by topic, project, tool, or model. Click a topic to drill down.",
+    "trendsHint": "Daily token, cost, and tool/model distribution over time.",
+    "sourcesHint": "See which tool logs were detected and ingested.",
+    "topTopics": "Top topics by cost"
   }
 }

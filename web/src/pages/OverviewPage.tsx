@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, type Rollup, type TimeSeriesBundle } from "../lib/api";
+import type { DateFilter, Granularity } from "../lib/dateFilter";
+import { rangeInvalid } from "../lib/dateFilter";
 import { fmtUsd } from "../lib/format";
 import { totalsChartData } from "../lib/timeseriesView";
 import { StatsCards } from "../components/StatsCards";
@@ -9,11 +11,12 @@ import { SharePieChart } from "../components/charts/SharePieChart";
 import { RollupTable } from "../components/RollupTable";
 
 interface Props {
-  since: string;
+  filter: DateFilter;
+  granularity: Granularity;
   onDrillTopic: (topic: string) => void;
 }
 
-export function OverviewPage({ since, onDrillTopic }: Props) {
+export function OverviewPage({ filter, granularity, onDrillTopic }: Props) {
   const { t } = useTranslation();
   const [topics, setTopics] = useState<Rollup[]>([]);
   const [tools, setTools] = useState<Rollup[]>([]);
@@ -22,13 +25,22 @@ export function OverviewPage({ since, onDrillTopic }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (rangeInvalid(filter)) {
+      setLoading(false);
+      setError(null);
+      setTopics([]);
+      setTools([]);
+      setSeries(null);
+      return;
+    }
     let active = true;
     setLoading(true);
     setError(null);
+    const window = { since: filter.since, until: filter.until, granularity };
     Promise.all([
-      api.report("topic", since),
-      api.report("tool", since),
-      api.timeseries(since),
+      api.report("topic", window),
+      api.report("tool", window),
+      api.timeseries(window),
     ])
       .then(([topicRows, toolRows, ts]) => {
         if (!active) return;
@@ -41,7 +53,7 @@ export function OverviewPage({ since, onDrillTopic }: Props) {
     return () => {
       active = false;
     };
-  }, [since, t]);
+  }, [filter, granularity, t]);
 
   const chartData = series ? totalsChartData(series) : [];
 

@@ -1,34 +1,42 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, type TimeSeriesBundle } from "../lib/api";
+import type { DateFilter, Granularity } from "../lib/dateFilter";
+import { rangeInvalid } from "../lib/dateFilter";
 import { fmtUsd } from "../lib/format";
 import { splitChartData, totalsChartData } from "../lib/timeseriesView";
 import { TrendLineChart } from "../components/charts/TrendLineChart";
 import { StackedAreaChart } from "../components/charts/StackedAreaChart";
 
 interface Props {
-  since: string;
+  filter: DateFilter;
+  granularity: Granularity;
 }
 
-export function TrendsPage({ since }: Props) {
+export function TrendsPage({ filter, granularity }: Props) {
   const { t } = useTranslation();
   const [series, setSeries] = useState<TimeSeriesBundle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (rangeInvalid(filter)) {
+      setLoading(false);
+      setSeries(null);
+      return;
+    }
     let active = true;
     setLoading(true);
     setError(null);
     api
-      .timeseries(since)
+      .timeseries({ since: filter.since, until: filter.until, granularity })
       .then((data) => active && setSeries(data))
       .catch((e) => active && setError(e instanceof Error ? e.message : t("common.failed")))
       .finally(() => active && setLoading(false));
     return () => {
       active = false;
     };
-  }, [since, t]);
+  }, [filter, granularity, t]);
 
   const totals = series ? totalsChartData(series) : [];
   const byTool = series ? splitChartData(series.by_tool, series.tool_keys) : [];

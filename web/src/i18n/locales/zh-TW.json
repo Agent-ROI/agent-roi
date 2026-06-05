@@ -43,7 +43,13 @@
     "days7": "7 天",
     "days30": "30 天",
     "days90": "90 天",
-    "fromDate": "起始日"
+    "fromDate": "起始日",
+    "toDate": "結束日",
+    "rangeInvalid": "起始日不能晚於結束日",
+    "granularity": "圖表粒度",
+    "granularity_day": "每日",
+    "granularity_week": "每週",
+    "granularity_month": "每月"
   },
   "sources": {
     "title": "資料來源",
@@ -78,8 +84,31 @@
     "drillBreakdown": "點擊查看工具/模型分解",
     "openSession": "開啟工作階段 — 內部會依模式合併呼叫"
   },
+  "nav": {
+    "label": "導航",
+    "overview": "總覽",
+    "topics": "主題分析",
+    "trends": "趨勢圖表",
+    "sources": "資料來源",
+    "pricing": "模型定價"
+  },
+  "pages": {
+    "overviewHint": "一眼看懂花費、權杖用量與工具佔比。",
+    "topicsHint": "依主題、專案、工具或模型分組，點主題可下鑽。",
+    "trendsHint": "追蹤每日權杖、成本與工具/模型分佈變化。",
+    "sourcesHint": "查看各工具 log 是否被偵測與匯入。",
+    "topTopics": "花費最高的主題"
+  },
   "chart": {
-    "costByTop": "依{{dimension}}的花費（前 10）"
+    "costByTop": "依{{dimension}}的花費（前 10）",
+    "tokenTrend": "權杖用量趨勢",
+    "costTrend": "每日花費趨勢",
+    "ioTrend": "輸入 / 輸出權杖",
+    "interactionsTrend": "每日互動次數",
+    "toolShare": "工具權杖佔比",
+    "tokensByTool": "依工具的權杖堆疊",
+    "tokensByModel": "依模型的權杖堆疊",
+    "other": "其他"
   },
   "breakdown": {
     "summary": "{{interactions}} 次互動 · {{sessions}} 個工作階段 · {{tokens}} 權杖 · {{cost}}",

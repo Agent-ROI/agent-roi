@@ -6,16 +6,18 @@ import {
   type Rollup,
   type SessionSummary,
 } from "../lib/api";
+import type { DateFilter } from "../lib/dateFilter";
+import { rangeInvalid } from "../lib/dateFilter";
 import { fmtTokens, fmtUsd } from "../lib/format";
 import { SessionModal } from "./SessionModal";
 
 interface Props {
   topic: string;
-  since: string;
+  filter: DateFilter;
   onClose: () => void;
 }
 
-export function BreakdownModal({ topic, since, onClose }: Props) {
+export function BreakdownModal({ topic, filter, onClose }: Props) {
   const { t } = useTranslation();
   const [data, setData] = useState<TopicBreakdown | null>(null);
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
@@ -23,8 +25,10 @@ export function BreakdownModal({ topic, since, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (rangeInvalid(filter)) return;
     let active = true;
-    Promise.all([api.topic(topic, since), api.sessions(topic, since)])
+    const window = { since: filter.since, until: filter.until };
+    Promise.all([api.topic(topic, window), api.sessions(topic, window)])
       .then(([d, s]) => {
         if (!active) return;
         setData(d);
@@ -34,7 +38,7 @@ export function BreakdownModal({ topic, since, onClose }: Props) {
     return () => {
       active = false;
     };
-  }, [topic, since, t]);
+  }, [topic, filter, t]);
 
   return (
     <>

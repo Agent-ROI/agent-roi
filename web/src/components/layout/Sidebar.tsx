@@ -1,14 +1,18 @@
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../LanguageSwitcher";
+import type { DateFilter, Granularity } from "../../lib/dateFilter";
 import { DateRangeFilter } from "./DateRangeFilter";
+import { GranularityFilter } from "./GranularityFilter";
 
 export type PageId = "overview" | "topics" | "trends" | "sources" | "pricing";
 
 interface Props {
   page: PageId;
   onPage: (page: PageId) => void;
-  since: string;
-  onSince: (value: string) => void;
+  filter: DateFilter;
+  onFilter: (filter: DateFilter) => void;
+  granularity: Granularity;
+  onGranularity: (value: Granularity) => void;
   onSync: () => void;
   syncing: boolean;
 }
@@ -21,7 +25,16 @@ const NAV: { id: PageId; icon: string }[] = [
   { id: "pricing", icon: "$" },
 ];
 
-export function Sidebar({ page, onPage, since, onSince, onSync, syncing }: Props) {
+export function Sidebar({
+  page,
+  onPage,
+  filter,
+  onFilter,
+  granularity,
+  onGranularity,
+  onSync,
+  syncing,
+}: Props) {
   const { t } = useTranslation();
 
   return (
@@ -57,7 +70,8 @@ export function Sidebar({ page, onPage, since, onSince, onSync, syncing }: Props
       </nav>
 
       <div className="sidebar-section">
-        <DateRangeFilter since={since} onSince={onSince} compact />
+        <DateRangeFilter filter={filter} onFilter={onFilter} compact />
+        <GranularityFilter value={granularity} onChange={onGranularity} />
       </div>
 
       <div className="sidebar-footer">

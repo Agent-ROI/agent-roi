@@ -43,7 +43,13 @@
     "days7": "7 天",
     "days30": "30 天",
     "days90": "90 天",
-    "fromDate": "起始日"
+    "fromDate": "起始日",
+    "toDate": "结束日",
+    "rangeInvalid": "起始日不能晚于结束日",
+    "granularity": "图表粒度",
+    "granularity_day": "每日",
+    "granularity_week": "每周",
+    "granularity_month": "每月"
   },
   "sources": {
     "title": "数据来源",
@@ -78,8 +84,31 @@
     "drillBreakdown": "点击查看工具/模型分解",
     "openSession": "打开会话 — 内部会按模式合并调用"
   },
+  "nav": {
+    "label": "导航",
+    "overview": "总览",
+    "topics": "主题分析",
+    "trends": "趋势图表",
+    "sources": "数据来源",
+    "pricing": "模型定价"
+  },
+  "pages": {
+    "overviewHint": "一眼看懂花费、令牌用量与工具占比。",
+    "topicsHint": "按主题、项目、工具或模型分组，点主题可下钻。",
+    "trendsHint": "追踪每日令牌、成本与工具/模型分布变化。",
+    "sourcesHint": "查看各工具日志是否被检测与导入。",
+    "topTopics": "花费最高的主题"
+  },
   "chart": {
-    "costByTop": "按{{dimension}}的花费（前 10）"
+    "costByTop": "按{{dimension}}的花费（前 10）",
+    "tokenTrend": "令牌用量趋势",
+    "costTrend": "每日花费趋势",
+    "ioTrend": "输入 / 输出令牌",
+    "interactionsTrend": "每日交互次数",
+    "toolShare": "工具令牌占比",
+    "tokensByTool": "按工具的令牌堆叠",
+    "tokensByModel": "按模型的令牌堆叠",
+    "other": "其他"
   },
   "breakdown": {
     "summary": "{{interactions}} 次交互 · {{sessions}} 个会话 · {{tokens}} 令牌 · {{cost}}",

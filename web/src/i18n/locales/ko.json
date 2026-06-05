@@ -31,6 +31,7 @@
     "refreshView": "뷰 새로고침",
     "ingested": "가져옴",
     "classified": "분류됨",
+    "sync": "동기화",
     "error": "오류"
   },
   "controls": {
@@ -39,7 +40,16 @@
     "allTime": "전체",
     "today": "오늘",
     "days7": "7일",
-    "days30": "30일"
+    "days30": "30일",
+    "hours24": "24h",
+    "days90": "90 days",
+    "fromDate": "From",
+    "toDate": "To",
+    "rangeInvalid": "Start date must be before end date",
+    "granularity": "Chart granularity",
+    "granularity_day": "Daily",
+    "granularity_week": "Weekly",
+    "granularity_month": "Monthly"
   },
   "sources": {
     "title": "데이터 소스",
@@ -75,7 +85,15 @@
     "openSession": "세션 열기 — 내부에서 패턴별로 그룹화"
   },
   "chart": {
-    "costByTop": "{{dimension}}별 비용 (상위 10)"
+    "costByTop": "{{dimension}}별 비용 (상위 10)",
+    "tokenTrend": "Token usage over time",
+    "costTrend": "Daily cost trend",
+    "ioTrend": "Input vs output tokens",
+    "interactionsTrend": "Daily interactions",
+    "toolShare": "Token share by tool",
+    "tokensByTool": "Tokens by tool (stacked)",
+    "tokensByModel": "Tokens by model (stacked)",
+    "other": "Other"
   },
   "breakdown": {
     "summary": "{{interactions}} 상호작용 · {{sessions}} 세션 · {{tokens}} 토큰 · {{cost}}",
@@ -136,5 +154,20 @@
     "af": "Afrikaans",
     "ko": "한국어",
     "label": "언어"
+  },
+  "nav": {
+    "label": "Navigation",
+    "overview": "Overview",
+    "topics": "Topics",
+    "trends": "Trends",
+    "sources": "Sources",
+    "pricing": "Pricing"
+  },
+  "pages": {
+    "overviewHint": "At-a-glance cost, token usage, and tool share.",
+    "topicsHint": "Group by topic, project, tool, or model. Click a topic to drill down.",
+    "trendsHint": "Daily token, cost, and tool/model distribution over time.",
+    "sourcesHint": "See which tool logs were detected and ingested.",
+    "topTopics": "Top topics by cost"
   }
 }

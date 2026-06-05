@@ -101,11 +101,18 @@ export interface TimeSeriesSplitRow {
 }
 
 export interface TimeSeriesBundle {
+  granularity: string;
   totals: TimeSeriesPoint[];
   by_tool: TimeSeriesSplitRow[];
   by_model: TimeSeriesSplitRow[];
   tool_keys: string[];
   model_keys: string[];
+}
+
+export interface WindowParams {
+  since?: string;
+  until?: string;
+  granularity?: string;
 }
 
 function backendDownMessage(): string {
@@ -139,24 +146,43 @@ const qs = (params: Record<string, string>) => {
 };
 
 export const api = {
-  report: (groupBy: Dimension, since: string) =>
-    request<Rollup[]>(`/api/report${qs({ group_by: groupBy, since })}`),
+  report: (groupBy: Dimension, window: WindowParams = {}) =>
+    request<Rollup[]>(
+      `/api/report${qs({ group_by: groupBy, since: window.since ?? "", until: window.until ?? "" })}`
+    ),
 
-  topic: (topic: string, since: string) =>
-    request<TopicBreakdown>(`/api/report/topic/${encodeURIComponent(topic)}${qs({ since })}`),
+  topic: (topic: string, window: WindowParams = {}) =>
+    request<TopicBreakdown>(
+      `/api/report/topic/${encodeURIComponent(topic)}${qs({
+        since: window.since ?? "",
+        until: window.until ?? "",
+      })}`
+    ),
 
   pricing: () => request<ModelPricing[]>("/api/pricing"),
 
-  sessions: (topic: string, since: string) =>
-    request<SessionSummary[]>(`/api/sessions${qs({ topic, since })}`),
+  sessions: (topic: string, window: WindowParams = {}) =>
+    request<SessionSummary[]>(
+      `/api/sessions${qs({
+        topic,
+        since: window.since ?? "",
+        until: window.until ?? "",
+      })}`
+    ),
 
   session: (id: string) =>
     request<SessionDetail>(`/api/sessions/${encodeURIComponent(id)}`),
 
   sources: () => request<Sources>("/api/sources"),
 
-  timeseries: (since: string) =>
-    request<TimeSeriesBundle>(`/api/timeseries${qs({ since })}`),
+  timeseries: (window: WindowParams = {}) =>
+    request<TimeSeriesBundle>(
+      `/api/timeseries${qs({
+        since: window.since ?? "",
+        until: window.until ?? "",
+        granularity: window.granularity ?? "day",
+      })}`
+    ),
 
   ingest: () => request<{ ingested: number }>("/api/ingest", { method: "POST" }),
   classify: () => request<{ classified: number }>("/api/classify", { method: "POST" }),

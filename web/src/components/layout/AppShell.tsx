@@ -1,11 +1,14 @@
 import type { ReactNode } from "react";
+import type { DateFilter, Granularity } from "../../lib/dateFilter";
 import { Sidebar, type PageId } from "./Sidebar";
 
 interface Props {
   page: PageId;
   onPage: (page: PageId) => void;
-  since: string;
-  onSince: (value: string) => void;
+  filter: DateFilter;
+  onFilter: (filter: DateFilter) => void;
+  granularity: Granularity;
+  onGranularity: (value: Granularity) => void;
   onSync: () => void;
   syncing: boolean;
   children: ReactNode;
@@ -14,8 +17,10 @@ interface Props {
 export function AppShell({
   page,
   onPage,
-  since,
-  onSince,
+  filter,
+  onFilter,
+  granularity,
+  onGranularity,
   onSync,
   syncing,
   children,
@@ -25,8 +30,10 @@ export function AppShell({
       <Sidebar
         page={page}
         onPage={onPage}
-        since={since}
-        onSince={onSince}
+        filter={filter}
+        onFilter={onFilter}
+        granularity={granularity}
+        onGranularity={onGranularity}
         onSync={onSync}
         syncing={syncing}
       />
