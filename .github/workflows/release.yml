@@ -24,7 +24,7 @@ jobs:
           cache-dependency-path: web/package-lock.json
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
 
       - name: Build web UI into the package
         run: ./scripts/build_web.sh
