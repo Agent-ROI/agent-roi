@@ -9,6 +9,7 @@ import { TopicsPage } from "./pages/TopicsPage";
 import { TrendsPage } from "./pages/TrendsPage";
 import { SourcesPage } from "./pages/SourcesPage";
 import { PricingPage } from "./pages/PricingPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { BreakdownModal } from "./components/BreakdownModal";
 
 const EMPTY_FILTER: DateFilter = { since: "", until: "" };
@@ -78,6 +79,7 @@ export default function App() {
           <SourcesPage reloadKey={version} onRefresh={refresh} />
         )}
         {page === "pricing" && <PricingPage />}
+        {page === "settings" && <SettingsPage />}
       </AppShell>
 
       {drillTopic && (

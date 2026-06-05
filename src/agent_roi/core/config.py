@@ -17,7 +17,7 @@ from pydantic import BaseModel
 if sys.version_info >= (3, 11):
     import tomllib
 else:  # pragma: no cover
-    import tomli as tomllib  # noqa: PLC0415
+    import tomli as tomllib
 
 APP_NAME = "agent-roi"
 
@@ -33,25 +33,67 @@ class ClassifierConfig(BaseModel):
 
 
 class CollectorsConfig(BaseModel):
-    enabled: list[str] = ["claude_code", "codex", "copilot", "gemini"]
+    enabled: list[str] = ["claude_code", "codex", "copilot", "gemini", "hermes"]
+
+
+class BudgetConfig(BaseModel):
+    """Optional spend limits (USD) per rolling period.
+
+    All limits default to ``None`` (no budget). When set, the dashboard shows
+    spend against the limit and flags when a period is over budget. This is what
+    turns raw cost tracking into a real ROI signal — "am I within budget for
+    this day / week / month?"
+    """
+
+    daily_usd: float | None = None
+    weekly_usd: float | None = None
+    monthly_usd: float | None = None
 
 
 class Config(BaseModel):
     classifier: ClassifierConfig = ClassifierConfig()
     collectors: CollectorsConfig = CollectorsConfig()
+    budget: BudgetConfig = BudgetConfig()
     db_path: Path = Path(user_data_dir(APP_NAME)) / "agent_roi.db"
 
     @classmethod
     def load(cls) -> Config:
-        path = _config_path()
+        path = config_path()
         if not path.exists():
             return cls()
         with path.open("rb") as f:
             data = tomllib.load(f)
         return cls.model_validate(data)
 
+    def save(self) -> None:
+        path = config_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        lines: list[str] = []
+        lines.append(f'db_path = "{self.db_path}"')
+        lines.append("")
+        lines.append("[classifier]")
+        lines.append(f'provider = "{self.classifier.provider}"')
+        lines.append(f"similarity_threshold = {self.classifier.similarity_threshold}")
+        lines.append(f"label_terms = {self.classifier.label_terms}")
+        lines.append("")
+        lines.append("[collectors]")
+        enabled = ", ".join(f'"{e}"' for e in self.collectors.enabled)
+        lines.append(f"enabled = [{enabled}]")
+        lines.append("")
+        lines.append("[budget]")
+        # Only write limits that are set; TOML has no null, so omit None values.
+        for key, value in (
+            ("daily_usd", self.budget.daily_usd),
+            ("weekly_usd", self.budget.weekly_usd),
+            ("monthly_usd", self.budget.monthly_usd),
+        ):
+            if value is not None:
+                lines.append(f"{key} = {value}")
+        lines.append("")
+        path.write_text("\n".join(lines), encoding="utf-8")
 
-def _config_path() -> Path:
+
+def config_path() -> Path:
     override = os.environ.get("AGENT_ROI_CONFIG")
     if override:
         return Path(override)

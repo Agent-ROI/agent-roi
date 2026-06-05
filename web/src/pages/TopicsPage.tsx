@@ -77,6 +77,7 @@ export function TopicsPage({ filter, onDrillTopic, reloadKey }: Props) {
             rows={rows}
             dimension={dimension}
             onDrill={drillable ? onDrillTopic : undefined}
+            showVsAverage={drillable}
           />
           {drillable && (
             <p className="muted small hint-line">{t("app.drillTip")}</p>

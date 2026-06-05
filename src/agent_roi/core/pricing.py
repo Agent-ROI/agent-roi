@@ -19,7 +19,7 @@ from agent_roi.core.models import Interaction, ModelPricing
 if sys.version_info >= (3, 11):
     import tomllib
 else:
-    import tomli as tomllib  # noqa: PLC0415
+    import tomli as tomllib
 
 _TOML_PATH = Path(__file__).parent / "pricing.toml"
 _EPOCH_ZERO = date(1970, 1, 1)

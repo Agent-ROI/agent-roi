@@ -82,7 +82,8 @@
     "toolModel": "工具 / 模型",
     "snippet": "摘要",
     "drillBreakdown": "点击查看工具/模型分解",
-    "openSession": "打开会话 — 内部会按模式合并调用"
+    "openSession": "打开会话 — 内部会按模式合并调用",
+    "vsAverage": "对比平均"
   },
   "nav": {
     "label": "导航",
@@ -90,14 +91,16 @@
     "topics": "主题分析",
     "trends": "趋势图表",
     "sources": "数据来源",
-    "pricing": "模型定价"
+    "pricing": "模型定价",
+    "settings": "设置"
   },
   "pages": {
     "overviewHint": "一眼看懂花费、令牌用量与工具占比。",
     "topicsHint": "按主题、项目、工具或模型分组，点主题可下钻。",
     "trendsHint": "追踪每日令牌、成本与工具/模型分布变化。",
     "sourcesHint": "查看各工具日志是否被检测与导入。",
-    "topTopics": "花费最高的主题"
+    "topTopics": "花费最高的主题",
+    "settingsHint": "设置语言、分类器与数据收集器。"
   },
   "chart": {
     "costByTop": "按{{dimension}}的花费（前 10）",
@@ -173,5 +176,38 @@
   },
   "pagination": {
     "pageOf": "第 {{page}} / {{total}} 页"
+  },
+  "settings": {
+    "language": "语言",
+    "classifier": "分类器",
+    "threshold": "相似度阈值",
+    "thresholdHint": "越高 = 越严格（更多、更小的主题）。越低 = 更宽松。",
+    "labelTerms": "标签词数",
+    "labelTermsHint": "用于命名每个主题的特征词数量。",
+    "collectors": "收集器",
+    "paths": "文件路径",
+    "configPath": "配置文件",
+    "dbPath": "数据库",
+    "save": "保存设置",
+    "saving": "保存中…",
+    "saved": "已保存！",
+    "searchSessions": "搜索工作阶段…",
+    "budget": "预算",
+    "budgetHint": "选填的花费上限（美元）。留空表示不限制。",
+    "budgetNone": "不限制"
+  },
+  "budget": {
+    "title": "预算",
+    "overAlert": "超出预算",
+    "noneSet": "尚未设定预算 — 在设置中加入上限即可对照目标追踪花费。",
+    "noLimit": "未设定上限",
+    "ofLimit": "上限 {{limit}}",
+    "remaining": "剩余 {{amount}}",
+    "overBy": "超出 {{amount}}",
+    "period": {
+      "day": "今天",
+      "week": "本周",
+      "month": "本月"
+    }
   }
 }

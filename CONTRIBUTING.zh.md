@@ -12,15 +12,20 @@ React 前端（以 npm 管理）。
 ```bash
 # 後端
 uv sync --extra dev
-uv run pytest          # 跑測試
-uv run ruff check src  # lint
-uv run mypy            # 型別檢查
+uv run agent-roi serve   # API 監聽 :8000（同時提供已建置的 Web UI）
 
-# 前端
+uv run pytest            # 跑測試
+uv run ruff check src    # lint
+uv run mypy              # 型別檢查
+
+# 前端（僅在開發 UI 時需要）
 cd web
 npm install
-npm run build
+npm run dev              # Vite 開發伺服器，監聽 :5173（API 請求轉發至 :8000）
+npm run build            # 正式建置
 ```
+
+開發 UI 時同時啟動 `agent-roi serve` 與 `npm run dev`；其餘情況只需 `agent-roi serve` 即可。
 
 ## 專案結構
 

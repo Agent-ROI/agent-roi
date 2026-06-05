@@ -51,6 +51,24 @@ def parse_since(value: str, *, now: datetime | None = None) -> datetime | None:
         ) from exc
 
 
+def period_start(period: str, *, now: datetime | None = None) -> datetime:
+    """Inclusive start of the current ``day`` / ``week`` / ``month`` period.
+
+    Used by budget tracking to bound "spend so far this period". Weeks start on
+    Monday. All boundaries are at 00:00 in the reference timezone (UTC by
+    default), consistent with :func:`parse_since`.
+    """
+    now = now or datetime.now(tz=timezone.utc)
+    midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    if period == "day":
+        return midnight
+    if period == "week":
+        return midnight - timedelta(days=midnight.weekday())
+    if period == "month":
+        return midnight.replace(day=1)
+    raise ValueError(f"Unknown period: {period!r}. Use day, week, or month.")
+
+
 def parse_until(value: str, *, now: datetime | None = None) -> datetime | None:
     """Parse a window-end string (exclusive). Raises ``ValueError`` on bad input."""
     value = value.strip()

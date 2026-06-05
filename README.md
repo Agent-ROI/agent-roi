@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Agent-ROI/agent-roi/main/docs/assets/logo.svg" alt="Agent-ROI" width="72" height="72" />
+<img src="docs/assets/logo.jpg" alt="Agent-ROI" width="280" />
 
 # Agent-ROI
 
@@ -63,7 +63,7 @@ agent-roi doctor                          # see which tools were detected and wh
 
 | | |
 |---|---|
-| **Tool-agnostic** | Reads local logs from Claude Code, Codex CLI, GitHub Copilot, and Gemini CLI — no proxy, no workflow change |
+| **Tool-agnostic** | Reads local logs from Claude Code, Codex CLI, GitHub Copilot, Gemini CLI, and Hermes Agent — no proxy, no workflow change |
 | **Topic classification** | Model-free TF-IDF + cosine-similarity clustering; runs fully offline, no API keys |
 | **Cost & ROI** | Token usage mapped to per-model pricing, aggregated by **topic, tool, or model**, over any time window |
 | **Drill-down** | Click any topic to see which tools and models contributed; estimated vs exact counts clearly badged |
@@ -77,6 +77,7 @@ agent-roi doctor                          # see which tools were detected and wh
 | Codex CLI | ✅ |
 | GitHub Copilot | ✅ |
 | Gemini CLI | ✅ |
+| Hermes Agent | ✅ |
 | Cursor | 🔜 |
 
 ## Architecture
@@ -99,7 +100,7 @@ similarity_threshold = 0.18   # higher = more, smaller topics
 label_terms = 3
 
 [collectors]
-enabled = ["claude_code", "codex", "copilot", "gemini"]
+enabled = ["claude_code", "codex", "copilot", "gemini", "hermes"]
 ```
 
 See [docs/configuration.md](./docs/configuration.md).

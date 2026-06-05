@@ -14,6 +14,8 @@ def get_classifier(config: ClassifierConfig) -> Classifier:
     tokens to spend.
     """
     if config.provider == "semantic":
+        # Imported lazily: semantic.py pulls in scikit-learn/numpy, which we only
+        # need when classifying — keeping it here keeps the rest of the CLI light.
         from agent_roi.classify.semantic import SemanticClassifier
 
         return SemanticClassifier(

@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 
 class Tool(str, Enum):
@@ -15,6 +15,7 @@ class Tool(str, Enum):
     CODEX = "codex"
     COPILOT = "copilot"
     GEMINI = "gemini"
+    HERMES = "hermes"
     CURSOR = "cursor"
     UNKNOWN = "unknown"
 
@@ -222,6 +223,52 @@ class TimeSeriesBundle(BaseModel):
     by_model: list[TimeSeriesSplitRow]
     tool_keys: list[str]
     model_keys: list[str]
+
+
+class BudgetPeriodStatus(BaseModel):
+    """Spend vs. an optional limit for one rolling period (day / week / month).
+
+    This is the unit behind the dashboard's budget gauges. ``limit_usd`` is
+    ``None`` when no budget is configured for the period, in which case spend is
+    still reported but ``pct``/``over`` are meaningless (left at null/false).
+    """
+
+    period: str  # "day" | "week" | "month"
+    start: datetime  # inclusive start of the current period
+    spent_usd: float
+    limit_usd: float | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def pct(self) -> float | None:
+        """Spend as a percentage of the limit, or None when unbudgeted."""
+        if self.limit_usd is None or self.limit_usd <= 0:
+            return None
+        return self.spent_usd / self.limit_usd * 100
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def over(self) -> bool:
+        """True when a limit is set and spend has exceeded it."""
+        return self.limit_usd is not None and self.spent_usd > self.limit_usd
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def remaining_usd(self) -> float | None:
+        if self.limit_usd is None:
+            return None
+        return self.limit_usd - self.spent_usd
+
+
+class BudgetStatus(BaseModel):
+    """All configured budget periods at once — the dashboard's budget panel."""
+
+    periods: list[BudgetPeriodStatus]
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def any_over(self) -> bool:
+        return any(p.over for p in self.periods)
 
 
 class CollectorStatus(BaseModel):

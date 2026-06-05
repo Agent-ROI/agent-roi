@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
+import json
+import shutil
+import subprocess
+import sys
+import urllib.request
 from datetime import datetime
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
+from agent_roi import __version__
 from agent_roi.core.platform import platform_label
 from agent_roi.core.service import Service
 from agent_roi.core.timeframe import parse_since
@@ -23,8 +29,6 @@ console = Console()
 
 def _version_callback(value: bool) -> None:
     if value:
-        from agent_roi import __version__
-
         console.print(f"agent-roi {__version__}")
         raise typer.Exit()
 
@@ -53,9 +57,7 @@ def _parse_since(value: str) -> datetime | None:
 
 @app.command()
 def ingest(
-    classify: bool = typer.Option(
-        True, help="Also discover topics after ingesting (recommended)."
-    ),
+    classify: bool = typer.Option(True, help="Also discover topics after ingesting (recommended)."),
 ) -> None:
     """Collect interactions from all enabled tools, then discover topics."""
     service = Service()
@@ -187,6 +189,47 @@ def pricing() -> None:
 
 
 @app.command()
+def budget() -> None:
+    """Show spend so far this day/week/month against your configured limits.
+
+    Set limits in ``~/.config/agent-roi/config.toml`` under ``[budget]`` (or in
+    the web Settings page): daily_usd, weekly_usd, monthly_usd.
+    """
+    service = Service()
+    status = service.budget_status()
+    table = Table(title="Budget")
+    table.add_column("Period", style="cyan")
+    table.add_column("Since", justify="right", style="dim")
+    table.add_column("Spent (USD)", justify="right", style="green")
+    table.add_column("Limit (USD)", justify="right")
+    table.add_column("Used", justify="right")
+    table.add_column("Status", justify="center")
+
+    for p in status.periods:
+        if p.limit_usd is None:
+            limit, used, state = "—", "—", "[dim]no budget[/dim]"
+        else:
+            limit = f"${p.limit_usd:,.2f}"
+            used = f"{p.pct:.0f}%" if p.pct is not None else "—"
+            state = "[red]OVER[/red]" if p.over else "[green]ok[/green]"
+        table.add_row(
+            p.period.capitalize(),
+            str(p.start.date()),
+            f"${p.spent_usd:,.4f}",
+            limit,
+            used,
+            state,
+        )
+    console.print(table)
+    if status.any_over:
+        console.print("[red]⚠ You are over budget for at least one period.[/red]")
+    if all(p.limit_usd is None for p in status.periods):
+        console.print(
+            "[dim]No budgets set. Add [budget] daily_usd/weekly_usd/monthly_usd to config.[/dim]"
+        )
+
+
+@app.command()
 def doctor() -> None:
     """Show which tools were detected, where Agent-ROI looked, and what it found."""
     service = Service()
@@ -219,6 +262,9 @@ def serve(
     port: int = typer.Option(8000, help="Bind port."),
 ) -> None:
     """Run the REST API (and serve the built web UI if present)."""
+    # Imported lazily: uvicorn (+ its event-loop machinery) is a heavy import we
+    # only need for `serve`, so keeping it out of module scope keeps every other
+    # command's startup fast. This is the one deliberate in-function import.
     import uvicorn
 
     uvicorn.run("agent_roi.api.app:create_app", host=host, port=port, factory=True)
@@ -230,16 +276,11 @@ PACKAGE_NAME = "agent-roi-tracker"
 @app.command()
 def version() -> None:
     """Show the installed Agent-ROI version."""
-    from agent_roi import __version__
-
     console.print(f"agent-roi {__version__}")
 
 
 def _latest_pypi_version() -> str | None:
     """Return the newest version of the package on PyPI, or None if unreachable."""
-    import json
-    import urllib.request
-
     url = f"https://pypi.org/pypi/{PACKAGE_NAME}/json"
     try:
         with urllib.request.urlopen(url, timeout=10) as resp:  # noqa: S310
@@ -255,16 +296,12 @@ def _installed_version() -> str | None:
     The current process still has the old version imported, so we shell out to a
     fresh interpreter to read the up-to-date installed distribution metadata.
     """
-    import subprocess
-    import sys
-
     try:
         out = subprocess.run(
             [
                 sys.executable,
                 "-c",
-                "from importlib.metadata import version;"
-                f"print(version('{PACKAGE_NAME}'))",
+                f"from importlib.metadata import version;print(version('{PACKAGE_NAME}'))",
             ],
             capture_output=True,
             text=True,
@@ -278,9 +315,6 @@ def _installed_version() -> str | None:
 
 def _installed_via_uv_tool() -> bool:
     """True if agent-roi is managed by `uv tool` (vs a plain pip/uv pip install)."""
-    import shutil
-    import subprocess
-
     if shutil.which("uv") is None:
         return False
     try:
@@ -303,11 +337,6 @@ def update(
     pre: bool = typer.Option(False, "--pre", help="Include pre-release versions."),
 ) -> None:
     """Upgrade Agent-ROI to the latest release on PyPI."""
-    import subprocess
-    import sys
-
-    from agent_roi import __version__
-
     console.print(f"Installed: [bold]{__version__}[/bold]")
 
     latest = _latest_pypi_version()

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Agent-ROI/agent-roi/main/docs/assets/logo.svg" alt="Agent-ROI" width="72" height="72" />
+<img src="docs/assets/logo.jpg" alt="Agent-ROI" width="280" />
 
 # Agent-ROI
 
@@ -63,7 +63,7 @@ agent-roi doctor                          # 查看哪些工具被偵測到及原
 
 | | |
 |---|---|
-| **工具無關** | 讀取 Claude Code、Codex CLI、GitHub Copilot 與 Gemini CLI 的本地 log — 不需 proxy、不改變使用流程 |
+| **工具無關** | 讀取 Claude Code、Codex CLI、GitHub Copilot、Gemini CLI 與 Hermes Agent 的本地 log — 不需 proxy、不改變使用流程 |
 | **主題分類** | 免模型 TF-IDF + 餘弦相似度分群；完全離線、不花費 token、無需任何外部服務 |
 | **花費與 ROI** | token 用量對應到各模型定價，可依**主題、工具或模型**彙總，並套用任意時間區間 |
 | **下鑽分析** | 點任一主題即可看到各工具與模型的貢獻；估算值與精算值以標章清楚區分 |
@@ -77,6 +77,7 @@ agent-roi doctor                          # 查看哪些工具被偵測到及原
 | Codex CLI | ✅ |
 | GitHub Copilot | ✅ |
 | Gemini CLI | ✅ |
+| Hermes Agent | ✅ |
 | Cursor | 🔜 |
 
 ## 架構
@@ -99,7 +100,7 @@ similarity_threshold = 0.18   # 越高 = 主題越多、越細
 label_terms = 3
 
 [collectors]
-enabled = ["claude_code", "codex", "copilot", "gemini"]
+enabled = ["claude_code", "codex", "copilot", "gemini", "hermes"]
 ```
 
 詳見 [docs/configuration.zh.md](./docs/configuration.zh.md)。

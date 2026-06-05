@@ -27,7 +27,7 @@ def create_app(service: Service | None = None) -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:5173"],
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST", "PUT"],
         allow_headers=["*"],
     )
 
@@ -63,10 +63,20 @@ def create_app(service: Service | None = None) -> FastAPI:
         }
 
     @app.get("/api/sessions")
-    def sessions(topic: str = "", since: str = "", until: str = "") -> list[dict[str, object]]:
+    def sessions(
+        topic: str = "",
+        since: str = "",
+        until: str = "",
+        search: str = "",
+    ) -> list[dict[str, object]]:
         """Per-session rows, optionally scoped to one topic and time window."""
         start, end = _window(since, until)
-        rows = svc.sessions(topic=topic or None, start=start, end=end)
+        rows = svc.sessions(
+            topic=topic or None,
+            start=start,
+            end=end,
+            search=search or None,
+        )
         return [s.model_dump() | {"total_tokens": s.total_tokens} for s in rows]
 
     @app.get("/api/sessions/{session_id}")
@@ -76,11 +86,9 @@ def create_app(service: Service | None = None) -> FastAPI:
         if detail is None:
             raise HTTPException(404, f"No session {session_id!r}")
         return {
-            "session": detail.session.model_dump()
-            | {"total_tokens": detail.session.total_tokens},
+            "session": detail.session.model_dump() | {"total_tokens": detail.session.total_tokens},
             "interactions": [
-                i.model_dump() | {"total_tokens": i.total_tokens}
-                for i in detail.interactions
+                i.model_dump() | {"total_tokens": i.total_tokens} for i in detail.interactions
             ],
         }
 
@@ -109,6 +117,11 @@ def create_app(service: Service | None = None) -> FastAPI:
         """The pricing table behind every cost figure."""
         return [p.model_dump() for p in svc.pricing()]
 
+    @app.get("/api/budget")
+    def budget() -> dict[str, object]:
+        """Spend so far this day/week/month vs. the configured limits."""
+        return svc.budget_status().model_dump()
+
     @app.get("/api/sources")
     def sources() -> dict[str, object]:
         """Collector diagnostics: which tools were detected and where."""
@@ -116,6 +129,18 @@ def create_app(service: Service | None = None) -> FastAPI:
             "platform": platform_label(),
             "collectors": [s.model_dump() for s in svc.sources()],
         }
+
+    @app.get("/api/config")
+    def get_config() -> dict[str, object]:
+        return svc.get_config_info()
+
+    @app.put("/api/config")
+    def update_config(body: dict[str, object]) -> dict[str, object]:
+        return svc.update_config(
+            classifier=body.get("classifier"),  # type: ignore[arg-type]
+            collectors=body.get("collectors"),  # type: ignore[arg-type]
+            budget=body.get("budget"),  # type: ignore[arg-type]
+        )
 
     @app.post("/api/ingest")
     def ingest() -> dict[str, int]:

@@ -116,6 +116,41 @@ export interface WindowParams {
   granularity?: string;
 }
 
+export interface BudgetPeriodStatus {
+  period: "day" | "week" | "month";
+  start: string;
+  spent_usd: number;
+  limit_usd: number | null;
+  pct: number | null;
+  over: boolean;
+  remaining_usd: number | null;
+}
+
+export interface BudgetStatus {
+  periods: BudgetPeriodStatus[];
+  any_over: boolean;
+}
+
+export interface BudgetSettings {
+  daily_usd: number | null;
+  weekly_usd: number | null;
+  monthly_usd: number | null;
+}
+
+export interface ConfigInfo {
+  config_path: string;
+  db_path: string;
+  classifier: {
+    provider: string;
+    similarity_threshold: number;
+    label_terms: number;
+  };
+  collectors: {
+    enabled: string[];
+  };
+  budget: BudgetSettings;
+}
+
 function backendDownMessage(): string {
   return i18n.t("errors.backendDown");
 }
@@ -162,12 +197,15 @@ export const api = {
 
   pricing: () => request<ModelPricing[]>("/api/pricing"),
 
-  sessions: (topic: string, window: WindowParams = {}) =>
+  budget: () => request<BudgetStatus>("/api/budget"),
+
+  sessions: (topic: string, window: WindowParams = {}, search?: string) =>
     request<SessionSummary[]>(
       `/api/sessions${qs({
         topic,
         since: window.since ?? "",
         until: window.until ?? "",
+        search: search ?? "",
       })}`
     ),
 
@@ -189,4 +227,17 @@ export const api = {
   classify: () => request<{ classified: number }>("/api/classify", { method: "POST" }),
   refresh: () =>
     request<{ ingested: number; classified: number }>("/api/refresh", { method: "POST" }),
+
+  getConfig: () => request<ConfigInfo>("/api/config"),
+
+  updateConfig: (body: {
+    classifier?: Partial<ConfigInfo["classifier"]>;
+    collectors?: Partial<ConfigInfo["collectors"]>;
+    budget?: Partial<BudgetSettings>;
+  }) =>
+    request<ConfigInfo>("/api/config", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
 };

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { api, type Rollup, type TimeSeriesBundle } from "../lib/api";
+import { api, type BudgetStatus, type Rollup, type TimeSeriesBundle } from "../lib/api";
 import type { DateFilter, Granularity } from "../lib/dateFilter";
 import { rangeInvalid } from "../lib/dateFilter";
 import { fmtUsd } from "../lib/format";
 import { totalsChartData } from "../lib/timeseriesView";
+import { BudgetPanel } from "../components/BudgetPanel";
 import { StatsCards } from "../components/StatsCards";
 import { TrendLineChart } from "../components/charts/TrendLineChart";
 import { SharePieChart } from "../components/charts/SharePieChart";
@@ -22,6 +23,7 @@ export function OverviewPage({ filter, granularity, onDrillTopic, reloadKey }: P
   const [topics, setTopics] = useState<Rollup[]>([]);
   const [tools, setTools] = useState<Rollup[]>([]);
   const [series, setSeries] = useState<TimeSeriesBundle | null>(null);
+  const [budget, setBudget] = useState<BudgetStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,6 +58,18 @@ export function OverviewPage({ filter, granularity, onDrillTopic, reloadKey }: P
     };
   }, [filter, granularity, reloadKey, t]);
 
+  // Budget is always "this day/week/month" — independent of the date filter.
+  useEffect(() => {
+    let active = true;
+    api
+      .budget()
+      .then((b) => active && setBudget(b))
+      .catch(() => active && setBudget(null));
+    return () => {
+      active = false;
+    };
+  }, [reloadKey]);
+
   const chartData = series ? totalsChartData(series) : [];
 
   return (
@@ -71,6 +85,7 @@ export function OverviewPage({ filter, granularity, onDrillTopic, reloadKey }: P
       ) : (
         <>
           <StatsCards rows={topics} extraLabel={t("dimension.topic")} />
+          {budget && <BudgetPanel status={budget} />}
           <div className="chart-grid two-col">
             <TrendLineChart
               title={t("chart.tokenTrend")}

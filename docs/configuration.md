@@ -17,7 +17,12 @@ similarity_threshold = 0.18   # higher = more, smaller topics
 label_terms = 3               # words used to name each topic
 
 [collectors]
-enabled = ["claude_code", "codex", "copilot", "gemini"]
+enabled = ["claude_code", "codex", "copilot", "gemini", "hermes"]
+
+[budget]
+daily_usd = 5.0      # optional — omit a line to leave that period unbudgeted
+weekly_usd = 25.0
+monthly_usd = 100.0
 ```
 
 ## Options
@@ -37,7 +42,20 @@ required.
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `enabled` | `["claude_code", "codex", "copilot", "gemini"]` | Which tool collectors to run during ingest. |
+| `enabled` | `["claude_code", "codex", "copilot", "gemini", "hermes"]` | Which tool collectors to run during ingest. |
+
+### `[budget]`
+
+Optional spend limits (USD) per rolling period. When set, `agent-roi budget`
+and the dashboard's Overview show spend against the limit and flag when a period
+is over budget. Every limit is optional — omit a line to leave that period
+unbudgeted. Weeks start on Monday; months reset on the 1st.
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `daily_usd` | _(none)_ | Spend limit for the current day. |
+| `weekly_usd` | _(none)_ | Spend limit for the current week (since Monday). |
+| `monthly_usd` | _(none)_ | Spend limit for the current calendar month. |
 
 ### Database location
 

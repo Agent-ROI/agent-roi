@@ -82,7 +82,8 @@
     "toolModel": "Tool / Model",
     "snippet": "Snippet",
     "drillBreakdown": "Click to see tool/model breakdown",
-    "openSession": "Open session — calls are grouped by pattern inside"
+    "openSession": "Open session — calls are grouped by pattern inside",
+    "vsAverage": "vs avg"
   },
   "nav": {
     "label": "Navigation",
@@ -90,13 +91,15 @@
     "topics": "Topics",
     "trends": "Trends",
     "sources": "Sources",
-    "pricing": "Pricing"
+    "pricing": "Pricing",
+    "settings": "Settings"
   },
   "pages": {
     "overviewHint": "At-a-glance cost, token usage, and tool share.",
     "topicsHint": "Group by topic, project, tool, or model. Click a topic to drill down.",
     "trendsHint": "Daily token, cost, and tool/model distribution over time.",
     "sourcesHint": "See which tool logs were detected and ingested.",
+    "settingsHint": "Configure language, classifier, and data collectors.",
     "topTopics": "Top topics by cost"
   },
   "chart": {
@@ -171,7 +174,40 @@
     "ko": "한국어",
     "label": "Language"
   },
+  "settings": {
+    "language": "Language",
+    "classifier": "Classifier",
+    "threshold": "Similarity threshold",
+    "thresholdHint": "Higher = stricter (more, smaller topics). Lower = broader topics.",
+    "labelTerms": "Label terms",
+    "labelTermsHint": "Number of distinctive terms used to name each topic.",
+    "collectors": "Collectors",
+    "paths": "File paths",
+    "configPath": "Config file",
+    "dbPath": "Database",
+    "save": "Save settings",
+    "saving": "Saving…",
+    "saved": "Saved!",
+    "searchSessions": "Search sessions…",
+    "budget": "Budget",
+    "budgetHint": "Optional spend limits (USD). Leave blank for no limit.",
+    "budgetNone": "No limit"
+  },
   "pagination": {
     "pageOf": "Page {{page}} of {{total}}"
+  },
+  "budget": {
+    "title": "Budget",
+    "overAlert": "Over budget",
+    "noneSet": "No budget set yet — add limits in Settings to track spend against a target.",
+    "noLimit": "No limit set",
+    "ofLimit": "of {{limit}}",
+    "remaining": "{{amount}} left",
+    "overBy": "{{amount}} over",
+    "period": {
+      "day": "Today",
+      "week": "This week",
+      "month": "This month"
+    }
   }
 }

@@ -10,12 +10,14 @@ from agent_roi.collectors.claude_code import ClaudeCodeCollector
 from agent_roi.collectors.codex import CodexCollector
 from agent_roi.collectors.copilot import CopilotCollector
 from agent_roi.collectors.gemini import GeminiCollector
+from agent_roi.collectors.hermes import HermesCollector
 
 _REGISTRY: dict[str, type[Collector]] = {
     ClaudeCodeCollector.name: ClaudeCodeCollector,
     CodexCollector.name: CodexCollector,
     CopilotCollector.name: CopilotCollector,
     GeminiCollector.name: GeminiCollector,
+    HermesCollector.name: HermesCollector,
 }
 
 

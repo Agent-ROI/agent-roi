@@ -1,11 +1,10 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { LanguageSwitcher } from "../LanguageSwitcher";
 import type { DateFilter, Granularity } from "../../lib/dateFilter";
 import { DateRangeFilter } from "./DateRangeFilter";
 import { GranularityFilter } from "./GranularityFilter";
 
-export type PageId = "overview" | "topics" | "trends" | "sources" | "pricing";
+export type PageId = "overview" | "topics" | "trends" | "sources" | "pricing" | "settings";
 
 interface Props {
   page: PageId;
@@ -76,6 +75,18 @@ const NAV_ICONS: Record<PageId, ReactNode> = {
       />
     </svg>
   ),
+  settings: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path
+        d="M6.86 2h2.28l.32 1.6a5 5 0 011.14.66l1.54-.52.98 1.7-1.22 1.08a5 5 0 010 1.32l1.22 1.08-.98 1.7-1.54-.52a5 5 0 01-1.14.66L9.14 14H6.86l-.32-1.6a5 5 0 01-1.14-.66l-1.54.52-.98-1.7 1.22-1.08a5 5 0 010-1.32L2.88 7.08l.98-1.7 1.54.52a5 5 0 011.14-.66L6.86 2z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  ),
 };
 
 const NAV: { id: PageId }[] = [
@@ -84,6 +95,7 @@ const NAV: { id: PageId }[] = [
   { id: "trends" },
   { id: "sources" },
   { id: "pricing" },
+  { id: "settings" },
 ];
 
 export function Sidebar({
@@ -133,9 +145,6 @@ export function Sidebar({
         <GranularityFilter value={granularity} onChange={onGranularity} />
       </div>
 
-      <div className="sidebar-footer">
-        <LanguageSwitcher />
-      </div>
     </aside>
   );
 }

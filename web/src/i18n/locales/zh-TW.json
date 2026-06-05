@@ -82,7 +82,8 @@
     "toolModel": "工具 / 模型",
     "snippet": "摘要",
     "drillBreakdown": "點擊查看工具/模型分解",
-    "openSession": "開啟工作階段 — 內部會依模式合併呼叫"
+    "openSession": "開啟工作階段 — 內部會依模式合併呼叫",
+    "vsAverage": "對比平均"
   },
   "nav": {
     "label": "導航",
@@ -90,13 +91,15 @@
     "topics": "主題分析",
     "trends": "趨勢圖表",
     "sources": "資料來源",
-    "pricing": "模型定價"
+    "pricing": "模型定價",
+    "settings": "設定"
   },
   "pages": {
     "overviewHint": "一眼看懂花費、權杖用量與工具佔比。",
     "topicsHint": "依主題、專案、工具或模型分組，點主題可下鑽。",
     "trendsHint": "追蹤每日權杖、成本與工具/模型分佈變化。",
     "sourcesHint": "查看各工具 log 是否被偵測與匯入。",
+    "settingsHint": "設定語言、分類器與資料收集器。",
     "topTopics": "花費最高的主題"
   },
   "chart": {
@@ -171,7 +174,40 @@
     "ko": "한국어",
     "label": "語言"
   },
+  "settings": {
+    "language": "語言",
+    "classifier": "分類器",
+    "threshold": "相似度門檻",
+    "thresholdHint": "越高 = 越嚴格（更多、更小的主題）。越低 = 更寬鬆的主題。",
+    "labelTerms": "標籤詞數",
+    "labelTermsHint": "用於命名每個主題的特徵詞數量。",
+    "collectors": "收集器",
+    "paths": "檔案路徑",
+    "configPath": "設定檔",
+    "dbPath": "資料庫",
+    "save": "儲存設定",
+    "saving": "儲存中…",
+    "saved": "已儲存！",
+    "searchSessions": "搜尋工作階段…",
+    "budget": "預算",
+    "budgetHint": "選填的花費上限（美元）。留空表示不限制。",
+    "budgetNone": "不限制"
+  },
   "pagination": {
     "pageOf": "第 {{page}} / {{total}} 頁"
+  },
+  "budget": {
+    "title": "預算",
+    "overAlert": "超出預算",
+    "noneSet": "尚未設定預算 — 在設定中加入上限即可對照目標追蹤花費。",
+    "noLimit": "未設定上限",
+    "ofLimit": "上限 {{limit}}",
+    "remaining": "剩餘 {{amount}}",
+    "overBy": "超出 {{amount}}",
+    "period": {
+      "day": "今天",
+      "week": "本週",
+      "month": "本月"
+    }
   }
 }
