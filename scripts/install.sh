@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 # Agent-ROI one-line installer.
 #
 #   curl -LsSf https://raw.githubusercontent.com/Agent-ROI/agent-roi/main/scripts/install.sh | sh
@@ -18,48 +18,43 @@ BOLD='\033[1m'
 DIM='\033[2m'
 BLUE='\033[1;34m'
 GREEN='\033[1;32m'
-YELLOW='\033[1;33m'
 RED='\033[1;31m'
 RESET='\033[0m'
 
-# Disable colour when not writing to a terminal (piped to sh, redirected, etc.)
 if [ ! -t 1 ]; then
-  BOLD=''; DIM=''; BLUE=''; GREEN=''; YELLOW=''; RED=''; RESET=''
+  BOLD=''; DIM=''; BLUE=''; GREEN=''; RED=''; RESET=''
 fi
 
-step()  { printf "${BLUE}  →${RESET} ${BOLD}%s${RESET}\n" "$1"; }
-ok()    { printf "${GREEN}  ✓${RESET} %s\n" "$1"; }
-warn()  { printf "${YELLOW}  !${RESET} %s\n" "$1"; }
-err()   { printf "${RED}  ✗${RESET} %s\n" "$1" >&2; }
+step() { printf "${BLUE}  →${RESET} ${BOLD}%s${RESET}\n" "$1"; }
+ok()   { printf "${GREEN}  ✓${RESET} %s\n" "$1"; }
+err()  { printf "${RED}  ✗${RESET} %s\n" "$1" >&2; }
 
-# Spinner — runs in background, killed when the calling command finishes.
+# ── spinner (POSIX-safe) ─────────────────────────────────────────────────────
 _spin_pid=''
+
 spin_start() {
-  # Only animate when attached to a terminal.
   [ -t 1 ] || return 0
-  local msg="$1"
-  local frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  _spin_msg="$1"
   (
-    i=0
     while true; do
-      frame="${frames:$((i % ${#frames})):1}"
-      printf "\r${BLUE}  %s${RESET}  ${DIM}%s${RESET}  " "$frame" "$msg"
-      sleep 0.1
-      i=$((i + 1))
+      for _f in '⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏'; do
+        printf "\r${BLUE}  %s${RESET}  ${DIM}%s${RESET}   " "$_f" "$_spin_msg"
+        sleep 0.1
+      done
     done
   ) &
   _spin_pid=$!
-  disown "$_spin_pid" 2>/dev/null || true
 }
+
 spin_stop() {
-  if [ -n "$_spin_pid" ] && kill -0 "$_spin_pid" 2>/dev/null; then
+  if [ -n "$_spin_pid" ]; then
     kill "$_spin_pid" 2>/dev/null || true
     wait "$_spin_pid" 2>/dev/null || true
-    printf "\r\033[2K"  # clear spinner line
+    printf "\r\033[2K"
+    _spin_pid=''
   fi
-  _spin_pid=''
 }
-# Always clean up spinner on exit.
+
 trap 'spin_stop' EXIT
 
 # ── banner ───────────────────────────────────────────────────────────────────
@@ -106,11 +101,9 @@ printf "${DIM}  ─────────────────────�
 # ── 3. Next steps ────────────────────────────────────────────────────────────
 if command -v agent-roi >/dev/null 2>&1; then
   printf "${GREEN}${BOLD}  Done!${RESET}  Run:\n\n"
-  printf "    ${BOLD}agent-roi ingest${RESET}   ${DIM}# collect logs from your AI tools${RESET}\n"
-  printf "    ${BOLD}agent-roi serve${RESET}    ${DIM}# open the web dashboard${RESET}\n"
 else
   printf "${GREEN}${BOLD}  Done!${RESET}  Restart your shell (or run ${BOLD}uv tool update-shell${RESET}), then:\n\n"
-  printf "    ${BOLD}agent-roi ingest${RESET}   ${DIM}# collect logs from your AI tools${RESET}\n"
-  printf "    ${BOLD}agent-roi serve${RESET}    ${DIM}# open the web dashboard${RESET}\n"
 fi
+printf "    ${BOLD}agent-roi ingest${RESET}   ${DIM}# collect logs from your AI tools${RESET}\n"
+printf "    ${BOLD}agent-roi serve${RESET}    ${DIM}# open the web dashboard${RESET}\n"
 printf "\n"
