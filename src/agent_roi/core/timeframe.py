@@ -7,12 +7,15 @@ Accepts:
   ``30m`` (last 30 minutes), ``8w`` (last 8 weeks).
 
 Returns ``None`` for an empty string (meaning "no lower bound").
+
+``parse_until`` is the upper bound (exclusive): an ISO date includes that whole
+calendar day; ``today`` means through end of today.
 """
 
 from __future__ import annotations
 
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 _SHORTHAND = re.compile(r"^(\d+)\s*([mhdw])$", re.IGNORECASE)
 _UNIT_TO_DELTA = {
@@ -46,3 +49,28 @@ def parse_since(value: str, *, now: datetime | None = None) -> datetime | None:
         raise ValueError(
             f"Could not parse time '{value}'. Use a date (YYYY-MM-DD) or 7d/24h/today."
         ) from exc
+
+
+def parse_until(value: str, *, now: datetime | None = None) -> datetime | None:
+    """Parse a window-end string (exclusive). Raises ``ValueError`` on bad input."""
+    value = value.strip()
+    if not value:
+        return None
+    now = now or datetime.now(tz=timezone.utc)
+
+    if value.lower() == "today":
+        start_today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        return start_today + timedelta(days=1)
+
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError as exc:
+        raise ValueError(
+            f"Could not parse end time '{value}'. Use a date (YYYY-MM-DD) or today."
+        ) from exc
+
+    # Bare YYYY-MM-DD → include the full calendar day.
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        d = date.fromisoformat(value)
+        return datetime(d.year, d.month, d.day) + timedelta(days=1)
+    return parsed

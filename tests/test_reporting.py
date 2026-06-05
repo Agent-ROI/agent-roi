@@ -93,3 +93,32 @@ def test_timeseries_daily_buckets(tmp_path):
     assert bundle.totals[1].interactions == 1
     assert bundle.tool_keys == ["claude_code"]
     assert bundle.by_tool[0].values["claude_code"] == 2000
+
+
+def test_timeseries_monthly_buckets(tmp_path):
+    db = Database(tmp_path / "t.db")
+    db.upsert_many(
+        [
+            _itx("a", ts=datetime(2026, 5, 10, tzinfo=timezone.utc)),
+            _itx("b", ts=datetime(2026, 5, 20, tzinfo=timezone.utc)),
+            _itx("c", ts=datetime(2026, 6, 2, tzinfo=timezone.utc)),
+        ]
+    )
+    bundle = db.timeseries(granularity="month")
+    assert len(bundle.totals) == 2
+    assert bundle.totals[0].date == "2026-05"
+    assert bundle.totals[0].interactions == 2
+    assert bundle.totals[1].date == "2026-06"
+
+
+def test_until_excludes_later_rows(tmp_path):
+    db = Database(tmp_path / "t.db")
+    db.upsert_many(
+        [
+            _itx("a", ts=datetime(2026, 6, 1, tzinfo=timezone.utc)),
+            _itx("b", ts=datetime(2026, 6, 10, tzinfo=timezone.utc)),
+        ]
+    )
+    end = datetime(2026, 6, 6)
+    rollups = db.rollup("topic", end=end)
+    assert sum(r.interactions for r in rollups) == 1

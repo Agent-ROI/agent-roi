@@ -125,9 +125,10 @@ class Service:
         self,
         start: datetime | None = None,
         end: datetime | None = None,
+        granularity: str = "day",
     ) -> TimeSeriesBundle:
-        """Daily usage trends for charts."""
-        return self.db.timeseries(start=start, end=end)
+        """Usage trends for charts (day / week / month buckets)."""
+        return self.db.timeseries(start=start, end=end, granularity=granularity)
 
     def pricing(self) -> list[ModelPricing]:
         """The pricing table behind every cost figure (for verification)."""

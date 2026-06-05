@@ -318,15 +318,17 @@ class Database:
         self,
         start: datetime | None = None,
         end: datetime | None = None,
+        granularity: str = "day",
         top_series: int = 8,
     ) -> TimeSeriesBundle:
-        """Daily token/cost buckets plus splits by tool and model."""
-        totals = self._timeseries_totals(start, end)
+        """Token/cost buckets plus splits by tool and model."""
+        bucket = _timeseries_bucket(granularity)
+        totals = self._timeseries_totals(start, end, bucket)
         by_tool, tool_keys = self._timeseries_split(
-            InteractionRow.tool, start, end, top_series
+            InteractionRow.tool, start, end, top_series, bucket
         )
         by_model, model_keys = self._timeseries_split(
-            InteractionRow.model, start, end, top_series
+            InteractionRow.model, start, end, top_series, bucket
         )
         return TimeSeriesBundle(
             totals=totals,
@@ -337,12 +339,15 @@ class Database:
         )
 
     def _timeseries_totals(
-        self, start: datetime | None, end: datetime | None
+        self,
+        start: datetime | None,
+        end: datetime | None,
+        bucket: Any,
     ) -> list[TimeSeriesPoint]:
-        day = func.strftime("%Y-%m-%d", InteractionRow.timestamp).label("day")
+        period = bucket.label("period")
         with Session(self.engine) as session:
             stmt: Any = select(
-                day,
+                period,
                 func.count(),
                 func.sum(InteractionRow.input_tokens),
                 func.sum(InteractionRow.output_tokens),
@@ -351,7 +356,7 @@ class Database:
                 func.sum(InteractionRow.cost_usd),
             )
             stmt = _apply_window(stmt, start, end)
-            stmt = stmt.group_by(day).order_by(day)
+            stmt = stmt.group_by(period).order_by(period)
             return [
                 TimeSeriesPoint(
                     date=str(row[0]),
@@ -371,11 +376,12 @@ class Database:
         start: datetime | None,
         end: datetime | None,
         top: int,
+        bucket: Any,
     ) -> tuple[list[TimeSeriesSplitRow], list[str]]:
-        day = func.strftime("%Y-%m-%d", InteractionRow.timestamp).label("day")
+        period = bucket.label("period")
         with Session(self.engine) as session:
             stmt: Any = select(
-                day,
+                period,
                 key_col.label("series_key"),
                 func.count(),
                 func.sum(InteractionRow.input_tokens),
@@ -385,7 +391,7 @@ class Database:
                 func.sum(InteractionRow.cost_usd),
             )
             stmt = _apply_window(stmt, start, end)
-            stmt = stmt.group_by(day, key_col).order_by(day)
+            stmt = stmt.group_by(period, key_col).order_by(period)
             raw = list(session.execute(stmt))
 
         totals_by_key: dict[str, int] = {}
@@ -490,6 +496,16 @@ def _row_to_session(row: Any) -> SessionSummary:
         cost_usd=row[12] or 0.0,
         estimated=bool(row[13]),
     )
+
+
+def _timeseries_bucket(granularity: str) -> Any:
+    if granularity == "week":
+        return func.strftime("%Y-W%W", InteractionRow.timestamp)
+    if granularity == "month":
+        return func.strftime("%Y-%m", InteractionRow.timestamp)
+    if granularity != "day":
+        raise ValueError(f"Unknown granularity: {granularity!r}")
+    return func.strftime("%Y-%m-%d", InteractionRow.timestamp)
 
 
 def _apply_window(stmt: Any, start: datetime | None, end: datetime | None) -> Any:

@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from agent_roi import __version__
 from agent_roi.core.platform import platform_label
 from agent_roi.core.service import Service
-from agent_roi.core.timeframe import parse_since
+from agent_roi.core.timeframe import parse_since, parse_until
 
 
 def create_app(service: Service | None = None) -> FastAPI:
@@ -39,21 +39,22 @@ def create_app(service: Service | None = None) -> FastAPI:
     def report(
         group_by: str = "topic",
         since: str = "",
+        until: str = "",
     ) -> list[dict[str, object]]:
         """Usage/cost grouped by 'topic' | 'tool' | 'model', optionally windowed."""
         if group_by not in ("topic", "tool", "model", "project"):
             raise HTTPException(400, f"Invalid group_by: {group_by}")
-        start = _since(since)
+        start, end = _window(since, until)
         return [
             r.model_dump() | {"total_tokens": r.total_tokens}
-            for r in svc.report(dimension=group_by, start=start)
+            for r in svc.report(dimension=group_by, start=start, end=end)
         ]
 
     @app.get("/api/report/topic/{topic}")
-    def topic_breakdown(topic: str, since: str = "") -> dict[str, object]:
+    def topic_breakdown(topic: str, since: str = "", until: str = "") -> dict[str, object]:
         """Drill into one topic: split by tool and by model."""
-        start = _since(since)
-        bd = svc.topic_breakdown(topic, start=start)
+        start, end = _window(since, until)
+        bd = svc.topic_breakdown(topic, start=start, end=end)
         return {
             "topic": bd.topic,
             "total": bd.total.model_dump() | {"total_tokens": bd.total.total_tokens},
@@ -62,10 +63,10 @@ def create_app(service: Service | None = None) -> FastAPI:
         }
 
     @app.get("/api/sessions")
-    def sessions(topic: str = "", since: str = "") -> list[dict[str, object]]:
+    def sessions(topic: str = "", since: str = "", until: str = "") -> list[dict[str, object]]:
         """Per-session rows, optionally scoped to one topic and time window."""
-        start = _since(since)
-        rows = svc.sessions(topic=topic or None, start=start)
+        start, end = _window(since, until)
+        rows = svc.sessions(topic=topic or None, start=start, end=end)
         return [s.model_dump() | {"total_tokens": s.total_tokens} for s in rows]
 
     @app.get("/api/sessions/{session_id}")
@@ -84,11 +85,18 @@ def create_app(service: Service | None = None) -> FastAPI:
         }
 
     @app.get("/api/timeseries")
-    def timeseries(since: str = "") -> dict[str, object]:
-        """Daily token/cost trends plus splits by tool and model."""
-        start = _since(since)
-        bundle = svc.timeseries(start=start)
+    def timeseries(
+        since: str = "",
+        until: str = "",
+        granularity: str = "day",
+    ) -> dict[str, object]:
+        """Token/cost trends plus splits by tool and model."""
+        if granularity not in ("day", "week", "month"):
+            raise HTTPException(400, f"Invalid granularity: {granularity}")
+        start, end = _window(since, until)
+        bundle = svc.timeseries(start=start, end=end, granularity=granularity)
         return {
+            "granularity": granularity,
             "totals": [p.model_dump() | {"total_tokens": p.total_tokens} for p in bundle.totals],
             "by_tool": [r.model_dump() for r in bundle.by_tool],
             "by_model": [r.model_dump() for r in bundle.by_model],
@@ -131,6 +139,21 @@ def _since(value: str) -> datetime | None:
         return parse_since(value)
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
+
+
+def _until(value: str) -> datetime | None:
+    try:
+        return parse_until(value)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
+def _window(since: str, until: str) -> tuple[datetime | None, datetime | None]:
+    start = _since(since)
+    end = _until(until)
+    if start is not None and end is not None and start >= end:
+        raise HTTPException(400, "since must be before until")
+    return start, end
 
 
 def _mount_web_ui(app: FastAPI) -> None:
