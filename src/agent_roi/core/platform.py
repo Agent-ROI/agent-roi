@@ -74,3 +74,33 @@ def find_tool_dirs(*relative_parts: str) -> list[Path]:
         if candidate.is_dir():
             found.append(candidate)
     return found
+
+
+def vscode_user_dirs() -> list[Path]:
+    """Locate VS Code ``User`` directories across platforms (and forks/insiders).
+
+    VS Code stores per-user state (including chat sessions) under different paths
+    on each OS. We return every existing match so collectors can search them.
+    """
+    # Path of the "User" dir relative to each home, per platform.
+    rel_by_platform: dict[str, list[tuple[str, ...]]] = {
+        "darwin": [("Library", "Application Support", "{app}", "User")],
+        "win32": [("AppData", "Roaming", "{app}", "User")],
+        "linux": [(".config", "{app}", "User")],
+    }
+    # On WSL we also want the Windows-side VS Code, which lives under AppData.
+    if is_wsl():
+        rel_by_platform["linux"].append(("AppData", "Roaming", "{app}", "User"))
+
+    apps = ["Code", "Code - Insiders", "VSCodium", "Cursor"]
+    templates = rel_by_platform.get(sys.platform, rel_by_platform["linux"])
+
+    found: list[Path] = []
+    for home in home_candidates():
+        for template in templates:
+            for app in apps:
+                parts = tuple(p.replace("{app}", app) for p in template)
+                candidate = home.joinpath(*parts)
+                if candidate.is_dir():
+                    found.append(candidate)
+    return found

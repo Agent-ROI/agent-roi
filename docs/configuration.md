@@ -18,7 +18,7 @@ model = "llama3.2"
 batch_size = 20
 
 [collectors]
-enabled = ["claude_code", "codex"]
+enabled = ["claude_code", "codex", "copilot"]
 ```
 
 ## Options
@@ -38,7 +38,7 @@ Only short summaries are sent — never full prompt bodies.
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `enabled` | `["claude_code", "codex"]` | Which tool collectors to run during ingest. |
+| `enabled` | `["claude_code", "codex", "copilot"]` | Which tool collectors to run during ingest. |
 
 ### Database location
 

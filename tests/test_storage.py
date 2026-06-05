@@ -26,7 +26,7 @@ def test_upsert_is_idempotent(tmp_path):
     db = Database(tmp_path / "t.db")
     db.upsert_many([_itx("a"), _itx("b")])
     db.upsert_many([_itx("a"), _itx("b")])  # re-ingest
-    rollups = db.rollup_by_topic()
+    rollups = db.rollup("topic")
     total = sum(r.interactions for r in rollups)
     assert total == 2  # not 4
 
@@ -43,6 +43,6 @@ def test_reingest_preserves_topic(tmp_path):
 def test_rollup_groups_by_topic(tmp_path):
     db = Database(tmp_path / "t.db")
     db.upsert_many([_itx("a", topic="auth"), _itx("b", topic="auth"), _itx("c", topic="ci")])
-    rollups = {r.topic: r for r in db.rollup_by_topic()}
+    rollups = {r.key: r for r in db.rollup("topic")}
     assert rollups["auth"].interactions == 2
     assert rollups["ci"].interactions == 1

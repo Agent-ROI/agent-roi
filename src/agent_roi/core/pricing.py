@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from agent_roi.core.models import Interaction
+from agent_roi.core.models import Interaction, ModelPricing
 
 
 @dataclass(frozen=True)
@@ -40,6 +40,20 @@ def price_for(model: str) -> ModelPrice:
     if candidates:
         return PRICES[max(candidates, key=len)]
     return _UNKNOWN
+
+
+def all_prices() -> list[ModelPricing]:
+    """Return the full pricing table, so users can verify cost = usage x price."""
+    return [
+        ModelPricing(
+            model=name,
+            input=p.input,
+            output=p.output,
+            cache_read=p.cache_read,
+            cache_write=p.cache_write,
+        )
+        for name, p in sorted(PRICES.items())
+    ]
 
 
 def cost_of(interaction: Interaction) -> float:

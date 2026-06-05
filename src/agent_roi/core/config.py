@@ -30,7 +30,7 @@ class ClassifierConfig(BaseModel):
 
 
 class CollectorsConfig(BaseModel):
-    enabled: list[str] = ["claude_code", "codex"]
+    enabled: list[str] = ["claude_code", "codex", "copilot"]
 
 
 class Config(BaseModel):

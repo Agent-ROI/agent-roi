@@ -28,14 +28,17 @@ token** — 讓你能衡量 agent 的**投資報酬率（ROI）**，而不只是
 
 ## 功能特色
 
-- 🔌 **工具無關的採集器** — 解析 Claude Code、Codex CLI 等工具的本地 log（不需 proxy、
-  不改變使用流程）。
+- 🔌 **工具無關的採集器** — 解析 Claude Code、Codex CLI 與 GitHub Copilot 的本地 log
+  （不需 proxy、不改變使用流程）。
 - 🧠 **主題分類** — 可插拔的小模型依主題分組互動，讓你看到**每個主題**的成本，而非
   每個請求。
-- 💰 **花費與 ROI 追蹤** — token 用量對應到各模型定價，依主題、工具與時間區間彙總。
-- 🖥️ **CLI** — 直接在終端機查詢與產出報表。
-- 🌐 **Web UI** — 現代化的 React 儀表板，呈現趨勢、分解與下鑽。
-- 🗄️ **Local-first** — 所有資料留在你的機器上（SQLite）；雲端分類為選用。
+- 💰 **花費與 ROI 追蹤** — token 用量對應到各模型定價，可依**主題、工具或模型**彙總，
+  並套用**自訂時間區間**。
+- 🔎 **下鑽與可信度** — 點任一主題即可看到它的 token 來自哪些工具與模型；每個數字都有
+  **可檢視的定價表**佐證，估算值與精算值以標章清楚區分。
+- 🖥️ **CLI** — 終端機直接執行 `report`、主題下鑽、與 `pricing` 指令。
+- 🌐 **Web UI** — 現代化的 React 儀表板，含維度／時間控制、分解與下鑽。
+- 🗄️ **Local-first** — 所有資料留在你的機器上（SQLite）；完全離線；雲端分類為選用。
 
 ## 架構
 
@@ -68,8 +71,17 @@ ollama pull llama3.2
 # 從所有偵測到的工具匯入 log
 uv run agent-roi ingest
 
-# 依主題查看成本分解
-uv run agent-roi report --by topic
+# 將互動分類成主題（使用小模型）
+uv run agent-roi classify
+
+# 成本分解 — 依主題、工具或模型彙總，並套用時間區間
+uv run agent-roi report --by tool --since 7d
+
+# 下鑽單一主題：它的 token 來自哪些工具／模型？
+uv run agent-roi topic "auth refactor"
+
+# 檢視每個成本數字背後的定價表
+uv run agent-roi pricing
 
 # 啟動 web 儀表板（API + React UI）
 uv run agent-roi serve
@@ -86,7 +98,7 @@ provider = "ollama"     # 或 "anthropic"
 model = "llama3.2"
 
 [collectors]
-enabled = ["claude_code", "codex"]
+enabled = ["claude_code", "codex", "copilot"]
 ```
 
 ## 文件

@@ -8,10 +8,12 @@ from __future__ import annotations
 from agent_roi.collectors.base import Collector
 from agent_roi.collectors.claude_code import ClaudeCodeCollector
 from agent_roi.collectors.codex import CodexCollector
+from agent_roi.collectors.copilot import CopilotCollector
 
 _REGISTRY: dict[str, type[Collector]] = {
     ClaudeCodeCollector.name: ClaudeCodeCollector,
     CodexCollector.name: CodexCollector,
+    CopilotCollector.name: CopilotCollector,
 }
 
 

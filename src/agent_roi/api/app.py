@@ -6,14 +6,16 @@ served as static files so ``agent-roi serve`` gives a single-URL experience.
 
 from __future__ import annotations
 
+from datetime import datetime
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from agent_roi import __version__
 from agent_roi.core.service import Service
+from agent_roi.core.timeframe import parse_since
 
 
 def create_app(service: Service | None = None) -> FastAPI:
@@ -32,12 +34,36 @@ def create_app(service: Service | None = None) -> FastAPI:
     def health() -> dict[str, str]:
         return {"status": "ok", "version": __version__}
 
-    @app.get("/api/report/topics")
-    def report_topics() -> list[dict[str, object]]:
+    @app.get("/api/report")
+    def report(
+        group_by: str = "topic",
+        since: str = "",
+    ) -> list[dict[str, object]]:
+        """Usage/cost grouped by 'topic' | 'tool' | 'model', optionally windowed."""
+        if group_by not in ("topic", "tool", "model"):
+            raise HTTPException(400, f"Invalid group_by: {group_by}")
+        start = _since(since)
         return [
             r.model_dump() | {"total_tokens": r.total_tokens}
-            for r in svc.report_by_topic()
+            for r in svc.report(dimension=group_by, start=start)
         ]
+
+    @app.get("/api/report/topic/{topic}")
+    def topic_breakdown(topic: str, since: str = "") -> dict[str, object]:
+        """Drill into one topic: split by tool and by model."""
+        start = _since(since)
+        bd = svc.topic_breakdown(topic, start=start)
+        return {
+            "topic": bd.topic,
+            "total": bd.total.model_dump() | {"total_tokens": bd.total.total_tokens},
+            "by_tool": [r.model_dump() | {"total_tokens": r.total_tokens} for r in bd.by_tool],
+            "by_model": [r.model_dump() | {"total_tokens": r.total_tokens} for r in bd.by_model],
+        }
+
+    @app.get("/api/pricing")
+    def pricing() -> list[dict[str, object]]:
+        """The pricing table behind every cost figure."""
+        return [p.model_dump() for p in svc.pricing()]
 
     @app.post("/api/ingest")
     def ingest() -> dict[str, int]:
@@ -49,6 +75,13 @@ def create_app(service: Service | None = None) -> FastAPI:
 
     _mount_web_ui(app)
     return app
+
+
+def _since(value: str) -> datetime | None:
+    try:
+        return parse_since(value)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
 
 def _mount_web_ui(app: FastAPI) -> None:

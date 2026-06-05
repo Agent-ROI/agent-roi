@@ -6,10 +6,13 @@ and REST layers stay thin.
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from agent_roi.classify import get_classifier
 from agent_roi.collectors import get_collectors
 from agent_roi.core.config import Config
-from agent_roi.core.models import TopicRollup
+from agent_roi.core.models import ModelPricing, Rollup, TopicBreakdown
+from agent_roi.core.pricing import all_prices
 from agent_roi.storage import Database
 
 
@@ -45,5 +48,24 @@ class Service:
             self.db.set_topic(row.id, topic)
         return len(rows)
 
-    def report_by_topic(self) -> list[TopicRollup]:
-        return self.db.rollup_by_topic()
+    def report(
+        self,
+        dimension: str = "topic",
+        start: datetime | None = None,
+        end: datetime | None = None,
+    ) -> list[Rollup]:
+        """Aggregate usage/cost by 'topic', 'tool', or 'model' over a window."""
+        return self.db.rollup(dimension, start=start, end=end)
+
+    def topic_breakdown(
+        self,
+        topic: str,
+        start: datetime | None = None,
+        end: datetime | None = None,
+    ) -> TopicBreakdown:
+        """Drill into one topic: how its tokens split across tools and models."""
+        return self.db.topic_breakdown(topic, start=start, end=end)
+
+    def pricing(self) -> list[ModelPricing]:
+        """The pricing table behind every cost figure (for verification)."""
+        return all_prices()

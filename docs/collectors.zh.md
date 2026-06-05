@@ -7,13 +7,23 @@
 
 ## 內建採集器
 
-| 採集器 | 工具 | Log 位置 |
-|--------|------|----------|
-| `claude_code` | Claude Code | `~/.claude/projects/**/<session>.jsonl` |
-| `codex` | OpenAI Codex CLI | `~/.codex/sessions/**/*.jsonl` |
+| 採集器 | 工具 | Log 位置 | Token |
+|--------|------|----------|-------|
+| `claude_code` | Claude Code | `~/.claude/projects/**/<session>.jsonl` | 精算（工具回報） |
+| `codex` | OpenAI Codex CLI | `~/.codex/sessions/**/*.jsonl` | 精算（工具回報） |
+| `copilot` | GitHub Copilot Chat (VS Code) | `<VS Code User>/workspaceStorage/**/chatSessions/*` | **估算** |
 
 在 WSL 下，採集器也會搜尋掛載的 Windows home（`/mnt/c/Users/<name>/...`），因此由
-Windows 側執行的工具所寫的 log 會被自動納入。
+Windows 側執行的工具所寫的 log 會被自動納入。Copilot 採集器還會透過
+`core.platform.vscode_user_dirs()` 搜尋 VS Code 的分支（Insiders、VSCodium、Cursor）。
+
+### 關於估算 token
+
+有些工具只記錄對話內容，而**不**記錄真實 token 用量 —— GitHub Copilot 是典型案例，
+因為它是訂閱制計費而非按 token 計費。對這類工具，採集器會用一個離線啟發式從訊息文字
+估算 token 數，並將 `Interaction.estimated` 設為 `True`。報表會以 `estimated` / `exact`
+標章呈現，讓兩者絕不被悄悄混在一起。詳見
+[`core/tokens.py`](../src/agent_roi/core/tokens.py)。
 
 ## 撰寫新的採集器
 

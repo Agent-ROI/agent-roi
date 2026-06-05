@@ -18,7 +18,7 @@ model = "llama3.2"
 batch_size = 20
 
 [collectors]
-enabled = ["claude_code", "codex"]
+enabled = ["claude_code", "codex", "copilot"]
 ```
 
 ## 選項
@@ -38,7 +38,7 @@ enabled = ["claude_code", "codex"]
 
 | 鍵 | 預設 | 說明 |
 |----|------|------|
-| `enabled` | `["claude_code", "codex"]` | ingest 時要執行哪些工具採集器。 |
+| `enabled` | `["claude_code", "codex", "copilot"]` | ingest 時要執行哪些工具採集器。 |
 
 ### 資料庫位置
 

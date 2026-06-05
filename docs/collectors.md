@@ -8,14 +8,25 @@ and idempotent.
 
 ## Built-in collectors
 
-| Collector | Tool | Log location |
-|-----------|------|--------------|
-| `claude_code` | Claude Code | `~/.claude/projects/**/<session>.jsonl` |
-| `codex` | OpenAI Codex CLI | `~/.codex/sessions/**/*.jsonl` |
+| Collector | Tool | Log location | Tokens |
+|-----------|------|--------------|--------|
+| `claude_code` | Claude Code | `~/.claude/projects/**/<session>.jsonl` | exact (reported) |
+| `codex` | OpenAI Codex CLI | `~/.codex/sessions/**/*.jsonl` | exact (reported) |
+| `copilot` | GitHub Copilot Chat (VS Code) | `<VS Code User>/workspaceStorage/**/chatSessions/*` | **estimated** |
 
 Under WSL, collectors also search the mounted Windows home(s) at
 `/mnt/c/Users/<name>/...`, so logs written by tools running on the Windows side
-are picked up automatically.
+are picked up automatically. The Copilot collector additionally searches VS Code
+forks (Insiders, VSCodium, Cursor) via `core.platform.vscode_user_dirs()`.
+
+### A note on estimated tokens
+
+Some tools log the conversation but **not** real token usage — GitHub Copilot is
+the notable case, because it's subscription-billed rather than per-token. For
+these, the collector estimates token counts from the message text with an
+offline heuristic and sets `Interaction.estimated = True`. Reports surface this
+with an `estimated` / `exact` badge so the two are never silently mixed. See
+[`core/tokens.py`](../src/agent_roi/core/tokens.py).
 
 ## Writing a new collector
 

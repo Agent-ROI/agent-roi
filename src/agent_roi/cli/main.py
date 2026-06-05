@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+
 import typer
 from rich.console import Console
 from rich.table import Table
 
 from agent_roi.core.service import Service
+from agent_roi.core.timeframe import parse_since
 
 app = typer.Typer(
     name="agent-roi",
@@ -15,6 +18,14 @@ app = typer.Typer(
     add_completion=False,
 )
 console = Console()
+
+
+def _parse_since(value: str) -> datetime | None:
+    try:
+        return parse_since(value)
+    except ValueError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
 
 
 @app.command()
@@ -39,33 +50,103 @@ def classify(
 
 @app.command()
 def report(
-    by: str = typer.Option("topic", help="Grouping dimension. Currently: 'topic'."),
+    by: str = typer.Option("topic", help="Grouping dimension: topic | tool | model."),
+    since: str = typer.Option(
+        "", help="Time window start: a date (YYYY-MM-DD) or shorthand like 7d, 24h, today."
+    ),
 ) -> None:
-    """Show a token/cost breakdown."""
-    if by != "topic":
-        console.print(f"[red]Unsupported grouping: {by}[/red]")
+    """Show a token/cost breakdown, grouped and optionally time-windowed."""
+    if by not in ("topic", "tool", "model"):
+        console.print(f"[red]Unsupported grouping: {by} (use topic|tool|model)[/red]")
         raise typer.Exit(1)
 
+    start = _parse_since(since)
     service = Service()
-    rollups = service.report_by_topic()
+    rollups = service.report(dimension=by, start=start)
     if not rollups:
-        console.print("[yellow]No data yet. Run 'agent-roi ingest' first.[/yellow]")
+        console.print("[yellow]No data in range. Run 'agent-roi ingest' first.[/yellow]")
         return
 
-    table = Table(title="Token Cost by Topic")
-    table.add_column("Topic", style="cyan", no_wrap=True)
+    title = f"Token Cost by {by.capitalize()}"
+    if start is not None:
+        title += f"  (since {start.date()})"
+    table = Table(title=title)
+    table.add_column(by.capitalize(), style="cyan", no_wrap=True)
     table.add_column("Interactions", justify="right")
+    table.add_column("Input", justify="right")
+    table.add_column("Output", justify="right")
     table.add_column("Total Tokens", justify="right")
     table.add_column("Cost (USD)", justify="right", style="green")
+    table.add_column("Src", justify="center")
 
     for r in rollups:
         table.add_row(
-            r.topic,
+            r.key,
             str(r.interactions),
+            f"{r.input_tokens:,}",
+            f"{r.output_tokens:,}",
             f"{r.total_tokens:,}",
             f"${r.cost_usd:,.4f}",
+            "~est" if r.estimated else "exact",
         )
     console.print(table)
+    if any(r.estimated for r in rollups):
+        console.print("[dim]~est = token counts estimated (tool doesn't report usage).[/dim]")
+
+
+@app.command()
+def topic(
+    name: str = typer.Argument(..., help="Topic to drill into."),
+    since: str = typer.Option("", help="Time window start (date or 7d/24h/today)."),
+) -> None:
+    """Drill into one topic: how its tokens split across tools and models."""
+    start = _parse_since(since)
+    service = Service()
+    bd = service.topic_breakdown(name, start=start)
+    if bd.total.interactions == 0:
+        console.print(f"[yellow]No interactions for topic '{name}' in range.[/yellow]")
+        return
+
+    console.print(
+        f"[bold]{name}[/bold] — {bd.total.interactions} interactions, "
+        f"{bd.total.total_tokens:,} tokens, [green]${bd.total.cost_usd:,.4f}[/green]"
+    )
+
+    for label, rows in (("By Tool", bd.by_tool), ("By Model", bd.by_model)):
+        table = Table(title=label)
+        table.add_column(label.split()[-1], style="cyan")
+        table.add_column("Interactions", justify="right")
+        table.add_column("Total Tokens", justify="right")
+        table.add_column("Cost (USD)", justify="right", style="green")
+        table.add_column("Share", justify="right")
+        for r in rows:
+            share = (r.cost_usd / bd.total.cost_usd * 100) if bd.total.cost_usd else 0.0
+            table.add_row(
+                r.key,
+                str(r.interactions),
+                f"{r.total_tokens:,}",
+                f"${r.cost_usd:,.4f}",
+                f"{share:.0f}%",
+            )
+        console.print(table)
+
+
+@app.command()
+def pricing() -> None:
+    """Show the pricing table behind every cost figure (USD per 1M tokens)."""
+    service = Service()
+    table = Table(title="Model Pricing (USD per 1M tokens)")
+    table.add_column("Model", style="cyan")
+    table.add_column("Input", justify="right")
+    table.add_column("Output", justify="right")
+    table.add_column("Cache Read", justify="right")
+    table.add_column("Cache Write", justify="right")
+    for p in service.pricing():
+        table.add_row(
+            p.model, f"${p.input}", f"${p.output}", f"${p.cache_read}", f"${p.cache_write}"
+        )
+    console.print(table)
+    console.print("[dim]cost = (input x in + output x out + cache_read x cr + ...) / 1e6[/dim]")
 
 
 @app.command()

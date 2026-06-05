@@ -24,12 +24,13 @@ It reads the local session logs each tool already writes, uses a **small classif
 
 ## Features
 
-- 🔌 **Tool-agnostic collectors** — parse local logs from Claude Code, Codex CLI, and more (no proxy, no workflow change).
+- 🔌 **Tool-agnostic collectors** — parse local logs from Claude Code, Codex CLI, and GitHub Copilot (no proxy, no workflow change).
 - 🧠 **Topic classification** — a pluggable small model groups interactions by topic so you see cost *per subject*, not per request.
-- 💰 **Cost & ROI tracking** — token usage mapped to per-model pricing, aggregated by topic, tool, and time window.
-- 🖥️ **CLI** — query and report straight from the terminal.
-- 🌐 **Web UI** — a modern React dashboard for trends, breakdowns, and drill-downs.
-- 🗄️ **Local-first** — everything stays on your machine (SQLite); cloud classification is opt-in.
+- 💰 **Cost & ROI tracking** — token usage mapped to per-model pricing, aggregated by **topic, tool, or model**, over a **custom time window**.
+- 🔎 **Drill-down & trust** — click any topic to see which tools and models its tokens came from; every figure is backed by a **viewable pricing table**, and estimated numbers are clearly badged vs exact ones.
+- 🖥️ **CLI** — `report`, per-topic drill-down, and a `pricing` command straight from the terminal.
+- 🌐 **Web UI** — a modern React dashboard with dimension/time controls, breakdowns, and drill-downs.
+- 🗄️ **Local-first** — everything stays on your machine (SQLite); fully offline; cloud classification is opt-in.
 
 ## Architecture
 
@@ -62,8 +63,17 @@ ollama pull llama3.2
 # Ingest logs from all detected tools
 uv run agent-roi ingest
 
-# See a cost breakdown by topic
-uv run agent-roi report --by topic
+# Classify interactions into topics (uses the small model)
+uv run agent-roi classify
+
+# Cost breakdown — group by topic, tool, or model, over a time window
+uv run agent-roi report --by tool --since 7d
+
+# Drill into one topic: which tools/models did its tokens come from?
+uv run agent-roi topic "auth refactor"
+
+# Inspect the pricing table behind every cost figure
+uv run agent-roi pricing
 
 # Launch the web dashboard (API + React UI)
 uv run agent-roi serve
@@ -79,7 +89,7 @@ provider = "ollama"     # or "anthropic"
 model = "llama3.2"
 
 [collectors]
-enabled = ["claude_code", "codex"]
+enabled = ["claude_code", "codex", "copilot"]
 ```
 
 ## Documentation
