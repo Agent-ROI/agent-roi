@@ -76,6 +76,46 @@ def test_topic_breakdown_splits_by_tool_and_model(tmp_path):
     assert bd.total.estimated is True  # one of the two is estimated
 
 
+def test_estimated_badge_is_token_weighted(tmp_path):
+    """A group dominated by exact tokens isn't badged estimated by a tiny minority.
+
+    This is the Hermes case: hundreds of exact sessions plus a couple of
+    estimated Copilot turns should read as exact, since the cost is near-exact.
+    """
+    big_exact = Interaction(
+        id="exact",
+        tool=Tool.HERMES,
+        session_id="s",
+        timestamp=datetime(2026, 5, 4, tzinfo=timezone.utc),
+        model="claude-opus-4-6",
+        input_tokens=1_000_000,
+        topic="t",
+        estimated=False,
+    )
+    tiny_estimated = Interaction(
+        id="est",
+        tool=Tool.COPILOT,
+        session_id="s",
+        timestamp=datetime(2026, 5, 4, tzinfo=timezone.utc),
+        model="claude-opus-4-6",
+        input_tokens=100,
+        topic="t",
+        estimated=True,
+    )
+    db = Database(tmp_path / "t.db")
+    db.upsert_many([big_exact, tiny_estimated])
+
+    # rollup, topic_breakdown total, and sessions all use the same rule.
+    rollup = {r.key: r for r in db.rollup("topic")}["t"]
+    assert rollup.estimated is False
+    assert db.topic_breakdown("t").total.estimated is False
+    assert db.sessions(topic="t")[0].estimated is False
+
+    # Flip it: when estimated tokens dominate, the badge flips back on.
+    db.upsert_many([tiny_estimated.model_copy(update={"id": "est2", "input_tokens": 5_000_000})])
+    assert {r.key: r for r in db.rollup("topic")}["t"].estimated is True
+
+
 def test_timeseries_daily_buckets(tmp_path):
     db = Database(tmp_path / "t.db")
     db.upsert_many(
