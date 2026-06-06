@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import String, create_engine, func, select
+from sqlalchemy import String, and_, case, create_engine, func, select
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
@@ -234,7 +234,7 @@ class Database:
                 func.sum(InteractionRow.cache_read_tokens),
                 func.sum(InteractionRow.cache_write_tokens),
                 func.sum(InteractionRow.cost_usd),
-                func.max(InteractionRow.estimated),
+                _ESTIMATED_MAJORITY,
             )
             stmt = _apply_window(stmt, start, end)
             stmt = stmt.group_by(key_col).order_by(func.sum(InteractionRow.cost_usd).desc())
@@ -262,7 +262,7 @@ class Database:
                     func.sum(InteractionRow.cache_read_tokens),
                     func.sum(InteractionRow.cache_write_tokens),
                     func.sum(InteractionRow.cost_usd),
-                    func.max(InteractionRow.estimated),
+                    _ESTIMATED_MAJORITY,
                 ).where(topic_filter)
                 stmt = _apply_window(stmt, start, end)
                 stmt = stmt.group_by(key_col).order_by(func.sum(InteractionRow.cost_usd).desc())
@@ -301,7 +301,7 @@ class Database:
                 func.sum(InteractionRow.cache_read_tokens),
                 func.sum(InteractionRow.cache_write_tokens),
                 func.sum(InteractionRow.cost_usd),
-                func.max(InteractionRow.estimated),
+                _ESTIMATED_MAJORITY,
             )
             stmt = _apply_window(stmt, start, end)
             if topic is not None:
@@ -533,6 +533,25 @@ def _apply_window(stmt: Any, start: datetime | None, end: datetime | None) -> An
     return stmt
 
 
+def _rollup_tokens(r: Rollup) -> int:
+    return r.input_tokens + r.output_tokens + r.cache_read_tokens + r.cache_write_tokens
+
+
+# A grouped row is "estimated" only when estimated interactions make up at least
+# half of its *tokens*, not merely if any single one is. Otherwise a topic that
+# is 99% exact (e.g. Hermes) but contains a couple of estimated Copilot turns
+# would be wrongly badged estimated, hiding that its cost is near-exact. Ties
+# lean estimated (the conservative side for a cost-trust badge).
+_GROUP_TOKENS = (
+    InteractionRow.input_tokens
+    + InteractionRow.output_tokens
+    + InteractionRow.cache_read_tokens
+    + InteractionRow.cache_write_tokens
+)
+_ESTIMATED_TOKENS = func.sum(case((InteractionRow.estimated, _GROUP_TOKENS), else_=0))
+_ESTIMATED_MAJORITY = and_(_ESTIMATED_TOKENS > 0, func.sum(_GROUP_TOKENS) <= _ESTIMATED_TOKENS * 2)
+
+
 def _row_to_rollup(row: Any) -> Rollup:
     return Rollup(
         key=str(row[0]),
@@ -547,6 +566,8 @@ def _row_to_rollup(row: Any) -> Rollup:
 
 
 def _sum_rollups(key: str, rollups: list[Rollup]) -> Rollup:
+    _est_tokens = sum(_rollup_tokens(r) for r in rollups if r.estimated)
+    _total_tokens = sum(_rollup_tokens(r) for r in rollups)
     return Rollup(
         key=key,
         interactions=sum(r.interactions for r in rollups),
@@ -555,5 +576,9 @@ def _sum_rollups(key: str, rollups: list[Rollup]) -> Rollup:
         cache_read_tokens=sum(r.cache_read_tokens for r in rollups),
         cache_write_tokens=sum(r.cache_write_tokens for r in rollups),
         cost_usd=sum(r.cost_usd for r in rollups),
-        estimated=any(r.estimated for r in rollups),
+        # Token-weighted, consistent with _ESTIMATED_MAJORITY: a tool's
+        # interactions are uniform in estimated-ness, so weight each child by its
+        # tokens and flag the total estimated only if estimated tokens are at
+        # least half (ties lean estimated).
+        estimated=_est_tokens > 0 and _est_tokens * 2 >= _total_tokens,
     )

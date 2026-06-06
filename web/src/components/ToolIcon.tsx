@@ -73,6 +73,29 @@ function CodexIcon({ size }: { size: number }) {
   );
 }
 
+// Hermes Agent (NousResearch) — winged mark evoking the messenger god
+function HermesIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect width="24" height="24" rx="5" fill="#5B4BE0" />
+      {/* Stylized winged helmet / "H" with wings */}
+      <path
+        d="M7.5 7v10M16.5 7v10M7.5 12h9"
+        stroke="#fff"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7.5 8.2c-1.6-.2-3-.1-4.3.6 1.3.3 2.4.8 3.2 1.6M16.5 8.2c1.6-.2 3-.1 4.3.6-1.3.3-2.4.8-3.2 1.6"
+        stroke="#C7C0FF"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 // Cursor — official mark
 function CursorIcon({ size }: { size: number }) {
   return (
@@ -114,6 +137,7 @@ export function ToolIcon({ tool, size = 20, className }: Props) {
     if (key === "gemini" || key === "gemini_cli") return <GeminiIcon size={size} />;
     if (key === "copilot" || key === "github_copilot") return <CopilotIcon size={size} />;
     if (key === "codex" || key === "openai_codex") return <CodexIcon size={size} />;
+    if (key === "hermes" || key === "hermes_agent") return <HermesIcon size={size} />;
     if (key === "cursor") return <CursorIcon size={size} />;
     return <DefaultIcon size={size} tool={tool} />;
   })();
@@ -136,6 +160,8 @@ export function toolDisplayName(tool: string): string {
     github_copilot: "GitHub Copilot",
     codex: "Codex CLI",
     openai_codex: "Codex CLI",
+    hermes: "Hermes Agent",
+    hermes_agent: "Hermes Agent",
     cursor: "Cursor",
   };
   return map[tool.toLowerCase()] ?? tool;

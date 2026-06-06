@@ -28,16 +28,28 @@ lookup of the hash against the cwds recorded in `~/.gemini/projects.json`. It
 reads both the older single-object `.json` and the newer line-delimited `.jsonl`
 session shapes, and folds Gemini's reasoning (`thoughts`) tokens into output.
 
-Hermes is different from the others: instead of per-session log files it keeps a
-single SQLite database (`~/.hermes/state.db`) with `sessions` and `messages`
-tables. The collector opens it read-only (`mode=ro`) and reads one interaction
-per message, attributing each message's `token_count` to input or output by its
-`role` (assistant → output, everything else → input) and taking the model from
-the owning session. Because Hermes runs models from several providers, model ids
-are provider-prefixed (e.g. `anthropic/claude-opus-4-8`); the collector strips
-the prefix so the shared pricing table still resolves the cost. Column names are
-discovered defensively (`PRAGMA table_info`) so schema shifts across Hermes
-versions don't break ingest.
+Hermes is different from the others in two ways. First, instead of per-session
+log files it keeps a single SQLite database (`~/.hermes/state.db`, opened
+read-only). Second, it is a **multi-provider router**: the same agent calls Claude
+through a Copilot subscription, NVIDIA models via OpenRouter's free tier, local
+Ollama models, and so on, so model ids vary in shape (`anthropic/claude-opus-4.6`,
+`claude-sonnet-4.6`, `gpt-oss:20b`, `nvidia/…:free`). The collector strips any
+provider prefix and normalizes `.` to `-` so the shared pricing table resolves
+them; unknown, free, and local models price at $0, which is correct for them.
+
+Crucially, Hermes's `sessions` table already **aggregates exact token usage per
+session** — `input_tokens`, `output_tokens`, `cache_read_tokens`,
+`cache_write_tokens`, and `reasoning_tokens`. The collector emits **one
+interaction per session** straight from these columns (reasoning folded into
+output, matching Gemini) rather than guessing an input/output split from
+per-message totals. This matters because cache reads — priced ~10× lower than
+fresh input — dominate agent workloads and would be badly mis-costed otherwise.
+The counts are real, so Hermes interactions are `exact`, not estimated. The
+session `title` feeds the classifier; sessions without one fall back to their
+first user message so they still cluster into a topic. Older databases that
+predate the per-session token columns fall back to summing the per-message
+`token_count` (attributed by role). Column names are discovered defensively
+(`PRAGMA table_info`) so schema shifts across Hermes versions don't break ingest.
 
 ### A note on estimated tokens
 

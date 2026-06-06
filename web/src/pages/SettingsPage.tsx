@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { SUPPORTED_LANGS, normalizeLng } from "../i18n";
 import { api, type ConfigInfo } from "../lib/api";
+import { toolDisplayName } from "../components/ToolIcon";
 
 const ALL_COLLECTORS = ["claude_code", "codex", "copilot", "gemini", "hermes"];
 
@@ -154,7 +155,7 @@ export function SettingsPage() {
                     checked={enabledCollectors.includes(name)}
                     onChange={() => toggleCollector(name)}
                   />
-                  <span>{name.replace("_", " ")}</span>
+                  <span>{toolDisplayName(name)}</span>
                 </label>
               ))}
             </div>

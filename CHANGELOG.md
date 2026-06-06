@@ -11,9 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `scripts/install.ps1` — one-line installer for Windows (`irm … | iex`); installs `uv` if needed, then `agent-roi`, and prints the installed version.
 - README now documents the Windows install command and `agent-roi doctor`.
 - **Hermes Agent collector** — reads NousResearch Hermes sessions from its
-  SQLite store (`~/.hermes/state.db`), with real (exact) token counts. Provider-
-  prefixed model ids (`anthropic/…`, `openai/…`) are normalized so existing
-  pricing applies. Enabled by default.
+  SQLite store (`~/.hermes/state.db`), with real (exact) token counts. Emits one
+  interaction per session straight from Hermes's exact per-session token columns
+  (input/output/cache-read/cache-write/reasoning), so cache reads — which
+  dominate agent workloads and are priced ~10× lower — are costed correctly.
+  Handles Hermes's multi-provider model ids (`anthropic/…`, `openai/…`,
+  `nvidia/…:free`, `gpt-oss:20b`): the provider prefix is stripped and `.`
+  normalized to `-` so pricing resolves, with free/local models at $0. Enabled
+  by default.
 - **Budgets & ROI** — optional daily/weekly/monthly spend limits under `[budget]`
   in config (and the web Settings page). New `agent-roi budget` command and an
   Overview budget panel show spend vs. limit and flag over-budget periods.
@@ -28,6 +33,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   only the deliberate lazy imports (`uvicorn`, the scikit-learn classifier).
 
 ### Fixed
+- The `estimated` badge on grouped rows (topic/model totals) is now token-
+  weighted: a group reads `estimated` only when estimated interactions are at
+  least half of its tokens, instead of flipping if *any* single one was. A
+  topic that is 99% exact Hermes plus a couple of estimated Copilot turns now
+  correctly reads exact.
+- Hermes sessions without a title now fall back to their first user message as
+  the classifier summary, so they cluster into topics instead of all landing in
+  "uncategorized".
+- Hermes Agent now renders with a proper icon and "Hermes Agent" label on the
+  Sources and Settings pages (previously a generic fallback badge).
 - Language switching broken in i18next v26: `supportedLngs` caused the
   `zh-TW→zh→en` resolution chain to collapse to `[en]`, showing English for
   all non-English locales. Fixed by removing the redundant option.
