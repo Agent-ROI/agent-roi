@@ -69,7 +69,7 @@ class Config(BaseModel):
         path = config_path()
         path.parent.mkdir(parents=True, exist_ok=True)
         lines: list[str] = []
-        lines.append(f'db_path = "{self.db_path}"')
+        lines.append(f'db_path = "{self.db_path.as_posix()}"')
         lines.append("")
         lines.append("[classifier]")
         lines.append(f'provider = "{self.classifier.provider}"')

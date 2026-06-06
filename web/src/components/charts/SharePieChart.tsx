@@ -49,17 +49,16 @@ export function SharePieChart({ title, rows, height = 280 }: Props) {
             ))}
           </Pie>
           <Tooltip
-            formatter={(v: number, name: string) => [fmtTokens(v), toolDisplayName(name)]}
+            formatter={(v, name) => [fmtTokens(v as number), toolDisplayName(name as string)]}
             contentStyle={chartTooltipStyle}
           />
           <Legend
-            formatter={(value: string) => toolDisplayName(value)}
             content={({ payload }) => (
               <ul className="pie-legend">
                 {(payload ?? []).map((entry) => (
                   <li key={entry.value} className="pie-legend-item">
-                    <ToolIcon tool={entry.value} size={16} />
-                    <span style={{ color: entry.color }}>{toolDisplayName(entry.value)}</span>
+                    <ToolIcon tool={entry.value ?? ""} size={16} />
+                    <span style={{ color: entry.color ?? "inherit" }}>{toolDisplayName(entry.value ?? "")}</span>
                   </li>
                 ))}
               </ul>

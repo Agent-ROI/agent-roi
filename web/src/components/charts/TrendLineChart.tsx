@@ -47,7 +47,7 @@ export function TrendLineChart({
             width={72}
           />
           <Tooltip
-            formatter={(v: number) => valueFormatter(v)}
+            formatter={(v) => valueFormatter(v as number)}
             contentStyle={chartTooltipStyle}
           />
           {series.length > 1 && <Legend />}
