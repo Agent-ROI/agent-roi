@@ -35,7 +35,7 @@ export function RollupChart({ rows, dimension }: Props) {
           <YAxis type="category" dataKey="key" width={140} stroke="#787671" fontSize={12} />
           <Tooltip
             cursor={{ fill: "rgba(86,69,212,0.06)" }}
-            formatter={(v: number) => fmtUsd(v)}
+            formatter={(v) => fmtUsd(v as number)}
             contentStyle={{
               background: "#ffffff",
               border: "1px solid #e5e3df",

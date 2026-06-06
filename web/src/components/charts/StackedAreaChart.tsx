@@ -35,7 +35,7 @@ export function StackedAreaChart({ title, data, keys, height = 300 }: Props) {
             tickFormatter={(v) => fmtTokens(Number(v))}
             width={72}
           />
-          <Tooltip formatter={(v: number) => fmtTokens(v)} contentStyle={chartTooltipStyle} />
+          <Tooltip formatter={(v) => fmtTokens(v as number)} contentStyle={chartTooltipStyle} />
           <Legend />
           {keys.map((key, i) => (
             <Area
