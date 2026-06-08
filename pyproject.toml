@@ -1,6 +1,6 @@
 [project]
 name = "agent-roi-tracker"
-version = "0.2.2"
+version = "0.3.0"
 description = "Track the cost, usage, and ROI of your AI coding agents across every tool."
 readme = "README.md"
 requires-python = ">=3.10"

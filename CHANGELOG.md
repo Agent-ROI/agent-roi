@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-08
+
 ### Added
 - `scripts/install.ps1` — one-line installer for Windows (`irm … | iex`); installs `uv` if needed, then `agent-roi`, and prints the installed version.
 - README now documents the Windows install command and `agent-roi doctor`.
@@ -24,13 +26,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Overview budget panel show spend vs. limit and flag over-budget periods.
 - **"vs average" column** on the Topics table — each topic's cost relative to the
   average, so outlier-cost subjects stand out.
+- **Token composition view** — splits every token total into three buckets:
+  *overhead* (system prompt + tool/MCP schemas, re-sent each turn),
+  *cached* (context served from cache), and *work* (actual conversation).
+  Shown on the Overview page per-tool and in aggregate.
+- **Activity analysis page** — concrete actions behind the cost: which tools and
+  MCP servers were called, how often, how many tokens each returned, and which
+  files were touched most. Extracted from Claude Code `tool_use` blocks and
+  Copilot `toolInvocationSerialized` stream parts.
+- **`agent-roi mcp-cost`** — opt-in command that launches each configured stdio
+  MCP server, performs the JSON-RPC handshake, reads `tools/list`, and estimates
+  the per-turn token overhead of each server's schemas. Never runs during
+  `ingest` or `serve`.
 - OSS project health files: `SECURITY.md`, Dependabot config, issue-template
   chooser, and YAML issue forms.
 
 ### Changed
 - Budget/vs-average i18n keys added across all 11 locales.
+- Composition and activity i18n keys added across all 11 locales.
 - Moved trivial in-function imports to module top level; kept (and documented)
   only the deliberate lazy imports (`uvicorn`, the scikit-learn classifier).
+- GitHub Copilot collector rewritten for the new `{kind, k, v}` patch-stream
+  log format; previous format is no longer produced by VS Code.
 
 ### Fixed
 - The `estimated` badge on grouped rows (topic/model totals) is now token-
@@ -48,6 +65,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   all non-English locales. Fixed by removing the redundant option.
 - 210 missing translations filled across 8 locales (chart titles, nav labels,
   page hints, date range controls).
+- `mcp-cost` probe now uses a threading-based reader on Windows instead of
+  `select.select()`, which only works on sockets (not pipes) on that platform.
+- `mcp-cost` probe now catches `JSONDecodeError` and validates response shapes,
+  so a misbehaving server produces an error row instead of crashing the command.
 
 ## [0.2.2] - 2026-06-05
 
@@ -101,7 +122,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (topic / tool / model / project), time windows, and a React web dashboard.
 - One-line `install.sh`, published as `agent-roi-tracker` on PyPI.
 
-[Unreleased]: https://github.com/Agent-ROI/agent-roi/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/Agent-ROI/agent-roi/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Agent-ROI/agent-roi/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/Agent-ROI/agent-roi/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Agent-ROI/agent-roi/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Agent-ROI/agent-roi/compare/v0.1.0...v0.2.0
