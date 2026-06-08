@@ -23,8 +23,10 @@ from __future__ import annotations
 import contextlib
 import json
 import os
-import select
+import platform
+import queue
 import subprocess
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -140,15 +142,41 @@ def _handshake_and_list_tools(
         proc.stdin.write(json.dumps(obj) + "\n")  # type: ignore[union-attr]
         proc.stdin.flush()  # type: ignore[union-attr]
 
-    def recv() -> dict[str, Any]:
-        ready, _, _ = select.select([proc.stdout], [], [], timeout)
-        if not ready:
-            raise _ProbeError("timed out waiting for response")
-        line = proc.stdout.readline()  # type: ignore[union-attr]
-        if not line:
-            raise _ProbeError("server closed the connection")
-        parsed: dict[str, Any] = json.loads(line)
-        return parsed
+    if platform.system() == "Windows":
+        # select.select() doesn't work on pipes on Windows — use a reader thread.
+        line_queue: queue.Queue[str | None] = queue.Queue()
+
+        def _reader() -> None:
+            try:
+                for line in proc.stdout:  # type: ignore[union-attr]
+                    line_queue.put(line)
+            finally:
+                line_queue.put(None)
+
+        threading.Thread(target=_reader, daemon=True).start()
+
+        def recv() -> dict[str, Any]:
+            try:
+                line = line_queue.get(timeout=timeout)
+            except queue.Empty:
+                raise _ProbeError("timed out waiting for response") from None
+            if line is None:
+                raise _ProbeError("server closed the connection")
+            parsed: dict[str, Any] = json.loads(line)
+            return parsed
+
+    else:
+        import select as _select
+
+        def recv() -> dict[str, Any]:
+            ready, _, _ = _select.select([proc.stdout], [], [], timeout)
+            if not ready:
+                raise _ProbeError("timed out waiting for response")
+            line = proc.stdout.readline()  # type: ignore[union-attr]
+            if not line:
+                raise _ProbeError("server closed the connection")
+            parsed2: dict[str, Any] = json.loads(line)
+            return parsed2
 
     send(
         {
