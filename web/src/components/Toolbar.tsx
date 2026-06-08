@@ -30,10 +30,7 @@ export function Toolbar({ onRefresh }: Props) {
 
   return (
     <div className="toolbar">
-      <button disabled={!!busy} onClick={() => run("sync", api.refresh)}>
-        {busy === "sync" ? t("toolbar.syncing") : t("toolbar.syncData")}
-      </button>
-      <button className="ghost" disabled={!!busy} onClick={() => run("ingest", api.ingest)}>
+      <button disabled={!!busy} onClick={() => run("ingest", api.ingest)}>
         {busy === "ingest" ? t("toolbar.ingesting") : t("toolbar.ingestOnly")}
       </button>
       <button className="ghost" disabled={!!busy} onClick={() => run("classify", api.classify)}>
