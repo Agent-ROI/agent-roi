@@ -119,7 +119,7 @@ def _probe_stdio(name: str, cfg: dict[str, Any], timeout: float) -> McpServerCos
         tools = _handshake_and_list_tools(proc, timeout)
     except FileNotFoundError:
         return McpServerCost(name=name, transport="stdio", error="command not found")
-    except (OSError, _ProbeError) as exc:
+    except (OSError, _ProbeError, ValueError, TypeError, AttributeError) as exc:
         return McpServerCost(name=name, transport="stdio", error=str(exc))
     finally:
         if proc is not None:
@@ -162,7 +162,13 @@ def _handshake_and_list_tools(
                 raise _ProbeError("timed out waiting for response") from None
             if line is None:
                 raise _ProbeError("server closed the connection")
-            parsed: dict[str, Any] = json.loads(line)
+            try:
+                msg = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise _ProbeError(f"invalid JSON from server: {line[:80]!r}") from exc
+            if not isinstance(msg, dict):
+                raise _ProbeError(f"expected JSON object, got {type(msg).__name__}")
+            parsed: dict[str, Any] = msg
             return parsed
 
     else:
@@ -175,7 +181,13 @@ def _handshake_and_list_tools(
             line = proc.stdout.readline()  # type: ignore[union-attr]
             if not line:
                 raise _ProbeError("server closed the connection")
-            parsed2: dict[str, Any] = json.loads(line)
+            try:
+                msg2 = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise _ProbeError(f"invalid JSON from server: {line[:80]!r}") from exc
+            if not isinstance(msg2, dict):
+                raise _ProbeError(f"expected JSON object, got {type(msg2).__name__}")
+            parsed2: dict[str, Any] = msg2
             return parsed2
 
     send(
@@ -198,7 +210,12 @@ def _handshake_and_list_tools(
     for _ in range(20):
         msg = recv()
         if msg.get("id") == 2:
-            tools = msg.get("result", {}).get("tools", [])
+            if "error" in msg:
+                raise _ProbeError(f"tools/list error: {msg['error']}")
+            result = msg.get("result")
+            if not isinstance(result, dict):
+                raise _ProbeError("tools/list result is not an object")
+            tools = result.get("tools", [])
             return [t for t in tools if isinstance(t, dict)]
     raise _ProbeError("no tools/list response")
 

@@ -3,12 +3,10 @@ import type { CompositionBundle, TokenComposition } from "../lib/api";
 import { fmtTokens } from "../lib/format";
 import { ToolIcon, toolDisplayName } from "./ToolIcon";
 
-// overhead = fixed cost we'd rather minimise (amber), cached = re-sent context
-// served cheap (accent purple), work = the actual conversation (green).
 const COLORS = {
-  overhead: "#dd5b00",
-  cached: "#5645d4",
-  work: "#1aae39",
+  overhead: "var(--warning)",
+  cached: "var(--accent)",
+  work: "var(--success)",
 } as const;
 
 interface Props {
@@ -67,7 +65,13 @@ export function CompositionCard({ data, onSeeActivity }: Props) {
             <div>
               <div className="composition-legend-label">{t(`composition.${l.key}`)}</div>
               <div className="composition-legend-value">
-                {fmtTokens(l.tokens)} <span className="muted">· {l.pct}%</span>
+                {fmtTokens(l.tokens)}
+                {total.estimated && (
+                  <span className="est-badge" title={t("composition.estimatedNote")}>
+                    ~
+                  </span>
+                )}{" "}
+                <span className="muted">· {l.pct}%</span>
               </div>
             </div>
           </div>
