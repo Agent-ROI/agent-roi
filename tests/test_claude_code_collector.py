@@ -55,6 +55,84 @@ def test_parses_usage_and_ignores_non_assistant(tmp_path):
     assert itx.summary == "fixing the auth bug"
 
 
+def test_extracts_activities_tools_mcp_and_files(tmp_path):
+    records = [
+        {
+            "type": "assistant",
+            "timestamp": "2026-05-04T06:50:08.560Z",
+            "message": {
+                "id": "msg_act",
+                "model": "claude-opus-4-8",
+                "content": [
+                    {"type": "text", "text": "editing the file"},
+                    {"type": "tool_use", "name": "Bash", "input": {"command": "ls"}},
+                    {
+                        "type": "tool_use",
+                        "name": "Edit",
+                        "input": {"file_path": "/repo/app.py"},
+                    },
+                    {
+                        "type": "tool_use",
+                        "name": "mcp__github__create_issue",
+                        "input": {"title": "bug"},
+                    },
+                ],
+                "usage": {"input_tokens": 1, "output_tokens": 1},
+            },
+        },
+    ]
+    _write_session(tmp_path, "s3", records)
+
+    interactions = list(ClaudeCodeCollector(roots=[tmp_path]).collect())
+    acts = interactions[0].activities
+    assert [a.kind for a in acts] == ["Bash", "Edit", "mcp__github__create_issue"]
+    # File tools record their target path.
+    assert acts[1].target == "/repo/app.py"
+    # MCP tools expose their server name for grouping.
+    assert acts[2].mcp_server == "github"
+    # Non-MCP tools have no server.
+    assert acts[0].mcp_server is None
+
+
+def test_attributes_result_tokens_to_the_calling_tool(tmp_path):
+    # An assistant turn makes a Read call; the result comes back in a later user
+    # message keyed by tool_use_id. Its size should land on the Read activity.
+    records = [
+        {
+            "type": "assistant",
+            "timestamp": "2026-05-04T06:50:08.560Z",
+            "message": {
+                "id": "msg_1",
+                "model": "claude-opus-4-8",
+                "content": [
+                    {"type": "tool_use", "id": "tu_1", "name": "Read", "input": {"file_path": "/a"}}
+                ],
+                "usage": {"input_tokens": 1, "output_tokens": 1},
+            },
+        },
+        {
+            "type": "user",
+            "timestamp": "2026-05-04T06:50:09.000Z",
+            "message": {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": "tu_1",
+                        "content": "x" * 400,  # ~100 tokens at 4 chars/token
+                    }
+                ],
+            },
+        },
+    ]
+    _write_session(tmp_path, "s4", records)
+
+    interactions = list(ClaudeCodeCollector(roots=[tmp_path]).collect())
+    read = interactions[0].activities[0]
+    assert read.kind == "Read"
+    assert read.result_tokens > 0
+
+
 def test_unavailable_when_no_roots():
     assert ClaudeCodeCollector(roots=[]).is_available() is False
 

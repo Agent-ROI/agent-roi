@@ -31,6 +31,7 @@ uv run agent-roi ingest      # collect logs from enabled tools, then classify
 uv run agent-roi report --by tool --since 7d
 uv run agent-roi serve       # FastAPI on :8000 (serves built web UI if present)
 uv run agent-roi doctor      # which tools were detected, where, and what was found
+uv run agent-roi mcp-cost    # estimate each MCP server's per-turn schema overhead (opt-in)
 ```
 
 During UI dev run `agent-roi serve` (API on :8000) and `npm run dev` (UI on :5173) together; the API allows the Vite origin via CORS.
@@ -63,7 +64,9 @@ Collectors ──▶ Storage ──▶ Classifier ──▶ Storage ──▶ Re
 
 3. **Classifier** (`classify/`) — **model-free, offline only**. The single provider is `semantic` (`classify/semantic.py`): TF-IDF + cosine-similarity clustering, no model weights, no API keys, no network. It classifies **whole sessions as a unit** (a session = one continuous piece of work) and applies the discovered topic to all of that session's rows, so cost can be aggregated *per subject* rather than per request. `classify()` defaults to `reclassify=True`, which wipes and rebuilds all topics to keep clustering globally consistent.
 
-4. **Reports** — `Service.report(dimension=...)` aggregates by `topic | tool | model | project`, optionally time-windowed (`parse_since` accepts dates or shorthand like `7d`, `24h`, `today`). Drill into a topic with `topic_breakdown` (split by tool and model). Estimated token counts (tools that don't report usage) are badged distinctly from exact ones throughout CLI/API/UI.
+4. **Reports** — `Service.report(dimension=...)` aggregates by `topic | tool | model | project`, optionally time-windowed (`parse_since` accepts dates or shorthand like `7d`, `24h`, `today`). Drill into a topic with `topic_breakdown` (split by tool and model). Two further views sit on top: `composition()` splits tokens into overhead/cached/work (`TokenComposition`), and `activity()` aggregates the per-turn tool/MCP/file `Activity` records (`ActivityReport`). Estimated token counts (tools that don't report usage) are badged distinctly from exact ones throughout CLI/API/UI.
+
+`mcp/probe.py` is a separate, **opt-in** path (CLI `mcp-cost` only): it launches each configured stdio MCP server, runs the handshake + `tools/list`, and estimates each server's per-turn schema token overhead. It runs external programs, so it is never part of `ingest`/`serve`.
 
 ### Core domain (`core/`)
 

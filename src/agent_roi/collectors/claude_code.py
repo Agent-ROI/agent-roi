@@ -22,9 +22,10 @@ from pathlib import Path
 from typing import Any
 
 from agent_roi.collectors.base import Collector
-from agent_roi.core.models import Interaction, Tool
+from agent_roi.core.models import Activity, Interaction, Tool
 from agent_roi.core.platform import find_tool_dirs
 from agent_roi.core.project import project_for
+from agent_roi.core.tokens import estimate_tokens
 
 _SUMMARY_MAX = 600
 
@@ -58,16 +59,23 @@ class ClaudeCodeCollector(Collector):
         except OSError:
             return
 
-        last_user_text = ""
+        records = []
         for line in lines:
             line = line.strip()
             if not line:
                 continue
             try:
-                record = json.loads(line)
+                records.append(json.loads(line))
             except json.JSONDecodeError:
                 continue
 
+        # A tool call's result lands in a *later* user message, keyed by
+        # tool_use_id. Pre-scan so we can attribute each result's size back to the
+        # activity (how many tokens that tool returned into the context).
+        result_tokens = _result_tokens_by_id(records)
+
+        last_user_text = ""
+        for record in records:
             message = record.get("message")
             if not isinstance(message, dict):
                 continue
@@ -86,7 +94,7 @@ class ClaudeCodeCollector(Collector):
                 continue
 
             interaction = self._to_interaction(
-                record, message, usage, session_id, last_user_text, text
+                record, message, usage, session_id, last_user_text, text, result_tokens
             )
             if interaction is not None:
                 yield interaction
@@ -99,6 +107,7 @@ class ClaudeCodeCollector(Collector):
         session_id: str,
         user_text: str,
         assistant_text: str,
+        result_tokens: dict[str, int],
     ) -> Interaction | None:
         msg_id = message.get("id") or record.get("uuid")
         if not msg_id:
@@ -128,6 +137,7 @@ class ClaudeCodeCollector(Collector):
             cwd=cwd,
             project=project_for(cwd),
             summary=_combine_summary(user_text, assistant_text),
+            activities=_activities_from_content(message.get("content"), result_tokens),
         )
 
 
@@ -135,6 +145,74 @@ def _combine_summary(user_text: str, assistant_text: str) -> str:
     """Build a topic-bearing summary, preferring the user's request first."""
     parts = [p for p in (user_text, assistant_text) if p]
     return " ".join(parts)[:_SUMMARY_MAX]
+
+
+def _activities_from_content(
+    content: object, result_tokens: dict[str, int] | None = None
+) -> list[Activity]:
+    """Pull the concrete tool calls out of an assistant message's content.
+
+    Each ``tool_use`` block is one action: its ``name`` is the tool (``Bash``,
+    ``Read`` …), MCP tools are named ``mcp__<server>__<tool>``, and file tools
+    carry a ``file_path``/``path`` we record as the target. ``result_tokens`` maps
+    a tool_use id to the estimated size of the result it later returned, so each
+    activity also knows how many tokens it pushed into the context.
+    """
+    if not isinstance(content, list):
+        return []
+    result_tokens = result_tokens or {}
+    activities: list[Activity] = []
+    for block in content:
+        if not isinstance(block, dict) or block.get("type") != "tool_use":
+            continue
+        name = block.get("name")
+        if not name:
+            continue
+        name = str(name)
+        mcp_server = name.split("__")[1] if name.startswith("mcp__") and "__" in name[5:] else None
+        target = None
+        inp = block.get("input")
+        if isinstance(inp, dict):
+            fp = inp.get("file_path") or inp.get("path")
+            if isinstance(fp, str) and fp:
+                target = fp
+        activities.append(
+            Activity(
+                kind=name,
+                mcp_server=mcp_server,
+                target=target,
+                result_tokens=result_tokens.get(str(block.get("id")), 0),
+            )
+        )
+    return activities
+
+
+def _result_tokens_by_id(records: list[dict[str, Any]]) -> dict[str, int]:
+    """Map each tool_use id to the estimated token size of its tool_result.
+
+    tool_result blocks live in user messages and reference the call they answer
+    via ``tool_use_id``; their body is the content the tool pushed back into the
+    model's context. We estimate that body's size so a tool's "return volume" can
+    be attributed per tool / MCP server.
+    """
+    sizes: dict[str, int] = {}
+    for record in records:
+        message = record.get("message")
+        if not isinstance(message, dict):
+            continue
+        content = message.get("content")
+        if not isinstance(content, list):
+            continue
+        for block in content:
+            if not isinstance(block, dict) or block.get("type") != "tool_result":
+                continue
+            tid = block.get("tool_use_id")
+            if not tid:
+                continue
+            body = block.get("content")
+            text = body if isinstance(body, str) else json.dumps(body, ensure_ascii=False)
+            sizes[str(tid)] = estimate_tokens(text)
+    return sizes
 
 
 def _text_from_content(content: object) -> str:

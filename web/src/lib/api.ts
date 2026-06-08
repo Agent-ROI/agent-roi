@@ -23,6 +23,19 @@ export interface TopicBreakdown {
   by_model: Rollup[];
 }
 
+export interface ActivityCount {
+  label: string;
+  count: number;
+  result_tokens: number;
+}
+
+export interface ActivityReport {
+  total_actions: number;
+  by_tool: ActivityCount[];
+  by_mcp: ActivityCount[];
+  top_files: ActivityCount[];
+}
+
 export interface ModelPricing {
   model: string;
   effective_from: string;
@@ -30,6 +43,25 @@ export interface ModelPricing {
   output: number;
   cache_read: number;
   cache_write: number;
+}
+
+export interface TokenComposition {
+  overhead: number;
+  cached: number;
+  work: number;
+  overhead_pct: number;
+  cached_pct: number;
+  work_pct: number;
+  estimated: boolean;
+}
+
+export interface CompositionByTool extends TokenComposition {
+  tool: string;
+}
+
+export interface CompositionBundle {
+  total: TokenComposition;
+  by_tool: CompositionByTool[];
 }
 
 export interface SessionSummary {
@@ -193,6 +225,16 @@ export const api = {
         since: window.since ?? "",
         until: window.until ?? "",
       })}`
+    ),
+
+  composition: (window: WindowParams = {}) =>
+    request<CompositionBundle>(
+      `/api/composition${qs({ since: window.since ?? "", until: window.until ?? "" })}`
+    ),
+
+  activity: (window: WindowParams = {}) =>
+    request<ActivityReport>(
+      `/api/activity${qs({ since: window.since ?? "", until: window.until ?? "" })}`
     ),
 
   pricing: () => request<ModelPricing[]>("/api/pricing"),

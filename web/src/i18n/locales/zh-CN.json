@@ -92,7 +92,8 @@
     "trends": "趋势图表",
     "sources": "数据来源",
     "pricing": "模型定价",
-    "settings": "设置"
+    "settings": "设置",
+    "activity": "Activity"
   },
   "pages": {
     "overviewHint": "一眼看懂花费、令牌用量与工具占比。",
@@ -100,7 +101,8 @@
     "trendsHint": "追踪每日令牌、成本与工具/模型分布变化。",
     "sourcesHint": "查看各工具日志是否被检测与导入。",
     "topTopics": "花费最高的主题",
-    "settingsHint": "设置语言、分类器与数据收集器。"
+    "settingsHint": "设置语言、分类器与数据收集器。",
+    "activityHint": "What your agents actually did — the concrete actions behind the token cost."
   },
   "chart": {
     "costByTop": "按{{dimension}}的花费（前 10）",
@@ -209,5 +211,30 @@
       "week": "本周",
       "month": "本月"
     }
+  },
+  "composition": {
+    "title": "Where your tokens go",
+    "hint": "Most tokens are fixed overhead and re-sent context, not the conversation itself.",
+    "overhead": "Overhead",
+    "overheadHint": "System prompt, tool definitions and MCP schemas (cache writes).",
+    "cached": "Cached",
+    "cachedHint": "Context re-sent each turn, billed at the cheap cached rate.",
+    "work": "Work",
+    "workHint": "Uncached input plus output — the actual conversation.",
+    "byTool": "Composition by tool",
+    "estimatedNote": "estimated — no real token counts",
+    "seeActivity": "See what you actually used"
+  },
+  "activity": {
+    "totalActions": "Total actions",
+    "byTool": "Tools used",
+    "byMcp": "MCP servers",
+    "topFiles": "Files touched most",
+    "noMcp": "No MCP servers were used in this period.",
+    "noFiles": "No files were read or edited in this period.",
+    "empty": "No activity recorded yet. Run a sync to collect it.",
+    "times": "×",
+    "returnTokens": "Estimated tokens returned into context",
+    "tokenNote": "Token figures are estimated from result size; tools whose results aren't logged (e.g. Copilot) show \"—\"."
   }
 }

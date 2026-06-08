@@ -164,7 +164,8 @@
     "trends": "Trends",
     "sources": "Sources",
     "pricing": "Tarification",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "activity": "Activity"
   },
   "pages": {
     "overviewHint": "Coût, utilisation des jetons et part des outils en un coup d'œil.",
@@ -172,7 +173,8 @@
     "trendsHint": "Distribution quotidienne des jetons, coûts et outils/modèles au fil du temps.",
     "sourcesHint": "Voir quels journaux d'outils ont été détectés et importés.",
     "topTopics": "Principaux sujets par coût",
-    "settingsHint": "Configurer la langue, le classifieur et les collecteurs."
+    "settingsHint": "Configurer la langue, le classifieur et les collecteurs.",
+    "activityHint": "What your agents actually did — the concrete actions behind the token cost."
   },
   "pagination": {
     "pageOf": "Page {{page}} sur {{total}}"
@@ -209,5 +211,30 @@
       "week": "Cette semaine",
       "month": "Ce mois-ci"
     }
+  },
+  "composition": {
+    "title": "Where your tokens go",
+    "hint": "Most tokens are fixed overhead and re-sent context, not the conversation itself.",
+    "overhead": "Overhead",
+    "overheadHint": "System prompt, tool definitions and MCP schemas (cache writes).",
+    "cached": "Cached",
+    "cachedHint": "Context re-sent each turn, billed at the cheap cached rate.",
+    "work": "Work",
+    "workHint": "Uncached input plus output — the actual conversation.",
+    "byTool": "Composition by tool",
+    "estimatedNote": "estimated — no real token counts",
+    "seeActivity": "See what you actually used"
+  },
+  "activity": {
+    "totalActions": "Total actions",
+    "byTool": "Tools used",
+    "byMcp": "MCP servers",
+    "topFiles": "Files touched most",
+    "noMcp": "No MCP servers were used in this period.",
+    "noFiles": "No files were read or edited in this period.",
+    "empty": "No activity recorded yet. Run a sync to collect it.",
+    "times": "×",
+    "returnTokens": "Estimated tokens returned into context",
+    "tokenNote": "Token figures are estimated from result size; tools whose results aren't logged (e.g. Copilot) show \"—\"."
   }
 }

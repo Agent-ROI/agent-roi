@@ -374,5 +374,68 @@ def update(
         console.print(f"[green]Updated {__version__} → [bold]{new_version}[/bold].[/green]")
 
 
+@app.command(name="mcp-cost")
+def mcp_cost(
+    yes: bool = typer.Option(
+        False, "--yes", "-y", help="Skip the confirmation prompt and probe immediately."
+    ),
+) -> None:
+    """Estimate each MCP server's per-turn token overhead (its tool schemas).
+
+    This is opt-in and has side effects: it launches each configured stdio MCP
+    server to ask for its tool list. Servers are read from Claude Code's
+    ``~/.claude.json``; non-stdio servers are skipped (probing them would make
+    network calls).
+    """
+    from agent_roi.mcp import load_mcp_servers, probe_servers
+
+    servers = load_mcp_servers()
+    if not servers:
+        console.print(
+            "[yellow]No MCP servers found in ~/.claude.json.[/yellow]\n"
+            "[dim]VS Code MCP servers are registered by extensions and have no "
+            "static command to probe.[/dim]"
+        )
+        return
+
+    names = ", ".join(servers)
+    console.print(
+        f"[bold]This will launch {len(servers)} MCP server(s) to read their tool "
+        f"definitions:[/bold] {names}"
+    )
+    if not yes and not typer.confirm("Probe them now?", default=False):
+        console.print("[dim]Aborted.[/dim]")
+        return
+
+    with console.status("Probing MCP servers..."):
+        results = probe_servers(servers)
+
+    table = Table(title="MCP Schema Overhead (estimated tokens per turn)")
+    table.add_column("Server", style="cyan", no_wrap=True)
+    table.add_column("Transport", justify="center")
+    table.add_column("Tools", justify="right")
+    table.add_column("Est. tokens/turn", justify="right", style="green")
+    table.add_column("Note", style="dim")
+
+    total = 0
+    for r in results:
+        total += r.est_tokens
+        table.add_row(
+            r.name,
+            r.transport,
+            str(r.tools) if r.ok else "—",
+            f"~{r.est_tokens:,}" if r.ok else "—",
+            "" if r.ok else (r.error or ""),
+        )
+    if len([r for r in results if r.ok]) > 1:
+        table.add_section()
+        table.add_row("Total", "", "", f"~{total:,}", "")
+    console.print(table)
+    console.print(
+        "[dim]Estimated from each tool's JSON schema; sent once per session and "
+        "usually cache-written. Actual cost depends on the model's tokenizer.[/dim]"
+    )
+
+
 if __name__ == "__main__":
     app()

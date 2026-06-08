@@ -4,7 +4,14 @@ import type { DateFilter, Granularity } from "../../lib/dateFilter";
 import { DateRangeFilter } from "./DateRangeFilter";
 import { GranularityFilter } from "./GranularityFilter";
 
-export type PageId = "overview" | "topics" | "trends" | "sources" | "pricing" | "settings";
+export type PageId =
+  | "overview"
+  | "topics"
+  | "activity"
+  | "trends"
+  | "sources"
+  | "pricing"
+  | "settings";
 
 interface Props {
   page: PageId;
@@ -32,6 +39,17 @@ const NAV_ICONS: Record<PageId, ReactNode> = {
       <circle cx="13" cy="4" r="1.5" fill="currentColor" />
       <circle cx="13" cy="8" r="1.5" fill="currentColor" />
       <circle cx="13" cy="12" r="1.5" fill="currentColor" />
+    </svg>
+  ),
+  activity: (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+      <path
+        d="M10.5 2.5a3 3 0 00-3.9 3.6L2.5 10.2a1.4 1.4 0 102 2l4.1-4.1a3 3 0 003.6-3.9l-1.9 1.9-1.6-.4-.4-1.6 1.9-1.9z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+        fill="none"
+      />
     </svg>
   ),
   trends: (
@@ -92,6 +110,7 @@ const NAV_ICONS: Record<PageId, ReactNode> = {
 const NAV: { id: PageId }[] = [
   { id: "overview" },
   { id: "topics" },
+  { id: "activity" },
   { id: "trends" },
   { id: "sources" },
   { id: "pricing" },

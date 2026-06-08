@@ -57,6 +57,7 @@ agent-roi ingest                          # 從所有偵測到的工具匯入 lo
 agent-roi report --by topic --since 7d   # 本週各主題成本
 agent-roi serve                           # 開啟 http://127.0.0.1:8000 Web 儀表板
 agent-roi doctor                          # 查看哪些工具被偵測到及原因
+agent-roi mcp-cost                        # 估算每個 MCP server 每輪的固定開銷
 ```
 
 ## 功能特色
@@ -66,6 +67,9 @@ agent-roi doctor                          # 查看哪些工具被偵測到及原
 | **工具無關** | 讀取 Claude Code、Codex CLI、GitHub Copilot、Gemini CLI 與 Hermes Agent 的本地 log — 不需 proxy、不改變使用流程 |
 | **主題分類** | 免模型 TF-IDF + 餘弦相似度分群；完全離線、不花費 token、無需任何外部服務 |
 | **花費與 ROI** | token 用量對應到各模型定價，可依**主題、工具或模型**彙總，並套用任意時間區間 |
+| **權杖花在哪** | 把每筆總量拆成**固定開銷**（系統提示 + 工具 + MCP schema）、**快取重送**的上下文、與實際**對話**，讓你看清 token 真正花在哪 |
+| **活動分析** | 成本背後的具體動作：呼叫了哪些工具與 **MCP server**、各幾次、各回傳多少 token、以及最常存取哪些檔案 |
+| **MCP 成本** | `agent-roi mcp-cost` 估算每個 MCP server 每輪的 schema 固定開銷（opt-in；會啟動 server 讀取工具列表）|
 | **下鑽分析** | 點任一主題即可看到各工具與模型的貢獻；估算值與精算值以標章清楚區分 |
 | **Local-first** | 所有資料存在一個 SQLite 檔案；資料永不離開你的機器 |
 

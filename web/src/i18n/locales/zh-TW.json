@@ -92,7 +92,8 @@
     "trends": "趨勢圖表",
     "sources": "資料來源",
     "pricing": "模型定價",
-    "settings": "設定"
+    "settings": "設定",
+    "activity": "活動分析"
   },
   "pages": {
     "overviewHint": "一眼看懂花費、權杖用量與工具佔比。",
@@ -100,7 +101,8 @@
     "trendsHint": "追蹤每日權杖、成本與工具/模型分佈變化。",
     "sourcesHint": "查看各工具 log 是否被偵測與匯入。",
     "settingsHint": "設定語言、分類器與資料收集器。",
-    "topTopics": "花費最高的主題"
+    "topTopics": "花費最高的主題",
+    "activityHint": "你的代理實際做了什麼 — token 花費背後的具體動作。"
   },
   "chart": {
     "costByTop": "依{{dimension}}的花費（前 10）",
@@ -209,5 +211,30 @@
       "week": "本週",
       "month": "本月"
     }
+  },
+  "composition": {
+    "title": "你的權杖花在哪",
+    "hint": "大部分權杖是固定開銷與重送的上下文，而非對話本身。",
+    "overhead": "固定開銷",
+    "overheadHint": "系統提示、工具定義與 MCP schema（寫入快取）。",
+    "cached": "快取重送",
+    "cachedHint": "每輪重送的上下文，以較便宜的快取費率計價。",
+    "work": "實際對話",
+    "workHint": "未命中快取的輸入加輸出 — 真正的對話內容。",
+    "byTool": "各工具組成",
+    "estimatedNote": "估算 — 無真實權杖數",
+    "seeActivity": "看實際用了什麼"
+  },
+  "activity": {
+    "totalActions": "總動作數",
+    "byTool": "使用的工具",
+    "byMcp": "MCP 伺服器",
+    "topFiles": "最常存取的檔案",
+    "noMcp": "這段期間沒有使用 MCP 伺服器。",
+    "noFiles": "這段期間沒有讀取或編輯檔案。",
+    "empty": "尚無活動紀錄，執行同步以收集。",
+    "times": "次",
+    "returnTokens": "估算回傳進 context 的 token",
+    "tokenNote": "Token 數依回傳內容大小估算；未記錄回傳的工具（如 Copilot）顯示「—」。"
   }
 }

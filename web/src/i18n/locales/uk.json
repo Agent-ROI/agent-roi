@@ -164,7 +164,8 @@
     "trends": "Trends",
     "sources": "Джерела",
     "pricing": "Ціни",
-    "settings": "Налаштування"
+    "settings": "Налаштування",
+    "activity": "Activity"
   },
   "pages": {
     "overviewHint": "Витрати, використання токенів і частка інструментів — з першого погляду.",
@@ -172,7 +173,8 @@
     "trendsHint": "Щоденний розподіл токенів, витрат та інструментів/моделей з часом.",
     "sourcesHint": "Дивіться, які журнали інструментів виявлено та імпортовано.",
     "topTopics": "Топ-теми за витратами",
-    "settingsHint": "Налаштувати мову, класифікатор і збирачі даних."
+    "settingsHint": "Налаштувати мову, класифікатор і збирачі даних.",
+    "activityHint": "What your agents actually did — the concrete actions behind the token cost."
   },
   "pagination": {
     "pageOf": "Сторінка {{page}} з {{total}}"
@@ -209,5 +211,30 @@
       "week": "Цей тиждень",
       "month": "Цей місяць"
     }
+  },
+  "composition": {
+    "title": "Where your tokens go",
+    "hint": "Most tokens are fixed overhead and re-sent context, not the conversation itself.",
+    "overhead": "Overhead",
+    "overheadHint": "System prompt, tool definitions and MCP schemas (cache writes).",
+    "cached": "Cached",
+    "cachedHint": "Context re-sent each turn, billed at the cheap cached rate.",
+    "work": "Work",
+    "workHint": "Uncached input plus output — the actual conversation.",
+    "byTool": "Composition by tool",
+    "estimatedNote": "estimated — no real token counts",
+    "seeActivity": "See what you actually used"
+  },
+  "activity": {
+    "totalActions": "Total actions",
+    "byTool": "Tools used",
+    "byMcp": "MCP servers",
+    "topFiles": "Files touched most",
+    "noMcp": "No MCP servers were used in this period.",
+    "noFiles": "No files were read or edited in this period.",
+    "empty": "No activity recorded yet. Run a sync to collect it.",
+    "times": "×",
+    "returnTokens": "Estimated tokens returned into context",
+    "tokenNote": "Token figures are estimated from result size; tools whose results aren't logged (e.g. Copilot) show \"—\"."
   }
 }
