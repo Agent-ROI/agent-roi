@@ -164,7 +164,8 @@
     "trends": "Trends",
     "sources": "소스",
     "pricing": "가격",
-    "settings": "설정"
+    "settings": "설정",
+    "activity": "Activity"
   },
   "pages": {
     "overviewHint": "비용, 토큰 사용량, 도구 비중을 한눈에 확인.",
@@ -172,7 +173,8 @@
     "trendsHint": "일별 토큰, 비용, 도구/모델 분포 추이.",
     "sourcesHint": "어떤 도구 로그가 감지되고 수집되었는지 확인.",
     "topTopics": "비용 상위 주제",
-    "settingsHint": "언어, 분류기 및 데이터 수집기를 설정합니다."
+    "settingsHint": "언어, 분류기 및 데이터 수집기를 설정합니다.",
+    "activityHint": "What your agents actually did — the concrete actions behind the token cost."
   },
   "pagination": {
     "pageOf": "{{page}} / {{total}} 페이지"
@@ -209,5 +211,30 @@
       "week": "이번 주",
       "month": "이번 달"
     }
+  },
+  "composition": {
+    "title": "Where your tokens go",
+    "hint": "Most tokens are fixed overhead and re-sent context, not the conversation itself.",
+    "overhead": "Overhead",
+    "overheadHint": "System prompt, tool definitions and MCP schemas (cache writes).",
+    "cached": "Cached",
+    "cachedHint": "Context re-sent each turn, billed at the cheap cached rate.",
+    "work": "Work",
+    "workHint": "Uncached input plus output — the actual conversation.",
+    "byTool": "Composition by tool",
+    "estimatedNote": "estimated — no real token counts",
+    "seeActivity": "See what you actually used"
+  },
+  "activity": {
+    "totalActions": "Total actions",
+    "byTool": "Tools used",
+    "byMcp": "MCP servers",
+    "topFiles": "Files touched most",
+    "noMcp": "No MCP servers were used in this period.",
+    "noFiles": "No files were read or edited in this period.",
+    "empty": "No activity recorded yet. Run a sync to collect it.",
+    "times": "×",
+    "returnTokens": "Estimated tokens returned into context",
+    "tokenNote": "Token figures are estimated from result size; tools whose results aren't logged (e.g. Copilot) show \"—\"."
   }
 }

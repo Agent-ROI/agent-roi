@@ -12,11 +12,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import String, and_, case, create_engine, func, select
+from sqlalchemy import String, and_, case, create_engine, delete, func, select
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
 from agent_roi.core.models import (
+    ActivityCount,
+    ActivityReport,
     Interaction,
     InteractionView,
     Rollup,
@@ -63,6 +65,27 @@ class InteractionRow(Base):
     estimated: Mapped[bool] = mapped_column(default=False)
 
 
+class ActivityRow(Base):
+    """One tool call inside an interaction (Bash, Read, an MCP call, …).
+
+    Derived from the interaction's content, so re-ingest replaces a given
+    interaction's activities wholesale to stay idempotent. ``timestamp`` /
+    ``project`` are denormalized from the parent interaction so activity can be
+    windowed and grouped without a join.
+    """
+
+    __tablename__ = "activities"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    interaction_id: Mapped[str] = mapped_column(String, index=True)
+    timestamp: Mapped[datetime] = mapped_column(index=True)
+    project: Mapped[str] = mapped_column(String, default="", index=True)
+    kind: Mapped[str] = mapped_column(String, index=True)
+    mcp_server: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    target: Mapped[str | None] = mapped_column(String, nullable=True)
+    result_tokens: Mapped[int] = mapped_column(default=0)
+
+
 class Database:
     def __init__(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -77,17 +100,25 @@ class Database:
         a database from an older version is missing columns added later. We patch
         them in with ``ALTER TABLE`` (SQLite supports adding columns cheaply).
         """
-        expected = {
-            "estimated": "BOOLEAN DEFAULT 0",
-            "cwd": "TEXT DEFAULT ''",
-            "project": "TEXT DEFAULT ''",
+        expected: dict[str, dict[str, str]] = {
+            "interactions": {
+                "estimated": "BOOLEAN DEFAULT 0",
+                "cwd": "TEXT DEFAULT ''",
+                "project": "TEXT DEFAULT ''",
+            },
+            "activities": {
+                "result_tokens": "INTEGER DEFAULT 0",
+            },
         }
         with self.engine.begin() as conn:
-            rows = conn.exec_driver_sql("PRAGMA table_info(interactions)").fetchall()
-            existing = {row[1] for row in rows}
-            for column, ddl in expected.items():
-                if column not in existing:
-                    conn.exec_driver_sql(f"ALTER TABLE interactions ADD COLUMN {column} {ddl}")
+            for table, columns in expected.items():
+                rows = conn.exec_driver_sql(f"PRAGMA table_info({table})").fetchall()
+                if not rows:
+                    continue  # table doesn't exist yet; create_all will have made it
+                existing = {row[1] for row in rows}
+                for column, ddl in columns.items():
+                    if column not in existing:
+                        conn.exec_driver_sql(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}")
 
     def upsert_many(self, interactions: Iterable[Interaction]) -> int:
         """Insert or update interactions. Returns the number processed.
@@ -119,9 +150,26 @@ class Database:
                 update_cols = {k: v for k, v in values.items() if k not in ("id", "topic")}
                 stmt = stmt.on_conflict_do_update(index_elements=["id"], set_=update_cols)
                 session.execute(stmt)
+                self._replace_activities(session, itx)
                 count += 1
             session.commit()
         return count
+
+    def _replace_activities(self, session: Session, itx: Interaction) -> None:
+        """Rewrite an interaction's activities (delete-then-insert = idempotent)."""
+        session.execute(delete(ActivityRow).where(ActivityRow.interaction_id == itx.id))
+        for act in itx.activities:
+            session.add(
+                ActivityRow(
+                    interaction_id=itx.id,
+                    timestamp=itx.timestamp,
+                    project=itx.project,
+                    kind=act.kind,
+                    mcp_server=act.mcp_server,
+                    target=act.target,
+                    result_tokens=act.result_tokens,
+                )
+            )
 
     def unclassified(self, limit: int | None = None) -> list[InteractionRow]:
         with Session(self.engine) as session:
@@ -319,6 +367,57 @@ class Database:
             if limit is not None:
                 stmt = stmt.limit(limit)
             return [_row_to_session(row) for row in session.execute(stmt)]
+
+    def activity_report(
+        self,
+        start: datetime | None = None,
+        end: datetime | None = None,
+        project: str | None = None,
+        top_files: int = 20,
+    ) -> ActivityReport:
+        """Aggregate recorded tool calls into what was actually done.
+
+        Returns counts of tools used, MCP servers involved, and the files touched
+        most often — the concrete contents behind the token-composition numbers.
+        """
+
+        def window(stmt: Any) -> Any:
+            if start is not None:
+                stmt = stmt.where(ActivityRow.timestamp >= start)
+            if end is not None:
+                stmt = stmt.where(ActivityRow.timestamp < end)
+            if project:
+                stmt = stmt.where(ActivityRow.project == project)
+            return stmt
+
+        def counts(col: Any, where: Any = None, limit: int | None = None) -> list[ActivityCount]:
+            stmt = (
+                select(col, func.count(), func.coalesce(func.sum(ActivityRow.result_tokens), 0))
+                .group_by(col)
+                .order_by(func.count().desc())
+            )
+            stmt = window(stmt)
+            if where is not None:
+                stmt = stmt.where(where)
+            if limit is not None:
+                stmt = stmt.limit(limit)
+            return [
+                ActivityCount(label=str(label), count=n, result_tokens=int(tok))
+                for label, n, tok in session.execute(stmt)
+            ]
+
+        with Session(self.engine) as session:
+            total_stmt = window(select(func.count()).select_from(ActivityRow))
+            total = int(session.execute(total_stmt).scalar() or 0)
+            by_tool = counts(ActivityRow.kind)
+            by_mcp = counts(ActivityRow.mcp_server, where=ActivityRow.mcp_server.is_not(None))
+            top = counts(ActivityRow.target, where=ActivityRow.target.is_not(None), limit=top_files)
+        return ActivityReport(
+            total_actions=total,
+            by_tool=by_tool,
+            by_mcp=by_mcp,
+            top_files=top,
+        )
 
     def total_spend(
         self,
@@ -566,19 +665,4 @@ def _row_to_rollup(row: Any) -> Rollup:
 
 
 def _sum_rollups(key: str, rollups: list[Rollup]) -> Rollup:
-    _est_tokens = sum(_rollup_tokens(r) for r in rollups if r.estimated)
-    _total_tokens = sum(_rollup_tokens(r) for r in rollups)
-    return Rollup(
-        key=key,
-        interactions=sum(r.interactions for r in rollups),
-        input_tokens=sum(r.input_tokens for r in rollups),
-        output_tokens=sum(r.output_tokens for r in rollups),
-        cache_read_tokens=sum(r.cache_read_tokens for r in rollups),
-        cache_write_tokens=sum(r.cache_write_tokens for r in rollups),
-        cost_usd=sum(r.cost_usd for r in rollups),
-        # Token-weighted, consistent with _ESTIMATED_MAJORITY: a tool's
-        # interactions are uniform in estimated-ness, so weight each child by its
-        # tokens and flag the total estimated only if estimated tokens are at
-        # least half (ties lean estimated).
-        estimated=_est_tokens > 0 and _est_tokens * 2 >= _total_tokens,
-    )
+    return Rollup.sum(key, rollups)

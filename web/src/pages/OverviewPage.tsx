@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { api, type BudgetStatus, type Rollup, type TimeSeriesBundle } from "../lib/api";
+import {
+  api,
+  type BudgetStatus,
+  type CompositionBundle,
+  type Rollup,
+  type TimeSeriesBundle,
+} from "../lib/api";
 import type { DateFilter, Granularity } from "../lib/dateFilter";
 import { rangeInvalid } from "../lib/dateFilter";
 import { fmtUsd } from "../lib/format";
@@ -10,19 +16,29 @@ import { StatsCards } from "../components/StatsCards";
 import { TrendLineChart } from "../components/charts/TrendLineChart";
 import { SharePieChart } from "../components/charts/SharePieChart";
 import { RollupTable } from "../components/RollupTable";
+import { CompositionCard } from "../components/CompositionCard";
+import type { PageId } from "../components/layout/Sidebar";
 
 interface Props {
   filter: DateFilter;
   granularity: Granularity;
   onDrillTopic: (topic: string) => void;
+  onNavigate?: (page: PageId) => void;
   reloadKey?: number;
 }
 
-export function OverviewPage({ filter, granularity, onDrillTopic, reloadKey }: Props) {
+export function OverviewPage({
+  filter,
+  granularity,
+  onDrillTopic,
+  onNavigate,
+  reloadKey,
+}: Props) {
   const { t } = useTranslation();
   const [topics, setTopics] = useState<Rollup[]>([]);
   const [tools, setTools] = useState<Rollup[]>([]);
   const [series, setSeries] = useState<TimeSeriesBundle | null>(null);
+  const [composition, setComposition] = useState<CompositionBundle | null>(null);
   const [budget, setBudget] = useState<BudgetStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +50,7 @@ export function OverviewPage({ filter, granularity, onDrillTopic, reloadKey }: P
       setTopics([]);
       setTools([]);
       setSeries(null);
+      setComposition(null);
       return;
     }
     let active = true;
@@ -44,12 +61,14 @@ export function OverviewPage({ filter, granularity, onDrillTopic, reloadKey }: P
       api.report("topic", window),
       api.report("tool", window),
       api.timeseries(window),
+      api.composition(window),
     ])
-      .then(([topicRows, toolRows, ts]) => {
+      .then(([topicRows, toolRows, ts, comp]) => {
         if (!active) return;
         setTopics(topicRows);
         setTools(toolRows);
         setSeries(ts);
+        setComposition(comp);
       })
       .catch((e) => active && setError(e instanceof Error ? e.message : t("common.failed")))
       .finally(() => active && setLoading(false));
@@ -86,6 +105,12 @@ export function OverviewPage({ filter, granularity, onDrillTopic, reloadKey }: P
         <>
           <StatsCards rows={topics} extraLabel={t("dimension.topic")} />
           {budget && <BudgetPanel status={budget} />}
+          {composition && (
+            <CompositionCard
+              data={composition}
+              onSeeActivity={onNavigate ? () => onNavigate("activity") : undefined}
+            />
+          )}
           <div className="chart-grid two-col">
             <TrendLineChart
               title={t("chart.tokenTrend")}

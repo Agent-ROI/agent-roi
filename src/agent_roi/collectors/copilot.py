@@ -11,6 +11,7 @@ interactions as ``estimated`` so reports never present them as exact.
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path
@@ -18,7 +19,7 @@ from typing import Any
 from urllib.parse import unquote
 
 from agent_roi.collectors.base import Collector
-from agent_roi.core.models import Interaction, Tool
+from agent_roi.core.models import Activity, Interaction, Tool
 from agent_roi.core.platform import vscode_user_dirs
 from agent_roi.core.project import project_for
 from agent_roi.core.tokens import estimate_tokens
@@ -80,9 +81,7 @@ class CopilotCollector(Collector):
         # Collect all requests first so we can process them in conversation order
         # and accumulate history — earlier turns are re-sent on each request, so
         # input cost grows down the session.
-        requests: list[dict[str, Any]] = []
-        for obj in _load_objects(raw):
-            _collect_requests(obj, requests)
+        requests = _extract_requests(raw)
         requests.sort(key=lambda r: _ts_value(r.get("timestamp")))
 
         history_text = ""  # running transcript of prior turns in this session
@@ -128,6 +127,7 @@ class CopilotCollector(Collector):
             project=project_for(cwd),
             summary=summary,
             estimated=True,
+            activities=_activities_from_response(req.get("response")),
         )
 
 
@@ -155,15 +155,107 @@ def _workspace_cwd(ws_dir: Path) -> str:
         return unquote(folder[len("file://") :])
 
     if folder.startswith("vscode-remote://"):
-        # vscode-remote://ssh-remote%2B<host>/path/to/repo
         rest = folder[len("vscode-remote://") :]
-        slash = rest.find("/")
-        if slash != -1:
-            path = unquote(rest[slash:])
-            return path  # project_for will pick up the last meaningful segment
-        return unquote(rest)
+        authority, _, path = rest.partition("/")
+        # dev-container authorities encode the real local path as a hex JSON blob
+        # (e.g. dev-container%2B<hex>); recover the host path so the project name
+        # is meaningful instead of the opaque "/workspaces/..." mount point.
+        if authority.startswith("dev-container%2B"):
+            host = _devcontainer_host_path(authority[len("dev-container%2B") :])
+            if host:
+                return host
+        # ssh-remote://ssh-remote%2B<host>/path/to/repo -> /path/to/repo
+        return unquote("/" + path) if path else unquote(rest)
 
     return folder
+
+
+def _devcontainer_host_path(hex_blob: str) -> str:
+    """Decode a dev-container authority's hex-encoded JSON to a real path.
+
+    The blob decodes to JSON like ``{"hostPath": "/Users/yen/Desktop/app", ...}``
+    (a bind-mounted folder) or ``{"volumeName": "x", "folder": "x"}`` (a named
+    volume with no host path). Prefer the host path; fall back to the folder name.
+    """
+    try:
+        data = json.loads(bytes.fromhex(hex_blob).decode("utf-8"))
+    except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
+        return ""
+    host = data.get("hostPath")
+    if isinstance(host, str) and host:
+        return host
+    folder = data.get("folder")
+    return folder if isinstance(folder, str) else ""
+
+
+def _extract_requests(raw: str) -> list[dict[str, Any]]:
+    """Recover every chat request from a session file, across both log formats.
+
+    Newer VS Code writes a *patch stream*: a JSONL file whose first line
+    (``kind:0``) is a full session snapshot and whose later lines are
+    incremental edits to it — ``kind:1`` sets the value at a key path ``k``,
+    ``kind:2`` appends to the array at ``k`` (this is how streamed response
+    chunks accumulate). We replay the patches to rebuild the final session, then
+    read ``requests`` from it.
+
+    Older files are a single JSON object (or plain JSONL) that already contains
+    the requests inline, so we fall back to walking the tree for them.
+    """
+    objects = _load_objects(raw)
+    snapshot = _apply_patch_stream(objects)
+    if snapshot is not None:
+        reqs = snapshot.get("requests")
+        if isinstance(reqs, list):
+            return [r for r in reqs if isinstance(r, dict) and r.get("requestId")]
+
+    out: list[dict[str, Any]] = []
+    for obj in objects:
+        _collect_requests(obj, out)
+    return out
+
+
+def _apply_patch_stream(objects: list[Any]) -> dict[str, Any] | None:
+    """Replay a ``{kind, k, v}`` patch stream into the initial snapshot.
+
+    Returns the rebuilt session dict, or ``None`` if these objects aren't a
+    patch stream (so the caller can fall back to the inline-request format).
+    """
+    if not objects:
+        return None
+    first = objects[0]
+    if not isinstance(first, dict) or first.get("kind") != 0:
+        return None
+    if not isinstance(first.get("v"), dict):
+        return None
+    snapshot: dict[str, Any] = first["v"]
+    for patch in objects[1:]:
+        if not isinstance(patch, dict):
+            continue
+        kind, key, value = patch.get("kind"), patch.get("k"), patch.get("v")
+        if not isinstance(key, list) or not key:
+            continue
+        try:
+            _apply_patch(snapshot, kind, key, value)
+        except (KeyError, IndexError, TypeError):
+            # A patch may reference a path that doesn't exist yet; skip it
+            # rather than abandoning the whole session.
+            continue
+    return snapshot
+
+
+def _apply_patch(root: Any, kind: Any, key: list[Any], value: Any) -> None:
+    cur = root
+    for step in key[:-1]:
+        cur = cur[step]
+    last = key[-1]
+    if kind == 2:  # append to the array at this path (streamed chunks)
+        target = cur[last]
+        if isinstance(value, list):
+            target.extend(value)
+        else:
+            target.append(value)
+    else:  # kind == 1: set/overwrite the value at this path
+        cur[last] = value
 
 
 def _collect_requests(obj: Any, out: list[dict[str, Any]]) -> None:
@@ -265,6 +357,68 @@ def _response_text(response: Any) -> str:
                 parts.append(part)
         return "".join(parts)
     return ""
+
+
+# Copilot prefixes built-in tool ids with "copilot_"; strip it so names read
+# cleanly (copilot_readFile -> readFile) and align with other tools' style.
+_FILE_URI_RE = re.compile(r"file://(/[^\s)\"]+)")
+
+
+def _activities_from_response(response: Any) -> list[Activity]:
+    """Pull tool calls out of a Copilot response stream.
+
+    Each ``toolInvocationSerialized`` part is one action. ``toolId`` is the tool
+    (``copilot_readFile`` -> ``readFile``); ``source`` of type ``mcp`` carries the
+    MCP server's ``serverLabel``; and file tools embed the path either in
+    ``invocationMessage`` (a ``file://`` URI) or, for terminal runs, we record the
+    command's ``cwd``. This mirrors the Claude Code activity extraction so both
+    tools feed the same Activity Analysis view.
+    """
+    if not isinstance(response, list):
+        return []
+    activities: list[Activity] = []
+    for part in response:
+        if not isinstance(part, dict) or part.get("kind") != "toolInvocationSerialized":
+            continue
+        tool_id = part.get("toolId")
+        if not tool_id:
+            continue
+        kind = _normalize_tool_id(str(tool_id))
+
+        source = part.get("source")
+        mcp_server = None
+        if isinstance(source, dict) and source.get("type") == "mcp":
+            # ``label`` is a short server name (e.g. "GitKraken", "pencil");
+            # ``serverLabel`` is sometimes a long description, so prefer label.
+            mcp_server = source.get("label") or source.get("serverLabel")
+
+        target = _tool_target(part)
+        activities.append(Activity(kind=kind, mcp_server=mcp_server, target=target))
+    return activities
+
+
+def _normalize_tool_id(tool_id: str) -> str:
+    if tool_id.startswith("copilot_"):
+        return tool_id[len("copilot_") :]
+    return tool_id
+
+
+def _tool_target(part: dict[str, Any]) -> str | None:
+    """Best-effort file path / working dir a Copilot tool acted on."""
+    tsd = part.get("toolSpecificData")
+    if isinstance(tsd, dict):
+        # Terminal runs carry the working directory they ran in.
+        cwd = tsd.get("cwd")
+        if isinstance(cwd, str) and cwd:
+            return cwd
+    # File tools embed the path as a file:// URI inside the invocation message.
+    msg = part.get("invocationMessage")
+    text = msg.get("value") if isinstance(msg, dict) else msg
+    if isinstance(text, str):
+        m = _FILE_URI_RE.search(text)
+        if m:
+            return unquote(m.group(1))
+    return None
 
 
 def _normalize_model(model: str) -> str:

@@ -20,6 +20,30 @@ class Tool(str, Enum):
     UNKNOWN = "unknown"
 
 
+class Activity(BaseModel):
+    """One concrete action an agent took inside an interaction.
+
+    The token buckets in :class:`TokenComposition` say *how much* was spent on
+    overhead vs work; activities say *what was actually done* — which tools were
+    invoked, which MCP servers, which files were read or edited. This is what lets
+    the UI show a user the real contents behind the abstract numbers rather than
+    just "5.8M overhead tokens".
+
+    ``kind`` is the tool name (``Bash``, ``Read``, ``Edit`` …). For MCP tools the
+    name is ``mcp__<server>__<tool>``; ``mcp_server`` is then set to ``<server>``
+    so MCP usage can be grouped. ``target`` is the file path the action touched,
+    when the tool has one (Read/Edit/Write).
+    """
+
+    kind: str = Field(..., description="Tool name, e.g. 'Bash', 'Read', 'mcp__github__list'.")
+    mcp_server: str | None = Field(default=None, description="MCP server, if this is an MCP tool.")
+    target: str | None = Field(default=None, description="File path acted on, when applicable.")
+    # Estimated tokens this call returned into the context (tool_result size).
+    # Always an estimate — the API never reports per-tool token usage — so it is
+    # surfaced with an "estimated" badge. 0 when the result isn't recorded.
+    result_tokens: int = Field(default=0, description="Estimated tokens returned by the call.")
+
+
 class Interaction(BaseModel):
     """A single normalized request/response turn parsed from a tool's logs.
 
@@ -58,6 +82,10 @@ class Interaction(BaseModel):
     # interactions are flagged here and shown as "estimated" in reports.
     estimated: bool = False
 
+    # Concrete actions taken in this turn (tool calls, MCP calls, file edits).
+    # Stored in a separate table; never part of token/cost aggregation.
+    activities: list[Activity] = Field(default_factory=list)
+
     @property
     def total_tokens(self) -> int:
         return (
@@ -94,6 +122,105 @@ class Rollup(BaseModel):
             + self.cache_read_tokens
             + self.cache_write_tokens
         )
+
+    @classmethod
+    def sum(cls, key: str, rollups: list[Rollup]) -> Rollup:
+        """Combine rollups into one totaled row under ``key``.
+
+        ``estimated`` is token-weighted: a child's interactions are uniform in
+        estimated-ness, so weight each by its tokens and flag the total estimated
+        only when estimated tokens are at least half (ties lean estimated).
+        """
+        est = sum(r.total_tokens for r in rollups if r.estimated)
+        total = sum(r.total_tokens for r in rollups)
+        return cls(
+            key=key,
+            interactions=sum(r.interactions for r in rollups),
+            input_tokens=sum(r.input_tokens for r in rollups),
+            output_tokens=sum(r.output_tokens for r in rollups),
+            cache_read_tokens=sum(r.cache_read_tokens for r in rollups),
+            cache_write_tokens=sum(r.cache_write_tokens for r in rollups),
+            cost_usd=sum(r.cost_usd for r in rollups),
+            estimated=est > 0 and est * 2 >= total,
+        )
+
+
+class TokenComposition(BaseModel):
+    """Breaks token usage into *where it went*, not just how much.
+
+    Most tokens an agent spends aren't the user's words — they're fixed per-turn
+    overhead (system prompt + tool definitions + MCP schemas) and re-sent context.
+    Prompt caching makes the repeated part cheap, but it's still volume. We split
+    the same numbers a :class:`Rollup` already holds into three buckets so the UI
+    can answer "where did my tokens actually go?":
+
+    - ``overhead`` — tokens written into the cache (``cache_write``). The first
+      turn of a session writes the system prompt, tool definitions and every MCP
+      server's tool schema here, so this is the best available proxy for fixed
+      agent/MCP overhead.
+    - ``cached`` — tokens served from the cache (``cache_read``): context re-sent
+      each turn but billed at the cheap cached rate. Large ``cached`` means
+      caching is doing its job.
+    - ``work`` — uncached input plus output (``input + output``): the part that
+      actually varies with the conversation.
+
+    ``estimated`` mirrors the rollup: when true (e.g. Copilot, which reports no
+    real token counts and no cache split), the composition is approximate and
+    everything lands in ``work``.
+    """
+
+    overhead: int
+    cached: int
+    work: int
+    overhead_pct: float
+    cached_pct: float
+    work_pct: float
+    estimated: bool = False
+
+    @classmethod
+    def from_rollup(cls, r: Rollup) -> TokenComposition:
+        overhead = r.cache_write_tokens
+        cached = r.cache_read_tokens
+        work = r.input_tokens + r.output_tokens
+        total = overhead + cached + work
+        pct = (lambda n: round(100.0 * n / total, 1)) if total else (lambda n: 0.0)
+        return cls(
+            overhead=overhead,
+            cached=cached,
+            work=work,
+            overhead_pct=pct(overhead),
+            cached_pct=pct(cached),
+            work_pct=pct(work),
+            estimated=r.estimated,
+        )
+
+
+class ActivityCount(BaseModel):
+    """A label (tool name, MCP server, or file path) with usage and return volume.
+
+    ``count`` is how many times it was called; ``result_tokens`` is the estimated
+    tokens it returned into the context across those calls (0 when the tool's
+    return body isn't recorded, e.g. Copilot). The token figure is always an
+    estimate — no API reports per-tool usage.
+    """
+
+    label: str
+    count: int
+    result_tokens: int = 0
+
+
+class ActivityReport(BaseModel):
+    """What the agent actually did, aggregated for the Activity Analysis page.
+
+    Turns the abstract overhead/work split into concrete usage: which tools were
+    called and how often, which MCP servers were involved, and which files were
+    touched most. ``total_actions`` is every recorded tool call in the window.
+    """
+
+    total_actions: int
+    by_tool: list[ActivityCount]
+    by_mcp: list[ActivityCount]
+    top_files: list[ActivityCount]
 
 
 class TopicBreakdown(BaseModel):

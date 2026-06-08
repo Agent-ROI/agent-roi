@@ -57,6 +57,7 @@ agent-roi ingest                          # parse logs from all detected tools
 agent-roi report --by topic --since 7d   # cost per topic this week
 agent-roi serve                           # web dashboard on http://127.0.0.1:8000
 agent-roi doctor                          # see which tools were detected and why
+agent-roi mcp-cost                        # estimate each MCP server's per-turn overhead
 ```
 
 ## Features
@@ -66,6 +67,9 @@ agent-roi doctor                          # see which tools were detected and wh
 | **Tool-agnostic** | Reads local logs from Claude Code, Codex CLI, GitHub Copilot, Gemini CLI, and Hermes Agent — no proxy, no workflow change |
 | **Topic classification** | Model-free TF-IDF + cosine-similarity clustering; runs fully offline, no API keys |
 | **Cost & ROI** | Token usage mapped to per-model pricing, aggregated by **topic, tool, or model**, over any time window |
+| **Where tokens go** | Splits every total into **overhead** (system prompt + tool + MCP schemas), **cached** re-sent context, and actual **work** — so you see what your tokens are really spent on |
+| **Activity analysis** | Concrete actions behind the cost: which tools and **MCP servers** were called, how often, how many tokens each returned, and which files were touched most |
+| **MCP cost** | `agent-roi mcp-cost` estimates each MCP server's per-turn schema overhead (opt-in; launches the servers to read their tool list) |
 | **Drill-down** | Click any topic to see which tools and models contributed; estimated vs exact counts clearly badged |
 | **Local-first** | Everything in one SQLite file; data never leaves your machine |
 

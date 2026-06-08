@@ -13,7 +13,18 @@ from pathlib import Path
 
 # Workspace parents whose immediate child is the actual project (e.g. the folder
 # under ~/Desktop or ~/projects is the project, not Desktop itself).
-_WORKSPACE_PARENTS = {"desktop", "documents", "projects", "code", "src", "repos", "dev", "work"}
+_WORKSPACE_PARENTS = {
+    "desktop",
+    "documents",
+    "projects",
+    "code",
+    "src",
+    "repos",
+    "repo",
+    "dev",
+    "work",
+    "workspaces",
+}
 
 
 def project_for(cwd: str) -> str:

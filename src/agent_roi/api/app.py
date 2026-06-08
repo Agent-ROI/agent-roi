@@ -62,6 +62,18 @@ def create_app(service: Service | None = None) -> FastAPI:
             "by_model": [r.model_dump() | {"total_tokens": r.total_tokens} for r in bd.by_model],
         }
 
+    @app.get("/api/composition")
+    def composition(since: str = "", until: str = "") -> dict[str, object]:
+        """Where tokens went: overhead (cache writes) vs cached vs actual work."""
+        start, end = _window(since, until)
+        return svc.composition(start=start, end=end)
+
+    @app.get("/api/activity")
+    def activity(since: str = "", until: str = "", project: str = "") -> dict[str, object]:
+        """What the agent did: tools called, MCP servers, files touched."""
+        start, end = _window(since, until)
+        return svc.activity(start=start, end=end, project=project or None).model_dump()
+
     @app.get("/api/sessions")
     def sessions(
         topic: str = "",

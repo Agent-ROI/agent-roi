@@ -13,6 +13,7 @@ from agent_roi.classify.base import UNCATEGORIZED
 from agent_roi.collectors import get_collectors
 from agent_roi.core.config import Config, config_path
 from agent_roi.core.models import (
+    ActivityReport,
     BudgetPeriodStatus,
     BudgetStatus,
     CollectorStatus,
@@ -21,6 +22,7 @@ from agent_roi.core.models import (
     SessionDetail,
     SessionSummary,
     TimeSeriesBundle,
+    TokenComposition,
     TopicBreakdown,
 )
 from agent_roi.core.pricing import all_prices
@@ -126,6 +128,41 @@ class Service:
             limit=limit,
             search=search,
         )
+
+    def composition(
+        self,
+        start: datetime | None = None,
+        end: datetime | None = None,
+    ) -> dict[str, object]:
+        """Split token usage into overhead / cached / work, overall and per tool.
+
+        Answers "where did my tokens go?" — how much is fixed agent + MCP overhead
+        (cache writes), how much is cached re-sent context, how much is the actual
+        conversation. The per-tool split surfaces which tools carry the heaviest
+        overhead (e.g. a tool wired to many MCP servers).
+        """
+        by_tool = self.db.rollup("tool", start=start, end=end)
+        total = Rollup.sum("all", by_tool)
+        return {
+            "total": TokenComposition.from_rollup(total).model_dump(),
+            "by_tool": [
+                {
+                    "tool": r.key,
+                    "estimated": r.estimated,
+                    **TokenComposition.from_rollup(r).model_dump(),
+                }
+                for r in by_tool
+            ],
+        }
+
+    def activity(
+        self,
+        start: datetime | None = None,
+        end: datetime | None = None,
+        project: str | None = None,
+    ) -> ActivityReport:
+        """What the agent actually did: tools called, MCP servers, files touched."""
+        return self.db.activity_report(start=start, end=end, project=project)
 
     def get_config_info(self) -> dict[str, object]:
         return {

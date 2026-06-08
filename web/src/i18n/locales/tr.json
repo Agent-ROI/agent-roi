@@ -164,7 +164,8 @@
     "trends": "Trends",
     "sources": "Kaynaklar",
     "pricing": "Fiyatlandırma",
-    "settings": "Ayarlar"
+    "settings": "Ayarlar",
+    "activity": "Activity"
   },
   "pages": {
     "overviewHint": "Maliyet, token kullanımı ve araç payını tek bakışta görün.",
@@ -172,7 +173,8 @@
     "trendsHint": "Zaman içinde günlük token, maliyet ve araç/model dağılımı.",
     "sourcesHint": "Hangi araç günlüklerinin tespit edildiğini ve içe aktarıldığını görün.",
     "topTopics": "Maliyete göre en iyi konular",
-    "settingsHint": "Dil, sınıflandırıcı ve veri toplayıcıları yapılandırın."
+    "settingsHint": "Dil, sınıflandırıcı ve veri toplayıcıları yapılandırın.",
+    "activityHint": "What your agents actually did — the concrete actions behind the token cost."
   },
   "pagination": {
     "pageOf": "{{page}} / {{total}} sayfa"
@@ -209,5 +211,30 @@
       "week": "Bu hafta",
       "month": "Bu ay"
     }
+  },
+  "composition": {
+    "title": "Where your tokens go",
+    "hint": "Most tokens are fixed overhead and re-sent context, not the conversation itself.",
+    "overhead": "Overhead",
+    "overheadHint": "System prompt, tool definitions and MCP schemas (cache writes).",
+    "cached": "Cached",
+    "cachedHint": "Context re-sent each turn, billed at the cheap cached rate.",
+    "work": "Work",
+    "workHint": "Uncached input plus output — the actual conversation.",
+    "byTool": "Composition by tool",
+    "estimatedNote": "estimated — no real token counts",
+    "seeActivity": "See what you actually used"
+  },
+  "activity": {
+    "totalActions": "Total actions",
+    "byTool": "Tools used",
+    "byMcp": "MCP servers",
+    "topFiles": "Files touched most",
+    "noMcp": "No MCP servers were used in this period.",
+    "noFiles": "No files were read or edited in this period.",
+    "empty": "No activity recorded yet. Run a sync to collect it.",
+    "times": "×",
+    "returnTokens": "Estimated tokens returned into context",
+    "tokenNote": "Token figures are estimated from result size; tools whose results aren't logged (e.g. Copilot) show \"—\"."
   }
 }
