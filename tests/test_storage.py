@@ -34,7 +34,7 @@ def test_upsert_is_idempotent(tmp_path):
 def test_reingest_preserves_topic(tmp_path):
     db = Database(tmp_path / "t.db")
     db.upsert_many([_itx("a")])
-    db.set_topic("a", "auth refactor")
+    db.set_session_topic("s", "auth refactor")
     db.upsert_many([_itx("a")])  # incoming row has topic=None
     rows = db.unclassified()
     assert rows == []  # topic was preserved, so nothing unclassified

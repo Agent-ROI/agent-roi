@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { api, type Sources } from "../lib/api";
 import { fmtUsd } from "../lib/format";
+import { useFetch } from "../hooks/useFetch";
 import { ToolIcon, toolDisplayName } from "./ToolIcon";
 
 function translateNote(note: string, t: TFunction): string {
@@ -13,19 +14,8 @@ function translateNote(note: string, t: TFunction): string {
 
 export function SourcesPanel({ reloadKey }: { reloadKey: number }) {
   const { t } = useTranslation();
-  const [data, setData] = useState<Sources | null>(null);
+  const { data } = useFetch<Sources>(() => api.sources(), [reloadKey]);
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    api
-      .sources()
-      .then((d) => active && setData(d))
-      .catch(() => active && setData(null));
-    return () => {
-      active = false;
-    };
-  }, [reloadKey]);
 
   if (!data) return null;
 

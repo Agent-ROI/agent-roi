@@ -6,6 +6,7 @@ and REST layers stay thin.
 
 from __future__ import annotations
 
+import contextlib
 from datetime import datetime
 
 from agent_roi.classify import SessionDoc, get_classifier
@@ -45,7 +46,8 @@ class Service:
         for collector in collectors:
             if not collector.is_available():
                 continue
-            total += self.db.upsert_many(collector.collect())
+            with contextlib.suppress(Exception):
+                total += self.db.upsert_many(collector.collect())
         return total
 
     def classify(self, limit: int | None = None, reclassify: bool = True) -> int:

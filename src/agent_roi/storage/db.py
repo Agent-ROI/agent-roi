@@ -171,19 +171,9 @@ class Database:
                 )
             )
 
-    def unclassified(self, limit: int | None = None) -> list[InteractionRow]:
-        with Session(self.engine) as session:
-            stmt = select(InteractionRow).where(InteractionRow.topic.is_(None))
-            if limit is not None:
-                stmt = stmt.limit(limit)
-            return list(session.scalars(stmt))
-
-    def set_topic(self, interaction_id: str, topic: str) -> None:
-        with Session(self.engine) as session:
-            row = session.get(InteractionRow, interaction_id)
-            if row is not None:
-                row.topic = topic
-                session.commit()
+    def unclassified(self, limit: int | None = None) -> list[UnclassifiedSession]:
+        """Sessions with at least one unclassified interaction."""
+        return self.unclassified_sessions(limit=limit)
 
     def unclassified_sessions(self, limit: int | None = None) -> list[UnclassifiedSession]:
         """Sessions with at least one unclassified interaction (topic IS NULL)."""
@@ -260,6 +250,9 @@ class Database:
         "model": InteractionRow.model,
         "project": func.coalesce(func.nullif(InteractionRow.project, ""), "unknown"),
     }
+
+    VALID_DIMENSIONS: frozenset[str] = frozenset(_DIMENSIONS.keys())
+    VALID_GRANULARITIES: frozenset[str] = frozenset({"day", "week", "month"})
 
     def rollup(
         self,
@@ -552,8 +545,9 @@ class Database:
 
     def session_detail(self, session_id: str) -> SessionDetail | None:
         """A session's aggregate plus its individual interactions, newest first."""
-        summaries = [s for s in self.sessions() if s.session_id == session_id]
-        if not summaries:
+        summaries = self.sessions(topic=None, start=None, end=None, limit=None, search=None)
+        match = next((s for s in summaries if s.session_id == session_id), None)
+        if match is None:
             return None
         with Session(self.engine) as session:
             rows = list(
@@ -563,23 +557,23 @@ class Database:
                     .order_by(InteractionRow.timestamp.desc())
                 )
             )
-        interactions = [
-            InteractionView(
-                id=r.id,
-                tool=r.tool,
-                model=r.model,
-                timestamp=r.timestamp,
-                input_tokens=r.input_tokens,
-                output_tokens=r.output_tokens,
-                cache_read_tokens=r.cache_read_tokens,
-                cache_write_tokens=r.cache_write_tokens,
-                cost_usd=r.cost_usd,
-                estimated=r.estimated,
-                summary=r.summary,
-            )
-            for r in rows
-        ]
-        return SessionDetail(session=summaries[0], interactions=interactions)
+            interactions = [
+                InteractionView(
+                    id=r.id,
+                    tool=r.tool,
+                    model=r.model,
+                    timestamp=r.timestamp,
+                    input_tokens=r.input_tokens,
+                    output_tokens=r.output_tokens,
+                    cache_read_tokens=r.cache_read_tokens,
+                    cache_write_tokens=r.cache_write_tokens,
+                    cost_usd=r.cost_usd,
+                    estimated=r.estimated,
+                    summary=r.summary,
+                )
+                for r in rows
+            ]
+        return SessionDetail(session=match, interactions=interactions)
 
 
 def _topic_filter(topic: str) -> Any:

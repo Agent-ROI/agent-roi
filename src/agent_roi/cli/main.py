@@ -17,6 +17,7 @@ from agent_roi import __version__
 from agent_roi.core.platform import platform_label
 from agent_roi.core.service import Service
 from agent_roi.core.timeframe import parse_since
+from agent_roi.storage.db import Database
 
 app = typer.Typer(
     name="agent-roi",
@@ -89,8 +90,9 @@ def report(
     ),
 ) -> None:
     """Show a token/cost breakdown, grouped and optionally time-windowed."""
-    if by not in ("topic", "tool", "model", "project"):
-        console.print(f"[red]Unsupported grouping: {by} (use topic|tool|model|project)[/red]")
+    if by not in Database.VALID_DIMENSIONS:
+        valid = "|".join(sorted(Database.VALID_DIMENSIONS))
+        console.print(f"[red]Unsupported grouping: {by} (use {valid})[/red]")
         raise typer.Exit(1)
 
     start = _parse_since(since)

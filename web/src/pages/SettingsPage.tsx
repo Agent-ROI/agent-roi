@@ -13,6 +13,35 @@ const numOrNull = (v: string): number | null => {
 };
 const strOrEmpty = (v: number | null): string => (v === null ? "" : String(v));
 
+interface FormState {
+  threshold: number;
+  labelTerms: number;
+  enabledCollectors: string[];
+  daily: string;
+  weekly: string;
+  monthly: string;
+}
+
+function formFromConfig(cfg: ConfigInfo): FormState {
+  return {
+    threshold: cfg.classifier.similarity_threshold,
+    labelTerms: cfg.classifier.label_terms,
+    enabledCollectors: cfg.collectors.enabled,
+    daily: strOrEmpty(cfg.budget?.daily_usd ?? null),
+    weekly: strOrEmpty(cfg.budget?.weekly_usd ?? null),
+    monthly: strOrEmpty(cfg.budget?.monthly_usd ?? null),
+  };
+}
+
+const DEFAULT_FORM: FormState = {
+  threshold: 0.18,
+  labelTerms: 3,
+  enabledCollectors: [],
+  daily: "",
+  weekly: "",
+  monthly: "",
+};
+
 export function SettingsPage() {
   const { t, i18n } = useTranslation();
   const currentLang = normalizeLng(i18n.language);
@@ -22,25 +51,14 @@ export function SettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-
-  const [threshold, setThreshold] = useState(0.18);
-  const [labelTerms, setLabelTerms] = useState(3);
-  const [enabledCollectors, setEnabledCollectors] = useState<string[]>([]);
-  const [daily, setDaily] = useState("");
-  const [weekly, setWeekly] = useState("");
-  const [monthly, setMonthly] = useState("");
+  const [form, setForm] = useState<FormState>(DEFAULT_FORM);
 
   useEffect(() => {
     api
       .getConfig()
       .then((cfg) => {
         setConfig(cfg);
-        setThreshold(cfg.classifier.similarity_threshold);
-        setLabelTerms(cfg.classifier.label_terms);
-        setEnabledCollectors(cfg.collectors.enabled);
-        setDaily(strOrEmpty(cfg.budget?.daily_usd ?? null));
-        setWeekly(strOrEmpty(cfg.budget?.weekly_usd ?? null));
-        setMonthly(strOrEmpty(cfg.budget?.monthly_usd ?? null));
+        setForm(formFromConfig(cfg));
       })
       .catch((e) => setError(e instanceof Error ? e.message : t("common.failed")))
       .finally(() => setLoading(false));
@@ -51,12 +69,12 @@ export function SettingsPage() {
     setSaved(false);
     try {
       const updated = await api.updateConfig({
-        classifier: { similarity_threshold: threshold, label_terms: labelTerms },
-        collectors: { enabled: enabledCollectors },
+        classifier: { similarity_threshold: form.threshold, label_terms: form.labelTerms },
+        collectors: { enabled: form.enabledCollectors },
         budget: {
-          daily_usd: numOrNull(daily),
-          weekly_usd: numOrNull(weekly),
-          monthly_usd: numOrNull(monthly),
+          daily_usd: numOrNull(form.daily),
+          weekly_usd: numOrNull(form.weekly),
+          monthly_usd: numOrNull(form.monthly),
         },
       });
       setConfig(updated);
@@ -67,12 +85,15 @@ export function SettingsPage() {
     } finally {
       setSaving(false);
     }
-  }, [threshold, labelTerms, enabledCollectors, daily, weekly, monthly, t]);
+  }, [form, t]);
 
   const toggleCollector = (name: string) => {
-    setEnabledCollectors((prev) =>
-      prev.includes(name) ? prev.filter((c) => c !== name) : [...prev, name]
-    );
+    setForm((prev) => ({
+      ...prev,
+      enabledCollectors: prev.enabledCollectors.includes(name)
+        ? prev.enabledCollectors.filter((c) => c !== name)
+        : [...prev.enabledCollectors, name],
+    }));
   };
 
   return (
@@ -121,10 +142,10 @@ export function SettingsPage() {
                   min="0.05"
                   max="0.5"
                   step="0.01"
-                  value={threshold}
-                  onChange={(e) => setThreshold(parseFloat(e.target.value))}
+                  value={form.threshold}
+                  onChange={(e) => setForm((f) => ({ ...f, threshold: parseFloat(e.target.value) }))}
                 />
-                <span className="settings-range-value">{threshold.toFixed(2)}</span>
+                <span className="settings-range-value">{form.threshold.toFixed(2)}</span>
               </div>
               <p className="muted small">{t("settings.thresholdHint")}</p>
             </div>
@@ -138,8 +159,8 @@ export function SettingsPage() {
                 className="settings-input"
                 min={1}
                 max={10}
-                value={labelTerms}
-                onChange={(e) => setLabelTerms(parseInt(e.target.value, 10) || 3)}
+                value={form.labelTerms}
+                onChange={(e) => setForm((f) => ({ ...f, labelTerms: parseInt(e.target.value, 10) || 3 }))}
               />
               <p className="muted small">{t("settings.labelTermsHint")}</p>
             </div>
@@ -152,7 +173,7 @@ export function SettingsPage() {
                 <label key={name} className="settings-checkbox">
                   <input
                     type="checkbox"
-                    checked={enabledCollectors.includes(name)}
+                    checked={form.enabledCollectors.includes(name)}
                     onChange={() => toggleCollector(name)}
                   />
                   <span>{toolDisplayName(name)}</span>
@@ -176,8 +197,8 @@ export function SettingsPage() {
                   min={0}
                   step="0.5"
                   placeholder={t("settings.budgetNone")}
-                  value={daily}
-                  onChange={(e) => setDaily(e.target.value)}
+                  value={form.daily}
+                  onChange={(e) => setForm((f) => ({ ...f, daily: e.target.value }))}
                 />
               </div>
               <div className="settings-field">
@@ -191,8 +212,8 @@ export function SettingsPage() {
                   min={0}
                   step="1"
                   placeholder={t("settings.budgetNone")}
-                  value={weekly}
-                  onChange={(e) => setWeekly(e.target.value)}
+                  value={form.weekly}
+                  onChange={(e) => setForm((f) => ({ ...f, weekly: e.target.value }))}
                 />
               </div>
               <div className="settings-field">
@@ -206,8 +227,8 @@ export function SettingsPage() {
                   min={0}
                   step="1"
                   placeholder={t("settings.budgetNone")}
-                  value={monthly}
-                  onChange={(e) => setMonthly(e.target.value)}
+                  value={form.monthly}
+                  onChange={(e) => setForm((f) => ({ ...f, monthly: e.target.value }))}
                 />
               </div>
             </div>
