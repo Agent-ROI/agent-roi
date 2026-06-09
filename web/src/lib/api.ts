@@ -96,6 +96,10 @@ export interface TopicROI {
   active_seconds: number;
   active_minutes: number;
   usd_per_hour: number | null;
+  cost_per_session: number;
+  minutes_per_session: number;
+  tokens_per_session: number;
+  cost_cv: number | null;
   estimated: boolean;
 }
 

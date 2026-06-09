@@ -166,7 +166,7 @@
     "pricing": "Precios",
     "settings": "Ajustes",
     "activity": "Activity",
-    "roi": "ROI"
+    "roi": "Coste unitario"
   },
   "pages": {
     "overviewHint": "Costos, uso de tokens y proporción de herramientas de un vistazo.",
@@ -176,7 +176,7 @@
     "topTopics": "Principales temas por costo",
     "settingsHint": "Configurar idioma, clasificador y colectores de datos.",
     "activityHint": "What your agents actually did — the concrete actions behind the token cost.",
-    "roiHint": "Coste frente al tiempo de desarrollo activo, por tema."
+    "roiHint": "Coste unitario: lo que cuesta de media una tarea de cada tipo."
   },
   "pagination": {
     "pageOf": "Página {{page}} de {{total}}"
@@ -247,6 +247,18 @@
     "active": "Activo",
     "perHour": "$/hora",
     "flagHint": "Mayor tasa de gasto: merece atención.",
-    "methodHint": "El tiempo activo suma los intervalos entre turnos, excluyendo periodos inactivos; el umbral se deriva de tu propio uso, no es fijo. $/hora es la tasa de gasto en ese tiempo."
+    "methodHint": "Un tema es un tipo de trabajo y cada sesión una tarea. Las medias son por tarea. El tiempo activo excluye pausas; el umbral se deriva de tu propio uso. La consistencia es la variación del coste por tarea (coeficiente de variación).",
+    "perSessionTitle": "Coste por tarea",
+    "avgCost": "Coste medio / tarea",
+    "avgTime": "Tiempo medio / tarea",
+    "costPerSession": "$ / tarea",
+    "timePerSession": "Tiempo / tarea",
+    "tokensPerSession": "Tokens / tarea",
+    "consistency": "Consistencia",
+    "stable": "Estable",
+    "moderate": "Varía",
+    "volatile": "Errático",
+    "consistencyHint": "Cuánto varía el coste entre tareas del mismo tipo. \"Errático\" puede indicar retrabajo o dar vueltas.",
+    "searchTopics": "Buscar temas…"
   }
 }

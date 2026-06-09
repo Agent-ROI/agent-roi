@@ -166,7 +166,7 @@
     "pricing": "料金",
     "settings": "設定",
     "activity": "Activity",
-    "roi": "ROI"
+    "roi": "ユニットコスト"
   },
   "pages": {
     "overviewHint": "コスト、トークン使用量、ツールシェアを一目で確認。",
@@ -176,7 +176,7 @@
     "topTopics": "コスト上位のトピック",
     "settingsHint": "言語、分類器、データコレクターを設定します。",
     "activityHint": "What your agents actually did — the concrete actions behind the token cost.",
-    "roiHint": "トピックごとに、コストを実作業時間と比較します。"
+    "roiHint": "ユニットエコノミクス：各種類の作業を1件こなすのに平均どれくらいかかるか。"
   },
   "pagination": {
     "pageOf": "{{page}} / {{total}} ページ"
@@ -247,6 +247,18 @@
     "active": "作業時間",
     "perHour": "$/時",
     "flagHint": "消費レートが最も高い項目です。",
-    "methodHint": "作業時間はターン間の間隔の合計で、アイドル時間を除外します。しきい値は固定値ではなく、あなたの利用状況から導出されます。$/時はその時間あたりの消費レートです。"
+    "methodHint": "トピックは1種類の作業、各セッションはその1件です。平均は件単位。アクティブ時間はアイドルを除外し、しきい値はあなたの利用状況から導出します。安定度は件あたりコストのばらつき（変動係数）です。",
+    "perSessionTitle": "作業1件あたりのコスト",
+    "avgCost": "平均コスト / 件",
+    "avgTime": "平均時間 / 件",
+    "costPerSession": "$ / 件",
+    "timePerSession": "時間 / 件",
+    "tokensPerSession": "トークン / 件",
+    "consistency": "安定度",
+    "stable": "安定",
+    "moderate": "ばらつき",
+    "volatile": "不安定",
+    "consistencyHint": "同種の作業で件ごとにコストがどれだけ揺れるか。「不安定」は手戻りや堂々巡りの兆候のことも。",
+    "searchTopics": "トピックを検索…"
   }
 }

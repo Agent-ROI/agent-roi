@@ -166,7 +166,7 @@
     "pricing": "Preise",
     "settings": "Einstellungen",
     "activity": "Activity",
-    "roi": "ROI"
+    "roi": "Stückkosten"
   },
   "pages": {
     "overviewHint": "Kosten, Token-Nutzung und Werkzeuganteil auf einen Blick.",
@@ -176,7 +176,7 @@
     "topTopics": "Top-Themen nach Kosten",
     "settingsHint": "Sprache, Klassifizierer und Datensammler konfigurieren.",
     "activityHint": "What your agents actually did — the concrete actions behind the token cost.",
-    "roiHint": "Kosten im Verhältnis zur aktiven Entwicklungszeit, je Thema."
+    "roiHint": "Stückkosten: Was eine Arbeit jeder Art im Schnitt kostet."
   },
   "pagination": {
     "pageOf": "Seite {{page}} von {{total}}"
@@ -247,6 +247,18 @@
     "active": "Aktiv",
     "perHour": "$/Stunde",
     "flagHint": "Höchste Ausgabenrate – einen Blick wert.",
-    "methodHint": "Die aktive Zeit summiert die Abstände zwischen den Schritten ohne Leerlaufphasen; der Schwellwert wird aus Ihrer eigenen Nutzung abgeleitet, nicht fest vorgegeben. $/Stunde ist die Ausgabenrate über diese Zeit."
+    "methodHint": "Ein Thema ist eine Art Arbeit, jede Sitzung eine Einheit davon. Mittelwerte gelten je Einheit. Die aktive Zeit schließt Leerlauf aus; der Schwellenwert wird aus deiner eigenen Nutzung abgeleitet. Konstanz ist die Streuung der Kosten je Einheit (Variationskoeffizient).",
+    "perSessionTitle": "Kosten pro Arbeitseinheit",
+    "avgCost": "Ø Kosten / Einheit",
+    "avgTime": "Ø Zeit / Einheit",
+    "costPerSession": "$ / Einheit",
+    "timePerSession": "Zeit / Einheit",
+    "tokensPerSession": "Tokens / Einheit",
+    "consistency": "Konstanz",
+    "stable": "Stabil",
+    "moderate": "Schwankt",
+    "volatile": "Unstet",
+    "consistencyHint": "Wie stark die Kosten zwischen gleichartigen Einheiten schwanken. \"Unstet\" kann Nacharbeit oder Leerlauf bedeuten.",
+    "searchTopics": "Themen suchen…"
   }
 }
