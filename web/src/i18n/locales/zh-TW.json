@@ -94,7 +94,7 @@
     "pricing": "模型定價",
     "settings": "設定",
     "activity": "活動分析",
-    "roi": "投資報酬"
+    "roi": "單位成本"
   },
   "pages": {
     "overviewHint": "一眼看懂花費、權杖用量與工具佔比。",
@@ -104,7 +104,7 @@
     "settingsHint": "設定語言、分類器與資料收集器。",
     "topTopics": "花費最高的主題",
     "activityHint": "你的代理實際做了什麼 — token 花費背後的具體動作。",
-    "roiHint": "依主題衡量成本與實際開發時間的投資報酬。"
+    "roiHint": "單位經濟：每一類工作平均完成一件要花多少。"
   },
   "chart": {
     "costByTop": "依{{dimension}}的花費（前 10）",
@@ -247,6 +247,18 @@
     "active": "活躍時間",
     "perHour": "每小時花費",
     "flagHint": "燒錢速率最高，值得留意。",
-    "methodHint": "活躍時間是各回合間隔的加總，排除閒置區段；閾值由你自己的使用習慣推導，並非固定值。每小時花費是該時間內的支出速率。"
+    "methodHint": "一個主題是一類工作，每個 session 是其中一件。平均值以「每件」計算。Active 時間已扣除閒置，門檻由你自己的使用習慣推導。穩定度是每件成本的變異程度（變異係數）。",
+    "perSessionTitle": "完成一件事的成本",
+    "avgCost": "平均每件成本",
+    "avgTime": "平均每件時間",
+    "costPerSession": "$ / 件",
+    "timePerSession": "時間 / 件",
+    "tokensPerSession": "Tokens / 件",
+    "consistency": "穩定度",
+    "stable": "穩定",
+    "moderate": "有起伏",
+    "volatile": "不穩定",
+    "consistencyHint": "同類工作每件成本的起伏程度。「不穩定」可能代表重工或鬼打牆。",
+    "searchTopics": "搜尋主題…"
   }
 }

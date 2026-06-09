@@ -7,6 +7,7 @@ and REST layers stay thin.
 from __future__ import annotations
 
 import contextlib
+import math
 from datetime import datetime
 
 from agent_roi.classify import SessionDoc, get_classifier
@@ -30,6 +31,23 @@ from agent_roi.core.models import (
 from agent_roi.core.pricing import all_prices
 from agent_roi.core.timeframe import period_start
 from agent_roi.storage import Database
+
+
+def _coefficient_of_variation(values: list[float]) -> float | None:
+    """Stdev / mean of a sample — a unitless spread measure.
+
+    Unitless means it compares across topics regardless of their absolute cost:
+    a topic averaging $0.50/session and one averaging $50/session can both be
+    "highly variable" at CV ~ 1.0. Returns None when there are fewer than two
+    values (no spread to speak of) or the mean is non-positive.
+    """
+    if len(values) < 2:
+        return None
+    mean = sum(values) / len(values)
+    if mean <= 0:
+        return None
+    variance = sum((v - mean) ** 2 for v in values) / (len(values) - 1)
+    return round(math.sqrt(variance) / mean, 3)
 
 
 class Service:
@@ -149,15 +167,18 @@ class Service:
         start: datetime | None = None,
         end: datetime | None = None,
     ) -> list[TopicROI]:
-        """Cost vs. active time per topic — the ROI ranking.
+        """Per-topic unit economics — what one piece of work of each kind costs.
 
-        Aggregates the per-session active time (already on each summary) up to
-        the topic level so a user can see "this subject cost $X over Y hours",
-        and at what hourly burn rate. Sorted by cost, highest first.
+        A topic is the natural unit of "a thing you did", so aggregating its
+        sessions answers "on average, how much token / time / money does
+        finishing one of these take?" plus how *consistent* that is (the
+        coefficient of variation of per-session cost). Sorted by cost, highest
+        first.
         """
         rows = self.sessions(start=start, end=end)
         agg: dict[str, dict[str, float]] = {}
         est: dict[str, bool] = {}
+        costs: dict[str, list[float]] = {}
         for s in rows:
             a = agg.setdefault(
                 s.topic,
@@ -169,6 +190,7 @@ class Service:
             a["tokens"] += s.total_tokens
             a["active"] += s.active_seconds
             est[s.topic] = est.get(s.topic, False) or s.estimated
+            costs.setdefault(s.topic, []).append(s.cost_usd)
         topics = [
             TopicROI(
                 topic=topic,
@@ -177,6 +199,7 @@ class Service:
                 cost_usd=a["cost"],
                 total_tokens=int(a["tokens"]),
                 active_seconds=a["active"],
+                cost_cv=_coefficient_of_variation(costs[topic]),
                 estimated=est[topic],
             )
             for topic, a in agg.items()

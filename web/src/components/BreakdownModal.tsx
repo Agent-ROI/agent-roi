@@ -8,7 +8,7 @@ import {
 } from "../lib/api";
 import type { DateFilter } from "../lib/dateFilter";
 import { rangeInvalid } from "../lib/dateFilter";
-import { fmtTokens, fmtUsd } from "../lib/format";
+import { fmtTokens, fmtUsd, fmtDuration } from "../lib/format";
 import { Pagination } from "./Pagination";
 import { SessionModal } from "./SessionModal";
 
@@ -141,7 +141,9 @@ function SessionsTable({
             <th>{t("table.tools")}</th>
             <th className="num">{t("table.calls")}</th>
             <th className="num">{t("table.tokens")}</th>
+            <th className="num">{t("roi.active")}</th>
             <th className="num">{t("table.cost")}</th>
+            <th className="num">{t("roi.perHour")}</th>
           </tr>
         </thead>
         <tbody>
@@ -162,7 +164,13 @@ function SessionsTable({
               <td>{s.tools.join(", ")}</td>
               <td className="num">{s.interactions}</td>
               <td className="num">{fmtTokens(s.total_tokens)}</td>
+              <td className="num">
+                {s.active_seconds > 0 ? fmtDuration(s.active_minutes) : t("common.dash")}
+              </td>
               <td className="num cost">{fmtUsd(s.cost_usd)}</td>
+              <td className="num">
+                {s.usd_per_hour != null ? `${fmtUsd(s.usd_per_hour)}/h` : t("common.dash")}
+              </td>
             </tr>
           ))}
         </tbody>

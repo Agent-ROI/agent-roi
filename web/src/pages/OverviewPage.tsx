@@ -6,6 +6,7 @@ import {
   type CompositionBundle,
   type Rollup,
   type TimeSeriesBundle,
+  type TopicROI,
 } from "../lib/api";
 import type { DateFilter, Granularity } from "../lib/dateFilter";
 import { rangeInvalid } from "../lib/dateFilter";
@@ -39,6 +40,7 @@ export function OverviewPage({
   const [tools, setTools] = useState<Rollup[]>([]);
   const [series, setSeries] = useState<TimeSeriesBundle | null>(null);
   const [composition, setComposition] = useState<CompositionBundle | null>(null);
+  const [roi, setRoi] = useState<TopicROI[]>([]);
   const [budget, setBudget] = useState<BudgetStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +53,7 @@ export function OverviewPage({
       setTools([]);
       setSeries(null);
       setComposition(null);
+      setRoi([]);
       return;
     }
     let active = true;
@@ -62,13 +65,15 @@ export function OverviewPage({
       api.report("tool", window),
       api.timeseries(window),
       api.composition(window),
+      api.roi({ since: filter.since, until: filter.until }),
     ])
-      .then(([topicRows, toolRows, ts, comp]) => {
+      .then(([topicRows, toolRows, ts, comp, roiRows]) => {
         if (!active) return;
         setTopics(topicRows);
         setTools(toolRows);
         setSeries(ts);
         setComposition(comp);
+        setRoi(roiRows);
       })
       .catch((e) => active && setError(e instanceof Error ? e.message : t("common.failed")))
       .finally(() => active && setLoading(false));
@@ -90,6 +95,7 @@ export function OverviewPage({
   }, [reloadKey]);
 
   const chartData = series ? totalsChartData(series) : [];
+  const activeSeconds = roi.reduce((s, r) => s + r.active_seconds, 0);
 
   return (
     <div className="page">
@@ -103,7 +109,11 @@ export function OverviewPage({
         <p className="muted">{t("common.loading")}</p>
       ) : (
         <>
-          <StatsCards rows={topics} extraLabel={t("dimension.topic")} />
+          <StatsCards
+            rows={topics}
+            extraLabel={t("dimension.topic")}
+            activeSeconds={activeSeconds}
+          />
           {budget && <BudgetPanel status={budget} />}
           {composition && (
             <CompositionCard

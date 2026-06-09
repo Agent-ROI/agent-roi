@@ -234,11 +234,14 @@ def sessions(
 def roi(
     since: str = typer.Option("", help="Time window start (date or 7d/24h/today)."),
 ) -> None:
-    """Weigh cost against active development time, per topic.
+    """Unit economics per topic — what one piece of work of each kind costs.
 
-    Active time sums the gaps between turns but drops idle stretches, using a
-    threshold derived from your own usage (no fixed "5 minutes"). The $/hr column
-    is the burn rate; a high rate on little time is a "spinning wheels" signal.
+    A topic is one kind of work; each session is one piece of it. The table
+    shows the average cost / time / tokens to finish one piece, plus how
+    consistent that is (the coefficient of variation of per-piece cost). Active
+    time drops idle stretches using a threshold derived from your own usage (no
+    fixed "5 minutes"). "Erratic" consistency is a re-work / spinning-wheels
+    signal.
     """
     start = _parse_since(since)
     service = Service()
@@ -247,41 +250,48 @@ def roi(
         console.print("[yellow]No data in range. Run 'agent-roi ingest' first.[/yellow]")
         return
 
-    title = "ROI by Topic — cost vs. active time"
+    # Lead with the most expensive piece of work, not the biggest total.
+    rows.sort(key=lambda t: t.cost_per_session, reverse=True)
+
+    title = "Unit economics by Topic — cost per piece of work"
     if start is not None:
         title += f"  (since {start.date()})"
     table = Table(title=title)
     table.add_column("Topic", style="cyan", no_wrap=True)
-    table.add_column("Sessions", justify="right")
-    table.add_column("Calls", justify="right")
-    table.add_column("Active", justify="right")
-    table.add_column("Cost (USD)", justify="right", style="green")
+    table.add_column("Pieces", justify="right")
+    table.add_column("$/piece", justify="right", style="green")
+    table.add_column("Time/piece", justify="right")
+    table.add_column("Consistency", justify="center")
     table.add_column("$/hr", justify="right")
     table.add_column("Src", justify="center")
 
-    # Flag the steepest burn rates so "expensive per hour" jumps out.
-    rates = [t.usd_per_hour for t in rows if t.usd_per_hour is not None]
-    hot = max(rates) if rates else None
     for t in rows:
-        active = f"{t.active_minutes:g}m" if t.active_seconds else "—"
-        if t.usd_per_hour is None:
-            rate = "—"
+        per_time = f"{t.minutes_per_session:g}m" if t.active_seconds else "—"
+        rate = f"${t.usd_per_hour:,.0f}" if t.usd_per_hour is not None else "—"
+        # CV bands (rule-of-thumb, not tuned to any one user): tight / moderate
+        # spread / stdev exceeds the mean.
+        if t.cost_cv is None:
+            consistency = "—"
+        elif t.cost_cv < 0.5:
+            consistency = "[green]steady[/green]"
+        elif t.cost_cv < 1.0:
+            consistency = "[yellow]varies[/yellow]"
         else:
-            style = "red" if hot and t.usd_per_hour >= hot else "yellow"
-            rate = f"[{style}]${t.usd_per_hour:,.0f}[/{style}]"
+            consistency = "[red]erratic[/red]"
         table.add_row(
             t.topic,
             str(t.sessions),
-            str(t.interactions),
-            active,
-            f"${t.cost_usd:,.2f}",
+            f"${t.cost_per_session:,.2f}",
+            per_time,
+            consistency,
             rate,
             "~est" if t.estimated else "exact",
         )
     console.print(table)
     console.print(
-        "[dim]Active = active development time (idle gaps excluded, threshold "
-        "auto-derived from your usage). $/hr = spend rate over that time.[/dim]"
+        "[dim]One topic = one kind of work; one session = one piece. Averages are "
+        "per piece. Active time excludes idle gaps (threshold auto-derived). "
+        "Consistency = variation of per-piece cost.[/dim]"
     )
 
 

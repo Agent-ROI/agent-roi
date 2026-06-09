@@ -166,7 +166,7 @@
     "pricing": "Tarification",
     "settings": "Paramètres",
     "activity": "Activity",
-    "roi": "ROI"
+    "roi": "Coût unitaire"
   },
   "pages": {
     "overviewHint": "Coût, utilisation des jetons et part des outils en un coup d'œil.",
@@ -176,7 +176,7 @@
     "topTopics": "Principaux sujets par coût",
     "settingsHint": "Configurer la langue, le classifieur et les collecteurs.",
     "activityHint": "What your agents actually did — the concrete actions behind the token cost.",
-    "roiHint": "Coût rapporté au temps de développement actif, par sujet."
+    "roiHint": "Coût unitaire : ce que coûte en moyenne une tâche de chaque type."
   },
   "pagination": {
     "pageOf": "Page {{page}} sur {{total}}"
@@ -247,6 +247,18 @@
     "active": "Actif",
     "perHour": "$/heure",
     "flagHint": "Taux de dépense le plus élevé — à surveiller.",
-    "methodHint": "Le temps actif additionne les intervalles entre les tours, hors périodes d'inactivité ; le seuil est dérivé de votre propre usage, et non fixe. $/heure est le taux de dépense sur ce temps."
+    "methodHint": "Un sujet est un type de travail, chaque session une tâche. Les moyennes sont par tâche. Le temps actif exclut les pauses ; le seuil est dérivé de votre propre usage. La régularité est la variation du coût par tâche (coefficient de variation).",
+    "perSessionTitle": "Coût par tâche",
+    "avgCost": "Coût moyen / tâche",
+    "avgTime": "Temps moyen / tâche",
+    "costPerSession": "$ / tâche",
+    "timePerSession": "Temps / tâche",
+    "tokensPerSession": "Jetons / tâche",
+    "consistency": "Régularité",
+    "stable": "Stable",
+    "moderate": "Variable",
+    "volatile": "Irrégulier",
+    "consistencyHint": "À quel point le coût varie entre tâches du même type. « Irrégulier » peut signaler des reprises ou du surplace.",
+    "searchTopics": "Rechercher des sujets…"
   }
 }

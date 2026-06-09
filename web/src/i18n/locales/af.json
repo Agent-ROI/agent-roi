@@ -166,7 +166,7 @@
     "pricing": "Pryse",
     "settings": "Instellings",
     "activity": "Activity",
-    "roi": "ROI"
+    "roi": "Unit cost"
   },
   "pages": {
     "overviewHint": "Koste, token gebruik en gereedskap aandeel in een oogopslag.",
@@ -176,7 +176,7 @@
     "topTopics": "Top onderwerpe per koste",
     "settingsHint": "Stel taal, klassifiseerder en dataversamelaars op.",
     "activityHint": "What your agents actually did — the concrete actions behind the token cost.",
-    "roiHint": "Cost weighed against active development time, per topic."
+    "roiHint": "Unit economics: what one piece of work of each kind typically costs."
   },
   "pagination": {
     "pageOf": "Bladsy {{page}} van {{total}}"
@@ -247,6 +247,18 @@
     "active": "Active",
     "perHour": "$/hour",
     "flagHint": "Highest spend rate — worth a look.",
-    "methodHint": "Active time sums gaps between turns, excluding idle stretches; the threshold is derived from your own usage, not a fixed value. $/hour is the spend rate over that time."
+    "methodHint": "A topic is one kind of work; each session is one piece of it. Averages are per piece. Active time excludes idle gaps, with a threshold derived from your own usage. Consistency is the variation of per-piece cost (coefficient of variation).",
+    "perSessionTitle": "Cost per piece of work",
+    "avgCost": "Avg cost / piece",
+    "avgTime": "Avg time / piece",
+    "costPerSession": "$ / piece",
+    "timePerSession": "Time / piece",
+    "tokensPerSession": "Tokens / piece",
+    "consistency": "Consistency",
+    "stable": "Steady",
+    "moderate": "Varies",
+    "volatile": "Erratic",
+    "consistencyHint": "How much cost swings between pieces of the same kind. \"Erratic\" can mean re-work or spinning wheels.",
+    "searchTopics": "Search topics…"
   }
 }

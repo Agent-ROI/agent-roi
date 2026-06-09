@@ -94,7 +94,7 @@
     "pricing": "模型定价",
     "settings": "设置",
     "activity": "Activity",
-    "roi": "投资回报"
+    "roi": "单位成本"
   },
   "pages": {
     "overviewHint": "一眼看懂花费、令牌用量与工具占比。",
@@ -104,7 +104,7 @@
     "topTopics": "花费最高的主题",
     "settingsHint": "设置语言、分类器与数据收集器。",
     "activityHint": "What your agents actually did — the concrete actions behind the token cost.",
-    "roiHint": "按主题衡量成本与实际开发时间的投资回报。"
+    "roiHint": "单位经济：每一类工作平均完成一件要花多少。"
   },
   "chart": {
     "costByTop": "按{{dimension}}的花费（前 10）",
@@ -247,6 +247,18 @@
     "active": "活跃时间",
     "perHour": "每小时花费",
     "flagHint": "烧钱速率最高，值得留意。",
-    "methodHint": "活跃时间是各回合间隔的加总，排除闲置区段；阈值由你自己的使用习惯推导，并非固定值。每小时花费是该时间内的支出速率。"
+    "methodHint": "一个主题是一类工作，每个 session 是其中一件。平均值以“每件”计算。Active 时间已扣除闲置，阈值由你自己的使用习惯推导。稳定度是每件成本的变异程度（变异系数）。",
+    "perSessionTitle": "完成一件事的成本",
+    "avgCost": "平均每件成本",
+    "avgTime": "平均每件时间",
+    "costPerSession": "$ / 件",
+    "timePerSession": "时间 / 件",
+    "tokensPerSession": "Tokens / 件",
+    "consistency": "稳定度",
+    "stable": "稳定",
+    "moderate": "有起伏",
+    "volatile": "不稳定",
+    "consistencyHint": "同类工作每件成本的起伏程度。“不稳定”可能代表返工或原地打转。",
+    "searchTopics": "搜索主题…"
   }
 }

@@ -224,12 +224,20 @@ class ActivityReport(BaseModel):
 
 
 class TopicROI(BaseModel):
-    """A topic's cost weighed against the time invested in it — the ROI view.
+    """A topic's unit economics — what one "piece of work" of this kind costs.
+
+    A topic is the natural unit of "a thing you did": the classifier groups
+    continuous work into sessions, and like sessions into a topic. So the
+    per-session averages here answer "on average, how much token / time / money
+    does finishing one of these take?".
 
     ``active_seconds`` is summed active development time across the topic's
-    sessions (idle stretches excluded). ``usd_per_hour`` is the spend rate over
-    that time; ``low_output`` flags topics that burned a lot of calls/cost for
-    little measurable active time (a "spinning wheels" signal).
+    sessions (idle excluded). ``usd_per_hour`` is the burn *rate* (intensity).
+    ``cost_cv`` is the coefficient of variation of per-session cost (stdev /
+    mean) — unitless, so it compares across topics: a high value means this kind
+    of work is *inconsistent* (some sessions cost far more than others), a
+    "spinning wheels / re-work" signal. None when there are too few sessions to
+    have a meaningful spread.
     """
 
     topic: str
@@ -238,6 +246,8 @@ class TopicROI(BaseModel):
     cost_usd: float
     total_tokens: int
     active_seconds: float
+    # Coefficient of variation of per-session cost; None if < 2 sessions.
+    cost_cv: float | None = None
     estimated: bool = False
 
     @computed_field  # type: ignore[prop-decorator]
@@ -251,6 +261,26 @@ class TopicROI(BaseModel):
         if self.active_seconds <= 0:
             return None
         return round(self.cost_usd / (self.active_seconds / 3600), 2)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def cost_per_session(self) -> float:
+        """Average USD to finish one piece of work of this kind."""
+        return round(self.cost_usd / self.sessions, 4) if self.sessions else 0.0
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def minutes_per_session(self) -> float:
+        """Average active minutes to finish one piece of work of this kind."""
+        if not self.sessions:
+            return 0.0
+        return round(self.active_seconds / self.sessions / 60, 1)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def tokens_per_session(self) -> int:
+        """Average tokens to finish one piece of work of this kind."""
+        return round(self.total_tokens / self.sessions) if self.sessions else 0
 
 
 class TopicBreakdown(BaseModel):

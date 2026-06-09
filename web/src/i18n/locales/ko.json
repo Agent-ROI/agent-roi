@@ -166,7 +166,7 @@
     "pricing": "가격",
     "settings": "설정",
     "activity": "Activity",
-    "roi": "ROI"
+    "roi": "단위 비용"
   },
   "pages": {
     "overviewHint": "비용, 토큰 사용량, 도구 비중을 한눈에 확인.",
@@ -176,7 +176,7 @@
     "topTopics": "비용 상위 주제",
     "settingsHint": "언어, 분류기 및 데이터 수집기를 설정합니다.",
     "activityHint": "What your agents actually did — the concrete actions behind the token cost.",
-    "roiHint": "주제별로 비용을 실제 개발 시간과 비교합니다."
+    "roiHint": "단위 경제: 각 종류의 작업 한 건을 끝내는 데 평균 얼마가 드는지."
   },
   "pagination": {
     "pageOf": "{{page}} / {{total}} 페이지"
@@ -247,6 +247,18 @@
     "active": "활성 시간",
     "perHour": "$/시간",
     "flagHint": "지출 속도가 가장 높은 항목입니다.",
-    "methodHint": "활성 시간은 턴 사이 간격의 합이며 유휴 구간을 제외합니다. 임계값은 고정값이 아니라 사용 패턴에서 도출됩니다. $/시간은 해당 시간 동안의 지출 속도입니다."
+    "methodHint": "토픽은 한 종류의 작업이고 각 세션은 그중 한 건입니다. 평균은 건 단위입니다. 활성 시간은 유휴 구간을 제외하며, 임계값은 사용자 본인의 사용 패턴에서 도출합니다. 일관성은 건당 비용의 변동(변동계수)입니다.",
+    "perSessionTitle": "작업 한 건당 비용",
+    "avgCost": "평균 비용 / 건",
+    "avgTime": "평균 시간 / 건",
+    "costPerSession": "$ / 건",
+    "timePerSession": "시간 / 건",
+    "tokensPerSession": "토큰 / 건",
+    "consistency": "일관성",
+    "stable": "안정적",
+    "moderate": "변동",
+    "volatile": "불안정",
+    "consistencyHint": "같은 종류 작업에서 건마다 비용이 얼마나 흔들리는지. \"불안정\"은 재작업이나 헛바퀴를 뜻할 수 있습니다.",
+    "searchTopics": "토픽 검색…"
   }
 }
