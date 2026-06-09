@@ -165,7 +165,8 @@
     "sources": "Fuentes",
     "pricing": "Precios",
     "settings": "Ajustes",
-    "activity": "Activity"
+    "activity": "Activity",
+    "roi": "ROI"
   },
   "pages": {
     "overviewHint": "Costos, uso de tokens y proporción de herramientas de un vistazo.",
@@ -174,7 +175,8 @@
     "sourcesHint": "Ver qué registros de herramientas fueron detectados e importados.",
     "topTopics": "Principales temas por costo",
     "settingsHint": "Configurar idioma, clasificador y colectores de datos.",
-    "activityHint": "What your agents actually did — the concrete actions behind the token cost."
+    "activityHint": "What your agents actually did — the concrete actions behind the token cost.",
+    "roiHint": "Coste frente al tiempo de desarrollo activo, por tema."
   },
   "pagination": {
     "pageOf": "Página {{page}} de {{total}}"
@@ -236,5 +238,15 @@
     "times": "×",
     "returnTokens": "Estimated tokens returned into context",
     "tokenNote": "Token figures are estimated from result size; tools whose results aren't logged (e.g. Copilot) show \"—\"."
+  },
+  "roi": {
+    "totalCost": "Coste total",
+    "totalActive": "Tiempo activo",
+    "blendedRate": "Tasa media",
+    "sessions": "Sesiones",
+    "active": "Activo",
+    "perHour": "$/hora",
+    "flagHint": "Mayor tasa de gasto: merece atención.",
+    "methodHint": "El tiempo activo suma los intervalos entre turnos, excluyendo periodos inactivos; el umbral se deriva de tu propio uso, no es fijo. $/hora es la tasa de gasto en ese tiempo."
   }
 }

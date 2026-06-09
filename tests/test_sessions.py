@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from agent_roi.core.config import Config
 from agent_roi.core.models import Interaction, Tool
@@ -56,6 +56,39 @@ def test_session_detail_lists_interactions(tmp_path):
     assert detail.session.session_id == "s1"
     assert len(detail.interactions) == 2
     assert db.session_detail("missing") is None
+
+
+def test_active_time_excludes_idle_and_feeds_roi(tmp_path):
+    # Build a session with many short 30s gaps (working) and one long idle gap.
+    # Enough gaps (>=20) so the adaptive threshold fits the distribution rather
+    # than falling back to the default, and the long gap is dropped.
+    base = datetime(2026, 5, 4, 9, 0, tzinfo=timezone.utc)
+    rows = []
+    t = base
+    for i in range(25):
+        rows.append(_itx(f"w{i}", "s1", topic="auth", ts=t))
+        # A long idle break halfway through that must NOT count as work.
+        t += timedelta(hours=3) if i == 12 else timedelta(seconds=30)
+    service = Service(Config(db_path=tmp_path / "t.db"))
+    service.db.upsert_many(rows)
+
+    sessions = {s.session_id: s for s in service.sessions()}
+    active_min = sessions["s1"].active_minutes
+    # 24 gaps total; one is 3h (dropped). The other 23 are 30s each = 690s = 11.5m.
+    assert active_min == 11.5
+    assert sessions["s1"].usd_per_hour is not None
+
+    roi = {r.topic: r for r in service.roi_by_topic()}
+    assert roi["auth"].active_minutes == 11.5
+    assert roi["auth"].sessions == 1
+
+
+def test_single_turn_session_has_no_active_time(tmp_path):
+    service = Service(Config(db_path=tmp_path / "t.db"))
+    service.db.upsert_many([_itx("a", "s1", topic="auth")])
+    s = service.sessions()[0]
+    assert s.active_seconds == 0.0
+    assert s.usd_per_hour is None
 
 
 def test_sources_reports_collectors(tmp_path):

@@ -16,6 +16,11 @@ from sqlalchemy import String, and_, case, create_engine, delete, func, select
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
+from agent_roi.core.active_time import (
+    active_seconds,
+    adaptive_idle_threshold,
+    session_gaps_seconds,
+)
 from agent_roi.core.models import (
     ActivityCount,
     ActivityReport,
@@ -442,6 +447,40 @@ class Database:
             stmt: Any = select(func.sum(InteractionRow.cost_usd))
             stmt = _apply_window(stmt, start, end)
             return float(session.execute(stmt).scalar() or 0.0)
+
+    def active_time_by_session(
+        self,
+        start: datetime | None = None,
+        end: datetime | None = None,
+    ) -> tuple[dict[str, float], float]:
+        """Estimate active development time per session over a window.
+
+        Returns ``({session_id: active_seconds}, idle_threshold_seconds)``. The
+        idle threshold is derived once from the *whole window's* gap distribution
+        (see :mod:`agent_roi.core.active_time`) so every session is measured
+        consistently, then applied per session. This is a Python-side pass
+        because gap detection needs ordered per-session differencing that SQL
+        aggregation can't express cleanly.
+        """
+        with Session(self.engine) as session:
+            stmt: Any = select(InteractionRow.session_id, InteractionRow.timestamp)
+            stmt = _apply_window(stmt, start, end)
+            rows = session.execute(stmt).all()
+
+        stamps_by_session: dict[str, list[datetime]] = {}
+        for sid, ts in rows:
+            stamps_by_session.setdefault(str(sid), []).append(ts)
+
+        all_gaps: list[float] = []
+        for stamps in stamps_by_session.values():
+            all_gaps.extend(session_gaps_seconds(stamps))
+
+        threshold = adaptive_idle_threshold(all_gaps)
+        active = {
+            sid: active_seconds(stamps, threshold)
+            for sid, stamps in stamps_by_session.items()
+        }
+        return active, threshold
 
     def timeseries(
         self,

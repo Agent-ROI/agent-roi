@@ -25,6 +25,7 @@ from agent_roi.core.models import (
     TimeSeriesBundle,
     TokenComposition,
     TopicBreakdown,
+    TopicROI,
 )
 from agent_roi.core.pricing import all_prices
 from agent_roi.core.timeframe import period_start
@@ -124,14 +125,64 @@ class Service:
         limit: int | None = None,
         search: str | None = None,
     ) -> list[SessionSummary]:
-        """Per-session breakdown, optionally scoped to one topic and window."""
-        return self.db.sessions(
+        """Per-session breakdown, optionally scoped to one topic and window.
+
+        Each row is enriched with estimated *active* development time so the UI
+        can show value (time spent) alongside cost — the core of "ROI". The idle
+        threshold is derived once from the window's full gap distribution so all
+        sessions are measured on the same, user-adaptive basis.
+        """
+        rows = self.db.sessions(
             topic=topic,
             start=start,
             end=end,
             limit=limit,
             search=search,
         )
+        active, _ = self.db.active_time_by_session(start=start, end=end)
+        for row in rows:
+            row.active_seconds = active.get(row.session_id, 0.0)
+        return rows
+
+    def roi_by_topic(
+        self,
+        start: datetime | None = None,
+        end: datetime | None = None,
+    ) -> list[TopicROI]:
+        """Cost vs. active time per topic — the ROI ranking.
+
+        Aggregates the per-session active time (already on each summary) up to
+        the topic level so a user can see "this subject cost $X over Y hours",
+        and at what hourly burn rate. Sorted by cost, highest first.
+        """
+        rows = self.sessions(start=start, end=end)
+        agg: dict[str, dict[str, float]] = {}
+        est: dict[str, bool] = {}
+        for s in rows:
+            a = agg.setdefault(
+                s.topic,
+                {"sessions": 0, "interactions": 0, "cost": 0.0, "tokens": 0, "active": 0.0},
+            )
+            a["sessions"] += 1
+            a["interactions"] += s.interactions
+            a["cost"] += s.cost_usd
+            a["tokens"] += s.total_tokens
+            a["active"] += s.active_seconds
+            est[s.topic] = est.get(s.topic, False) or s.estimated
+        topics = [
+            TopicROI(
+                topic=topic,
+                sessions=int(a["sessions"]),
+                interactions=int(a["interactions"]),
+                cost_usd=a["cost"],
+                total_tokens=int(a["tokens"]),
+                active_seconds=a["active"],
+                estimated=est[topic],
+            )
+            for topic, a in agg.items()
+        ]
+        topics.sort(key=lambda t: t.cost_usd, reverse=True)
+        return topics
 
     def composition(
         self,
@@ -194,7 +245,14 @@ class Service:
 
     def session_detail(self, session_id: str) -> SessionDetail | None:
         """One session's aggregate plus its individual interactions."""
-        return self.db.session_detail(session_id)
+        detail = self.db.session_detail(session_id)
+        if detail is None:
+            return None
+        # Derive the idle threshold from the whole corpus (a single session has
+        # too few gaps to fit reliably), then apply it to this session.
+        active, _ = self.db.active_time_by_session()
+        detail.session.active_seconds = active.get(session_id, 0.0)
+        return detail
 
     def timeseries(
         self,

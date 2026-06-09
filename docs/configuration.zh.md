@@ -15,6 +15,7 @@ Agent-ROI 在零設定下即可運作。若要自訂，請在以下位置建立�
 [classifier]
 similarity_threshold = 0.18   # 越高 = 主題越多、越細
 label_terms = 3               # 每個主題名稱用幾個詞
+min_topic_sessions = 2        # 過小的群集會併入共用的「misc」主題
 
 [collectors]
 enabled = ["claude_code", "codex", "copilot", "gemini", "hermes"]
@@ -36,6 +37,7 @@ monthly_usd = 100.0
 |----|------|------|
 | `similarity_threshold` | `0.18` | 兩個 session 的餘弦相似度達到此值以上，即歸為同一主題。調高得到更多、更細的主題；調低得到更少、更廣的主題。 |
 | `label_terms` | `3` | 每個自動歸納的主題名稱包含幾個關鍵詞。 |
+| `min_topic_sessions` | `2` | session 數少於此值的群集會併入單一 `misc` 主題，避免報表被一堆只出現一次的單 session 標籤淹沒。設為 `1` 則每個群集都保留為獨立主題。 |
 
 ### `[collectors]`
 

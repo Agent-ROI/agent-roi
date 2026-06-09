@@ -165,7 +165,8 @@
     "sources": "Sources",
     "pricing": "Tarification",
     "settings": "Paramètres",
-    "activity": "Activity"
+    "activity": "Activity",
+    "roi": "ROI"
   },
   "pages": {
     "overviewHint": "Coût, utilisation des jetons et part des outils en un coup d'œil.",
@@ -174,7 +175,8 @@
     "sourcesHint": "Voir quels journaux d'outils ont été détectés et importés.",
     "topTopics": "Principaux sujets par coût",
     "settingsHint": "Configurer la langue, le classifieur et les collecteurs.",
-    "activityHint": "What your agents actually did — the concrete actions behind the token cost."
+    "activityHint": "What your agents actually did — the concrete actions behind the token cost.",
+    "roiHint": "Coût rapporté au temps de développement actif, par sujet."
   },
   "pagination": {
     "pageOf": "Page {{page}} sur {{total}}"
@@ -236,5 +238,15 @@
     "times": "×",
     "returnTokens": "Estimated tokens returned into context",
     "tokenNote": "Token figures are estimated from result size; tools whose results aren't logged (e.g. Copilot) show \"—\"."
+  },
+  "roi": {
+    "totalCost": "Coût total",
+    "totalActive": "Temps actif",
+    "blendedRate": "Taux moyen",
+    "sessions": "Sessions",
+    "active": "Actif",
+    "perHour": "$/heure",
+    "flagHint": "Taux de dépense le plus élevé — à surveiller.",
+    "methodHint": "Le temps actif additionne les intervalles entre les tours, hors périodes d'inactivité ; le seuil est dérivé de votre propre usage, et non fixe. $/heure est le taux de dépense sur ce temps."
   }
 }

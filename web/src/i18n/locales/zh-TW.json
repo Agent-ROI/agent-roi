@@ -93,7 +93,8 @@
     "sources": "資料來源",
     "pricing": "模型定價",
     "settings": "設定",
-    "activity": "活動分析"
+    "activity": "活動分析",
+    "roi": "投資報酬"
   },
   "pages": {
     "overviewHint": "一眼看懂花費、權杖用量與工具佔比。",
@@ -102,7 +103,8 @@
     "sourcesHint": "查看各工具 log 是否被偵測與匯入。",
     "settingsHint": "設定語言、分類器與資料收集器。",
     "topTopics": "花費最高的主題",
-    "activityHint": "你的代理實際做了什麼 — token 花費背後的具體動作。"
+    "activityHint": "你的代理實際做了什麼 — token 花費背後的具體動作。",
+    "roiHint": "依主題衡量成本與實際開發時間的投資報酬。"
   },
   "chart": {
     "costByTop": "依{{dimension}}的花費（前 10）",
@@ -236,5 +238,15 @@
     "times": "次",
     "returnTokens": "估算回傳進 context 的 token",
     "tokenNote": "Token 數依回傳內容大小估算；未記錄回傳的工具（如 Copilot）顯示「—」。"
+  },
+  "roi": {
+    "totalCost": "總成本",
+    "totalActive": "活躍時間",
+    "blendedRate": "平均時薪率",
+    "sessions": "工作階段",
+    "active": "活躍時間",
+    "perHour": "每小時花費",
+    "flagHint": "燒錢速率最高，值得留意。",
+    "methodHint": "活躍時間是各回合間隔的加總，排除閒置區段；閾值由你自己的使用習慣推導，並非固定值。每小時花費是該時間內的支出速率。"
   }
 }

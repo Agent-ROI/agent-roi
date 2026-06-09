@@ -760,6 +760,16 @@ tr.group-detail td.indent {
   vertical-align: middle;
 }
 
+/* ROI page: flag the steepest spend rate. */
+.rate-hot {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.rate-flag {
+  margin-left: 0.3rem;
+}
+
 .raw-toggle {
   display: block;
   margin: 0 auto 1rem;

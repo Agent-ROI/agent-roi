@@ -93,7 +93,8 @@
     "sources": "Sources",
     "pricing": "Pricing",
     "settings": "Settings",
-    "activity": "Activity"
+    "activity": "Activity",
+    "roi": "ROI"
   },
   "pages": {
     "overviewHint": "At-a-glance cost, token usage, and tool share.",
@@ -102,7 +103,8 @@
     "sourcesHint": "See which tool logs were detected and ingested.",
     "settingsHint": "Configure language, classifier, and data collectors.",
     "topTopics": "Top topics by cost",
-    "activityHint": "What your agents actually did — the concrete actions behind the token cost."
+    "activityHint": "What your agents actually did — the concrete actions behind the token cost.",
+    "roiHint": "Cost weighed against active development time, per topic."
   },
   "chart": {
     "costByTop": "Cost by {{dimension}} (top 10)",
@@ -236,5 +238,15 @@
     "times": "×",
     "returnTokens": "Estimated tokens returned into context",
     "tokenNote": "Token figures are estimated from result size; tools whose results aren't logged (e.g. Copilot) show \"—\"."
+  },
+  "roi": {
+    "totalCost": "Total cost",
+    "totalActive": "Active time",
+    "blendedRate": "Blended rate",
+    "sessions": "Sessions",
+    "active": "Active",
+    "perHour": "$/hour",
+    "flagHint": "Highest spend rate — worth a look.",
+    "methodHint": "Active time sums gaps between turns, excluding idle stretches; the threshold is derived from your own usage, not a fixed value. $/hour is the spend rate over that time."
   }
 }
