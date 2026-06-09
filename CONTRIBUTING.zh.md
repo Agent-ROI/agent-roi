@@ -38,13 +38,12 @@ src/agent_roi/
   api/          # FastAPI REST 層
   cli/          # Typer 命令列介面
 web/            # React + Vite 儀表板
-design/         # DESIGN.md 設計系統（Linear）— 改 UI 前請先閱讀
 docs/           # 英文文件 (*.md) + 中文翻譯 (*.zh.md)
 tests/          # pytest 測試
 ```
 
-前端遵循 [`design/DESIGN.md`](./design/DESIGN.md)（Notion）的設計系統。其 token 已
-鏡射為 `web/src/index.css` 的 CSS 變數；改動 UI 樣式前請先閱讀，讓外觀維持一致。
+前端的設計 token（顏色、圓角、陰影——改編自 Notion 的公開設計系統）以 CSS 變數的形式
+存放在 `web/src/index.css` 的 `:root` 區塊。請透過 `var()` 引用，不要把樣式寫死，讓外觀維持一致。
 
 ### 建置發佈版本
 
