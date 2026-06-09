@@ -223,6 +223,26 @@ class Database:
                 break
         return result
 
+    def purge_synthetic(self) -> int:
+        """Delete Claude Code's zero-cost "<synthetic>" rows. Returns rows removed.
+
+        Older databases may hold synthetic compaction/sidechain turns that the
+        collector now skips at ingest time. They carry no real usage and only
+        skew the model breakdown, so clear them out on ingest as well.
+        """
+        with Session(self.engine) as session:
+            ids = list(
+                session.scalars(
+                    select(InteractionRow.id).where(InteractionRow.model == "<synthetic>")
+                )
+            )
+            if not ids:
+                return 0
+            session.execute(delete(ActivityRow).where(ActivityRow.interaction_id.in_(ids)))
+            session.execute(delete(InteractionRow).where(InteractionRow.id.in_(ids)))
+            session.commit()
+            return len(ids)
+
     def clear_topics(self) -> None:
         """Reset every interaction's topic so the next classify re-labels all."""
         with Session(self.engine) as session:

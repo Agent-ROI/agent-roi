@@ -113,6 +113,14 @@ class ClaudeCodeCollector(Collector):
         if not msg_id:
             return None
 
+        # Claude Code injects "synthetic" assistant turns for compaction and
+        # sidechain bookkeeping. They carry no real token usage (model
+        # "<synthetic>", zero usage) and only pollute the model breakdown, so
+        # drop them rather than store zero-cost noise rows.
+        model = str(message.get("model", "unknown"))
+        if model == "<synthetic>":
+            return None
+
         ts_raw = record.get("timestamp")
         try:
             timestamp = (
@@ -129,7 +137,7 @@ class ClaudeCodeCollector(Collector):
             tool=self.tool,
             session_id=session_id,
             timestamp=timestamp,
-            model=message.get("model", "unknown"),
+            model=model,
             input_tokens=int(usage.get("input_tokens", 0)),
             output_tokens=int(usage.get("output_tokens", 0)),
             cache_read_tokens=int(usage.get("cache_read_input_tokens", 0)),

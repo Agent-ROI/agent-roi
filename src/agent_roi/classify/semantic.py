@@ -22,7 +22,7 @@ import math
 import re
 from collections import defaultdict
 
-from agent_roi.classify.base import UNCATEGORIZED, Classifier, SessionDoc
+from agent_roi.classify.base import MISC, UNCATEGORIZED, Classifier, SessionDoc
 
 # Generic words that carry no topic signal in coding-assistant chatter. Kept
 # short and intentionally conservative — real topic terms should survive.
@@ -157,12 +157,16 @@ class SemanticClassifier(Classifier):
         self,
         similarity_threshold: float = 0.18,
         label_terms: int = 3,
+        min_topic_sessions: int = 2,
     ) -> None:
         # Cosine similarity at/above which two sessions are treated as the same
         # topic. Higher = stricter (more, smaller topics).
         self.similarity_threshold = similarity_threshold
         # How many distinctive terms make up a generated topic label.
         self.label_terms = label_terms
+        # Clusters smaller than this are folded into a single "misc" topic so the
+        # report isn't drowned in one-off, single-session labels. 1 disables it.
+        self.min_topic_sessions = max(1, min_topic_sessions)
 
     def label_sessions(self, sessions: list[SessionDoc]) -> dict[str, str]:
         if not sessions:
@@ -177,8 +181,14 @@ class SemanticClassifier(Classifier):
         used: dict[str, int] = {}
         for members in clusters:
             label = _label_for(members, vectors, self.label_terms)
-            # Disambiguate identical labels from distinct clusters.
-            if label != UNCATEGORIZED and label in used:
+            # Fold one-off clusters into a shared "misc" topic so the report
+            # isn't buried under dozens of single-session labels. Empty clusters
+            # are already UNCATEGORIZED and left as-is.
+            if label != UNCATEGORIZED and len(members) < self.min_topic_sessions:
+                label = MISC
+            # Disambiguate identical labels from distinct clusters (but never
+            # split the shared misc/uncategorized buckets).
+            elif label not in (UNCATEGORIZED, MISC) and label in used:
                 used[label] += 1
                 label = f"{label} {used[label]}"
             else:

@@ -176,6 +176,8 @@ export interface ConfigInfo {
     provider: string;
     similarity_threshold: number;
     label_terms: number;
+    // Clusters smaller than this fold into a shared "misc" topic.
+    min_topic_sessions: number;
   };
   collectors: {
     enabled: string[];

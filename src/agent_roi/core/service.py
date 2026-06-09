@@ -48,6 +48,8 @@ class Service:
                 continue
             with contextlib.suppress(Exception):
                 total += self.db.upsert_many(collector.collect())
+        # Drop legacy zero-cost synthetic rows that older ingests may have stored.
+        self.db.purge_synthetic()
         return total
 
     def classify(self, limit: int | None = None, reclassify: bool = True) -> int:

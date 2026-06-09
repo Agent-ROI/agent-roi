@@ -30,6 +30,11 @@ class ClassifierConfig(BaseModel):
     similarity_threshold: float = 0.18
     # Number of distinctive terms used to name each discovered topic.
     label_terms: int = 3
+    # Clusters with fewer than this many sessions are folded into a single
+    # "misc" topic instead of becoming their own row. Stops the report from
+    # being buried under dozens of one-off, single-session topics. 1 disables
+    # the rollup (every cluster keeps its own label).
+    min_topic_sessions: int = 2
 
 
 class CollectorsConfig(BaseModel):
@@ -75,6 +80,7 @@ class Config(BaseModel):
         lines.append(f'provider = "{self.classifier.provider}"')
         lines.append(f"similarity_threshold = {self.classifier.similarity_threshold}")
         lines.append(f"label_terms = {self.classifier.label_terms}")
+        lines.append(f"min_topic_sessions = {self.classifier.min_topic_sessions}")
         lines.append("")
         lines.append("[collectors]")
         enabled = ", ".join(f'"{e}"' for e in self.collectors.enabled)

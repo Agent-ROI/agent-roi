@@ -17,6 +17,10 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 UNCATEGORIZED = "uncategorized"
+# Catch-all for clusters too small to be worth their own topic row. Distinct
+# from UNCATEGORIZED (which means "no usable text"): these sessions *were*
+# grouped, the group was just a one-off not worth surfacing on its own.
+MISC = "misc"
 
 
 @dataclass
