@@ -110,6 +110,10 @@ def report(
     table.add_column("Interactions", justify="right")
     table.add_column("Input", justify="right")
     table.add_column("Output", justify="right")
+    # Cache reads dominate the total for tools with prompt caching (often >80%),
+    # so break them out — otherwise "Total" looks inexplicably huge next to a
+    # tiny "Input". See TokenComposition for the same split in the UI.
+    table.add_column("Cached", justify="right", style="dim")
     table.add_column("Total Tokens", justify="right")
     table.add_column("Cost (USD)", justify="right", style="green")
     table.add_column("Src", justify="center")
@@ -120,11 +124,16 @@ def report(
             str(r.interactions),
             f"{r.input_tokens:,}",
             f"{r.output_tokens:,}",
+            f"{r.cache_read_tokens:,}",
             f"{r.total_tokens:,}",
             f"${r.cost_usd:,.4f}",
             "~est" if r.estimated else "exact",
         )
     console.print(table)
+    console.print(
+        "[dim]Cached = tokens served from the prompt cache (re-sent context, "
+        "billed cheap); included in Total.[/dim]"
+    )
     if any(r.estimated for r in rollups):
         console.print("[dim]~est = token counts estimated (tool doesn't report usage).[/dim]")
 
@@ -164,6 +173,57 @@ def topic(
                 f"{share:.0f}%",
             )
         console.print(table)
+
+
+@app.command()
+def sessions(
+    topic: str = typer.Option("", help="Only sessions in this topic."),
+    since: str = typer.Option("", help="Time window start (date or 7d/24h/today)."),
+    search: str = typer.Option("", help="Filter by text in the session summary."),
+    limit: int = typer.Option(30, help="Max sessions to show (most recent first)."),
+) -> None:
+    """List individual agent sessions: the unit a topic is made of."""
+    start = _parse_since(since)
+    service = Service()
+    rows = service.sessions(
+        topic=topic or None,
+        start=start,
+        search=search or None,
+        limit=limit,
+    )
+    if not rows:
+        console.print("[yellow]No sessions in range. Run 'agent-roi ingest' first.[/yellow]")
+        return
+
+    title = "Sessions"
+    if topic:
+        title += f" · {topic}"
+    if start is not None:
+        title += f"  (since {start.date()})"
+    table = Table(title=title)
+    table.add_column("Started", justify="right", style="dim", no_wrap=True)
+    table.add_column("Topic", style="cyan")
+    table.add_column("Project")
+    table.add_column("Tools")
+    table.add_column("Calls", justify="right")
+    table.add_column("Total Tokens", justify="right")
+    table.add_column("Cost (USD)", justify="right", style="green")
+    table.add_column("Src", justify="center")
+
+    for s in rows:
+        table.add_row(
+            s.started.strftime("%Y-%m-%d %H:%M"),
+            s.topic,
+            s.project or "—",
+            ", ".join(s.tools),
+            str(s.interactions),
+            f"{s.total_tokens:,}",
+            f"${s.cost_usd:,.4f}",
+            "~est" if s.estimated else "exact",
+        )
+    console.print(table)
+    if any(s.estimated for s in rows):
+        console.print("[dim]~est = token counts estimated (tool doesn't report usage).[/dim]")
 
 
 @app.command()

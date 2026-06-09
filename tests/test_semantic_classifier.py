@@ -54,10 +54,37 @@ def test_threshold_controls_grouping():
         _doc("b", "database migration schema postgres index"),
     ]
     # A very high threshold keeps them apart; a low one merges them.
-    strict = SemanticClassifier(similarity_threshold=0.99).label_sessions(docs)
-    loose = SemanticClassifier(similarity_threshold=0.05).label_sessions(docs)
+    # Disable the misc rollup so we observe raw clustering, not the small-cluster
+    # fold-in (which is exercised separately below).
+    strict = SemanticClassifier(
+        similarity_threshold=0.99, min_topic_sessions=1
+    ).label_sessions(docs)
+    loose = SemanticClassifier(
+        similarity_threshold=0.05, min_topic_sessions=1
+    ).label_sessions(docs)
     assert strict["a"] != strict["b"]
     assert loose["a"] == loose["b"]
+
+
+def test_small_clusters_fold_into_misc():
+    # Two unrelated one-off sessions: each clusters alone, so with the default
+    # min_topic_sessions=2 both collapse into the shared "misc" topic.
+    docs = [
+        _doc("a", "kubernetes helm chart deployment"),
+        _doc("b", "photoshop gradient export"),
+    ]
+    labels = SemanticClassifier(similarity_threshold=0.99).label_sessions(docs)
+    assert labels["a"] == "misc"
+    assert labels["b"] == "misc"
+
+    # A repeated topic (two similar sessions) clears the threshold and keeps its
+    # own label rather than folding into misc.
+    repeated = [
+        _doc("c", "auth login jwt refresh token"),
+        _doc("d", "auth login jwt refresh token rotation"),
+    ]
+    kept = SemanticClassifier(similarity_threshold=0.05).label_sessions(repeated)
+    assert kept["c"] == kept["d"] != "misc"
 
 
 def _itx(id_: str, session: str, summary: str, ts=None) -> Interaction:

@@ -21,6 +21,7 @@ def get_classifier(config: ClassifierConfig) -> Classifier:
         return SemanticClassifier(
             similarity_threshold=config.similarity_threshold,
             label_terms=config.label_terms,
+            min_topic_sessions=config.min_topic_sessions,
         )
     raise ValueError(f"Unknown classifier provider: {config.provider!r}")
 
