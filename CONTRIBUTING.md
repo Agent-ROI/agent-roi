@@ -40,14 +40,14 @@ src/agent_roi/
   api/          # FastAPI REST layer
   cli/          # Typer command-line interface
 web/            # React + Vite dashboard
-design/         # DESIGN.md design system (Linear) — read before UI changes
 docs/           # English docs (*.md) + Chinese translations (*.zh.md)
 tests/          # pytest suite
 ```
 
-The frontend follows the design system in [`design/DESIGN.md`](./design/DESIGN.md)
-(Notion). Its tokens are mirrored as CSS variables in `web/src/index.css`; read
-it before changing UI styles so the look stays consistent.
+The frontend's design tokens (colors, radii, elevation — adapted from Notion's
+public design system) live as CSS variables in the `:root` block of
+`web/src/index.css`. Reference them via `var()` rather than hard-coding styles,
+so the look stays consistent.
 
 ### Building a release
 

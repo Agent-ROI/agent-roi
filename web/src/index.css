@@ -2,6 +2,14 @@
  * Design tokens — Notion design system.
  * See design/DESIGN.md for the source spec. Keep these in sync with it.
  */
+/*
+ * Design tokens — the single source of truth for the UI's look.
+ *
+ * The palette, radii, and elevation are adapted from Notion's public marketing
+ * design system (via VoltAgent/awesome-design-md), used purely as a styling
+ * reference. When adding a token, keep it here and reference it via var(); don't
+ * hard-code colors, radii, or shadows in component styles.
+ */
 :root {
   /* Notion palette (light) */
   --canvas: #ffffff;

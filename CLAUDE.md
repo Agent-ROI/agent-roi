@@ -82,6 +82,6 @@ See `docs/collectors.md` for the full guide.
 
 ## Conventions
 
-- The frontend follows the design system in `design/DESIGN.md`; its tokens are mirrored as CSS variables in `web/src/index.css`. Read it before changing UI styles.
+- The frontend's design tokens (colors, radii, elevation) live as CSS variables in the `:root` block of `web/src/index.css` — the single source of truth. Reference them via `var()`; don't hard-code styles.
 - Docs are bilingual: every `docs/*.md` (and `README.md`, `CONTRIBUTING.md`) has a `*.zh.md` translation — update both when changing docs.
 - Python is `strict` mypy and ruff-linted (`E,F,I,UP,B,SIM`, line length 100).
