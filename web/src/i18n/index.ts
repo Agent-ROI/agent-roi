@@ -61,7 +61,9 @@ void i18n
     fallbackLng: "en",
     interpolation: { escapeValue: false },
     detection: {
-      order: ["localStorage", "navigator"],
+      // querystring first so a shared link can pin a language (?lng=en).
+      order: ["querystring", "localStorage", "navigator"],
+      lookupQuerystring: "lng",
       lookupLocalStorage: "agent-roi-lang",
       convertDetectedLanguage: normalizeLng,
     },

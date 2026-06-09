@@ -21,6 +21,20 @@ When you use multiple AI coding tools — Claude Code, Codex CLI, GitHub Copilot
 
 > *"For this feature / bug fix / topic — how many tokens did my agents burn, and was it worth it?"*
 
+<div align="center">
+
+<img src="docs/assets/screenshots/overview.webp" alt="Agent-ROI overview dashboard — cost trends, token composition, and active development time" width="800" />
+
+<sub>The overview: where your tokens and dollars go, plus how long you actually spent.</sub>
+
+<br /><br />
+
+<img src="docs/assets/screenshots/unit-cost.webp" alt="Agent-ROI unit-cost page — average cost, time, and tokens to finish one piece of work per topic, with a consistency signal" width="800" />
+
+<sub>Unit cost: what one piece of work of each kind typically costs — and how consistent it is.</sub>
+
+</div>
+
 ## Install
 
 **macOS / Linux / WSL:**

@@ -21,6 +21,20 @@
 
 > *「為了這個功能／bug 修正／主題，我的 agent 燒了多少 token — 值得嗎？」*
 
+<div align="center">
+
+<img src="docs/assets/screenshots/overview.webp" alt="Agent-ROI 總覽儀表板 — 成本趨勢、token 組成、實際開發時間" width="800" />
+
+<sub>總覽：token 與金錢花在哪，以及你實際花了多久。</sub>
+
+<br /><br />
+
+<img src="docs/assets/screenshots/unit-cost.webp" alt="Agent-ROI 單位成本頁 — 每個主題平均完成一件事的成本／時間／token，附穩定度訊號" width="800" />
+
+<sub>單位成本：每一類工作平均完成一件要花多少 — 以及穩不穩定。</sub>
+
+</div>
+
 ## 安裝
 
 **macOS / Linux / WSL：**
