@@ -18,6 +18,14 @@ export const fmtUsd = (n: number): string =>
     maximumFractionDigits: 4,
   }).format(n);
 
+/** Active-time minutes → compact "1h 54m" / "47m" / "—" (0 is unmeasurable). */
+export const fmtDuration = (minutes: number): string => {
+  if (!minutes || minutes <= 0) return "—";
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  return h ? `${h}h ${m}m` : `${m}m`;
+};
+
 export const fmtDateTime = (iso: string): string =>
   new Date(iso).toLocaleString(locale());
 

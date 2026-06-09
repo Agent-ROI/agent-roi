@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, type SessionDetail } from "../lib/api";
-import { fmtTokens, fmtUsd, fmtDateTime, fmtTimeRange } from "../lib/format";
+import { fmtTokens, fmtUsd, fmtDateTime, fmtTimeRange, fmtDuration } from "../lib/format";
 import { classificationSnippets, groupCalls, type CallGroup } from "../lib/sessionView";
 import { Pagination } from "./Pagination";
 
@@ -67,6 +67,13 @@ export function SessionModal({ sessionId, onClose }: Props) {
                   tokens: fmtTokens(s.total_tokens),
                   cost: fmtUsd(s.cost_usd),
                 })}
+                {s.active_seconds > 0 && (
+                  <span>
+                    {" · "}
+                    {fmtDuration(s.active_minutes)}
+                    {s.usd_per_hour != null && ` · ${fmtUsd(s.usd_per_hour)}/h`}
+                  </span>
+                )}
               </div>
               <div className="pill-row">
                 {s.tools.map((tool) => (

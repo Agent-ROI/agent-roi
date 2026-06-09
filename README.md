@@ -55,6 +55,7 @@ Set `AGENT_ROI_FROM_GIT=1` before running the install script to get the latest f
 ```bash
 agent-roi ingest                          # parse logs from all detected tools
 agent-roi report --by topic --since 7d   # cost per topic this week
+agent-roi roi --since 7d                  # cost vs. active dev time, per topic
 agent-roi serve                           # web dashboard on http://127.0.0.1:8000
 agent-roi doctor                          # see which tools were detected and why
 agent-roi mcp-cost                        # estimate each MCP server's per-turn overhead
@@ -67,6 +68,7 @@ agent-roi mcp-cost                        # estimate each MCP server's per-turn 
 | **Tool-agnostic** | Reads local logs from Claude Code, Codex CLI, GitHub Copilot, Gemini CLI, and Hermes Agent — no proxy, no workflow change |
 | **Topic classification** | Model-free TF-IDF + cosine-similarity clustering; runs fully offline, no API keys |
 | **Cost & ROI** | Token usage mapped to per-model pricing, aggregated by **topic, tool, or model**, over any time window |
+| **Time, not just cost** | Estimates **active development time** per topic/session (gaps between turns, idle stretches excluded via a threshold derived from your own usage — no magic constant), so cost is weighed against time spent and a **$/hour** burn rate. `agent-roi roi` ranks topics and flags the steepest rates |
 | **Where tokens go** | Splits every total into **overhead** (system prompt + tool + MCP schemas), **cached** re-sent context, and actual **work** — so you see what your tokens are really spent on |
 | **Activity analysis** | Concrete actions behind the cost: which tools and **MCP servers** were called, how often, how many tokens each returned, and which files were touched most |
 | **MCP cost** | `agent-roi mcp-cost` estimates each MCP server's per-turn schema overhead (opt-in; launches the servers to read their tool list) |

@@ -93,7 +93,8 @@
     "sources": "数据来源",
     "pricing": "模型定价",
     "settings": "设置",
-    "activity": "Activity"
+    "activity": "Activity",
+    "roi": "投资回报"
   },
   "pages": {
     "overviewHint": "一眼看懂花费、令牌用量与工具占比。",
@@ -102,7 +103,8 @@
     "sourcesHint": "查看各工具日志是否被检测与导入。",
     "topTopics": "花费最高的主题",
     "settingsHint": "设置语言、分类器与数据收集器。",
-    "activityHint": "What your agents actually did — the concrete actions behind the token cost."
+    "activityHint": "What your agents actually did — the concrete actions behind the token cost.",
+    "roiHint": "按主题衡量成本与实际开发时间的投资回报。"
   },
   "chart": {
     "costByTop": "按{{dimension}}的花费（前 10）",
@@ -236,5 +238,15 @@
     "times": "×",
     "returnTokens": "Estimated tokens returned into context",
     "tokenNote": "Token figures are estimated from result size; tools whose results aren't logged (e.g. Copilot) show \"—\"."
+  },
+  "roi": {
+    "totalCost": "总成本",
+    "totalActive": "活跃时间",
+    "blendedRate": "平均时薪率",
+    "sessions": "会话",
+    "active": "活跃时间",
+    "perHour": "每小时花费",
+    "flagHint": "烧钱速率最高，值得留意。",
+    "methodHint": "活跃时间是各回合间隔的加总，排除闲置区段；阈值由你自己的使用习惯推导，并非固定值。每小时花费是该时间内的支出速率。"
   }
 }

@@ -165,7 +165,8 @@
     "sources": "Quellen",
     "pricing": "Preise",
     "settings": "Einstellungen",
-    "activity": "Activity"
+    "activity": "Activity",
+    "roi": "ROI"
   },
   "pages": {
     "overviewHint": "Kosten, Token-Nutzung und Werkzeuganteil auf einen Blick.",
@@ -174,7 +175,8 @@
     "sourcesHint": "Sehen Sie, welche Werkzeug-Logs erkannt und importiert wurden.",
     "topTopics": "Top-Themen nach Kosten",
     "settingsHint": "Sprache, Klassifizierer und Datensammler konfigurieren.",
-    "activityHint": "What your agents actually did — the concrete actions behind the token cost."
+    "activityHint": "What your agents actually did — the concrete actions behind the token cost.",
+    "roiHint": "Kosten im Verhältnis zur aktiven Entwicklungszeit, je Thema."
   },
   "pagination": {
     "pageOf": "Seite {{page}} von {{total}}"
@@ -236,5 +238,15 @@
     "times": "×",
     "returnTokens": "Estimated tokens returned into context",
     "tokenNote": "Token figures are estimated from result size; tools whose results aren't logged (e.g. Copilot) show \"—\"."
+  },
+  "roi": {
+    "totalCost": "Gesamtkosten",
+    "totalActive": "Aktive Zeit",
+    "blendedRate": "Durchschnittsrate",
+    "sessions": "Sitzungen",
+    "active": "Aktiv",
+    "perHour": "$/Stunde",
+    "flagHint": "Höchste Ausgabenrate – einen Blick wert.",
+    "methodHint": "Die aktive Zeit summiert die Abstände zwischen den Schritten ohne Leerlaufphasen; der Schwellwert wird aus Ihrer eigenen Nutzung abgeleitet, nicht fest vorgegeben. $/Stunde ist die Ausgabenrate über diese Zeit."
   }
 }

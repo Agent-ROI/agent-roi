@@ -70,6 +70,12 @@ def create_app(service: Service | None = None) -> FastAPI:
             "by_model": [r.model_dump() | {"total_tokens": r.total_tokens} for r in bd.by_model],
         }
 
+    @app.get("/api/roi")
+    def roi(since: str = "", until: str = "") -> list[dict[str, object]]:
+        """Cost vs. active development time per topic — the ROI ranking."""
+        start, end = _window(since, until)
+        return [t.model_dump() for t in svc.roi_by_topic(start=start, end=end)]
+
     @app.get("/api/composition")
     def composition(since: str = "", until: str = "") -> dict[str, object]:
         """Where tokens went: overhead (cache writes) vs cached vs actual work."""

@@ -223,6 +223,36 @@ class ActivityReport(BaseModel):
     top_files: list[ActivityCount]
 
 
+class TopicROI(BaseModel):
+    """A topic's cost weighed against the time invested in it — the ROI view.
+
+    ``active_seconds`` is summed active development time across the topic's
+    sessions (idle stretches excluded). ``usd_per_hour`` is the spend rate over
+    that time; ``low_output`` flags topics that burned a lot of calls/cost for
+    little measurable active time (a "spinning wheels" signal).
+    """
+
+    topic: str
+    sessions: int
+    interactions: int
+    cost_usd: float
+    total_tokens: int
+    active_seconds: float
+    estimated: bool = False
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def active_minutes(self) -> float:
+        return round(self.active_seconds / 60, 1)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def usd_per_hour(self) -> float | None:
+        if self.active_seconds <= 0:
+            return None
+        return round(self.cost_usd / (self.active_seconds / 3600), 2)
+
+
 class TopicBreakdown(BaseModel):
     """A topic's total, plus how it splits across tools and models.
 
@@ -270,6 +300,12 @@ class SessionSummary(BaseModel):
     cost_usd: float
     estimated: bool = False
 
+    # Estimated *active* development time in this session: the sum of gaps
+    # between turns, excluding idle stretches (see core.active_time). 0 for a
+    # single-turn session (no measurable elapsed work). Filled in by the service
+    # layer, not stored — it depends on a globally-derived idle threshold.
+    active_seconds: float = 0.0
+
     @property
     def total_tokens(self) -> int:
         return (
@@ -278,6 +314,19 @@ class SessionSummary(BaseModel):
             + self.cache_read_tokens
             + self.cache_write_tokens
         )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def active_minutes(self) -> float:
+        return round(self.active_seconds / 60, 1)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def usd_per_hour(self) -> float | None:
+        """Spend rate over active time, or None when time is unmeasurable."""
+        if self.active_seconds <= 0:
+            return None
+        return round(self.cost_usd / (self.active_seconds / 3600), 2)
 
 
 class InteractionView(BaseModel):

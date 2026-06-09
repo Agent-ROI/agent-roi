@@ -6,6 +6,7 @@ import { AppShell } from "./components/layout/AppShell";
 import type { PageId } from "./components/layout/Sidebar";
 import { OverviewPage } from "./pages/OverviewPage";
 import { TopicsPage } from "./pages/TopicsPage";
+import { ROIPage } from "./pages/ROIPage";
 import { ActivityPage } from "./pages/ActivityPage";
 import { TrendsPage } from "./pages/TrendsPage";
 import { SourcesPage } from "./pages/SourcesPage";
@@ -74,6 +75,7 @@ export default function App() {
         {page === "topics" && (
           <TopicsPage filter={filter} onDrillTopic={setDrillTopic} reloadKey={version} />
         )}
+        {page === "roi" && <ROIPage filter={filter} reloadKey={version} />}
         {page === "activity" && <ActivityPage filter={filter} reloadKey={version} />}
         {page === "trends" && (
           <TrendsPage filter={filter} granularity={granularity} reloadKey={version} />

@@ -206,24 +206,83 @@ def sessions(
     table.add_column("Project")
     table.add_column("Tools")
     table.add_column("Calls", justify="right")
-    table.add_column("Total Tokens", justify="right")
+    table.add_column("Active", justify="right")
     table.add_column("Cost (USD)", justify="right", style="green")
+    table.add_column("$/hr", justify="right")
     table.add_column("Src", justify="center")
 
     for s in rows:
+        active = f"{s.active_minutes:g}m" if s.active_seconds else "—"
+        rate = f"${s.usd_per_hour:,.0f}" if s.usd_per_hour is not None else "—"
         table.add_row(
             s.started.strftime("%Y-%m-%d %H:%M"),
             s.topic,
             s.project or "—",
             ", ".join(s.tools),
             str(s.interactions),
-            f"{s.total_tokens:,}",
+            active,
             f"${s.cost_usd:,.4f}",
+            rate,
             "~est" if s.estimated else "exact",
         )
     console.print(table)
     if any(s.estimated for s in rows):
         console.print("[dim]~est = token counts estimated (tool doesn't report usage).[/dim]")
+
+
+@app.command()
+def roi(
+    since: str = typer.Option("", help="Time window start (date or 7d/24h/today)."),
+) -> None:
+    """Weigh cost against active development time, per topic.
+
+    Active time sums the gaps between turns but drops idle stretches, using a
+    threshold derived from your own usage (no fixed "5 minutes"). The $/hr column
+    is the burn rate; a high rate on little time is a "spinning wheels" signal.
+    """
+    start = _parse_since(since)
+    service = Service()
+    rows = service.roi_by_topic(start=start)
+    if not rows:
+        console.print("[yellow]No data in range. Run 'agent-roi ingest' first.[/yellow]")
+        return
+
+    title = "ROI by Topic — cost vs. active time"
+    if start is not None:
+        title += f"  (since {start.date()})"
+    table = Table(title=title)
+    table.add_column("Topic", style="cyan", no_wrap=True)
+    table.add_column("Sessions", justify="right")
+    table.add_column("Calls", justify="right")
+    table.add_column("Active", justify="right")
+    table.add_column("Cost (USD)", justify="right", style="green")
+    table.add_column("$/hr", justify="right")
+    table.add_column("Src", justify="center")
+
+    # Flag the steepest burn rates so "expensive per hour" jumps out.
+    rates = [t.usd_per_hour for t in rows if t.usd_per_hour is not None]
+    hot = max(rates) if rates else None
+    for t in rows:
+        active = f"{t.active_minutes:g}m" if t.active_seconds else "—"
+        if t.usd_per_hour is None:
+            rate = "—"
+        else:
+            style = "red" if hot and t.usd_per_hour >= hot else "yellow"
+            rate = f"[{style}]${t.usd_per_hour:,.0f}[/{style}]"
+        table.add_row(
+            t.topic,
+            str(t.sessions),
+            str(t.interactions),
+            active,
+            f"${t.cost_usd:,.2f}",
+            rate,
+            "~est" if t.estimated else "exact",
+        )
+    console.print(table)
+    console.print(
+        "[dim]Active = active development time (idle gaps excluded, threshold "
+        "auto-derived from your usage). $/hr = spend rate over that time.[/dim]"
+    )
 
 
 @app.command()

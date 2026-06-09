@@ -80,6 +80,23 @@ export interface SessionSummary {
   total_tokens: number;
   cost_usd: number;
   estimated: boolean;
+  // Estimated active development time (idle gaps excluded). active_seconds is 0
+  // for single-turn sessions; usd_per_hour is null when time is unmeasurable.
+  active_seconds: number;
+  active_minutes: number;
+  usd_per_hour: number | null;
+}
+
+export interface TopicROI {
+  topic: string;
+  sessions: number;
+  interactions: number;
+  cost_usd: number;
+  total_tokens: number;
+  active_seconds: number;
+  active_minutes: number;
+  usd_per_hour: number | null;
+  estimated: boolean;
 }
 
 export interface InteractionView {
@@ -227,6 +244,11 @@ export const api = {
         since: window.since ?? "",
         until: window.until ?? "",
       })}`
+    ),
+
+  roi: (window: WindowParams = {}) =>
+    request<TopicROI[]>(
+      `/api/roi${qs({ since: window.since ?? "", until: window.until ?? "" })}`
     ),
 
   composition: (window: WindowParams = {}) =>

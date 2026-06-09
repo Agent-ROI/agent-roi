@@ -15,6 +15,7 @@ Override the path with the `AGENT_ROI_CONFIG` environment variable.
 [classifier]
 similarity_threshold = 0.18   # higher = more, smaller topics
 label_terms = 3               # words used to name each topic
+min_topic_sessions = 2        # smaller clusters fold into a shared "misc" topic
 
 [collectors]
 enabled = ["claude_code", "codex", "copilot", "gemini", "hermes"]
@@ -37,6 +38,7 @@ required.
 |-----|---------|-------------|
 | `similarity_threshold` | `0.18` | Cosine similarity at or above which two sessions are merged into one topic. Raise to get more, narrower topics; lower to get fewer, broader ones. |
 | `label_terms` | `3` | Number of distinctive words used to name each discovered topic. |
+| `min_topic_sessions` | `2` | Clusters with fewer than this many sessions fold into a single `misc` topic, so the report isn't buried under one-off, single-session labels. Set to `1` to keep every cluster as its own topic. |
 
 ### `[collectors]`
 
