@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { api, type SessionDetail } from "../lib/api";
 import { fmtTokens, fmtUsd, fmtDateTime, fmtTimeRange } from "../lib/format";
 import { classificationSnippets, groupCalls, type CallGroup } from "../lib/sessionView";
+import { Pagination } from "./Pagination";
 
 interface Props {
   sessionId: string;
@@ -130,28 +131,7 @@ export function SessionModal({ sessionId, onClose }: Props) {
                       </tbody>
                     </table>
                     {totalPages > 1 && (
-                      <div className="pagination">
-                        <button
-                          className="chip"
-                          disabled={groupsPage === 0}
-                          onClick={() => setGroupsPage((p) => p - 1)}
-                        >
-                          ‹
-                        </button>
-                        <span className="pagination-info">
-                          {t("pagination.pageOf", {
-                            page: groupsPage + 1,
-                            total: totalPages,
-                          })}
-                        </span>
-                        <button
-                          className="chip"
-                          disabled={groupsPage >= totalPages - 1}
-                          onClick={() => setGroupsPage((p) => p + 1)}
-                        >
-                          ›
-                        </button>
-                      </div>
+                      <Pagination page={groupsPage} totalPages={totalPages} onChange={setGroupsPage} />
                     )}
                   </>
                 );

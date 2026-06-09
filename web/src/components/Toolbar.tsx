@@ -11,11 +11,11 @@ export function Toolbar({ onRefresh }: Props) {
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
 
-  async function run(label: string, fn: () => Promise<unknown>) {
+  async function run(label: string, fn: () => Promise<Record<string, number>>) {
     setBusy(label);
     setNote(null);
     try {
-      const result = (await fn()) as Record<string, number>;
+      const result = await fn();
       const summary = Object.entries(result)
         .map(([k, v]) => `${t(`toolbar.${k}`, { defaultValue: k })}: ${v}`)
         .join(" · ");

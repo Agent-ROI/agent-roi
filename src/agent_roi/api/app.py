@@ -12,11 +12,19 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from agent_roi import __version__
 from agent_roi.core.platform import platform_label
 from agent_roi.core.service import Service
 from agent_roi.core.timeframe import parse_since, parse_until
+from agent_roi.storage.db import Database
+
+
+class ConfigUpdateBody(BaseModel):
+    classifier: dict[str, object] | None = None
+    collectors: dict[str, object] | None = None
+    budget: dict[str, object] | None = None
 
 
 def create_app(service: Service | None = None) -> FastAPI:
@@ -42,7 +50,7 @@ def create_app(service: Service | None = None) -> FastAPI:
         until: str = "",
     ) -> list[dict[str, object]]:
         """Usage/cost grouped by 'topic' | 'tool' | 'model', optionally windowed."""
-        if group_by not in ("topic", "tool", "model", "project"):
+        if group_by not in Database.VALID_DIMENSIONS:
             raise HTTPException(400, f"Invalid group_by: {group_by}")
         start, end = _window(since, until)
         return [
@@ -111,7 +119,7 @@ def create_app(service: Service | None = None) -> FastAPI:
         granularity: str = "day",
     ) -> dict[str, object]:
         """Token/cost trends plus splits by tool and model."""
-        if granularity not in ("day", "week", "month"):
+        if granularity not in Database.VALID_GRANULARITIES:
             raise HTTPException(400, f"Invalid granularity: {granularity}")
         start, end = _window(since, until)
         bundle = svc.timeseries(start=start, end=end, granularity=granularity)
@@ -147,11 +155,11 @@ def create_app(service: Service | None = None) -> FastAPI:
         return svc.get_config_info()
 
     @app.put("/api/config")
-    def update_config(body: dict[str, object]) -> dict[str, object]:
+    def update_config(body: ConfigUpdateBody) -> dict[str, object]:
         return svc.update_config(
-            classifier=body.get("classifier"),  # type: ignore[arg-type]
-            collectors=body.get("collectors"),  # type: ignore[arg-type]
-            budget=body.get("budget"),  # type: ignore[arg-type]
+            classifier=body.classifier,
+            collectors=body.collectors,
+            budget=body.budget,
         )
 
     @app.post("/api/ingest")
