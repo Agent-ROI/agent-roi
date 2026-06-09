@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-09
+
+### Added
+
+- **Active development time & unit economics.** The dashboard now measures cost
+  against *active* development time — the gaps between turns with idle stretches
+  removed, using a threshold derived from your own usage rather than a fixed
+  value. The renamed **Unit cost** page (was "ROI") shows what one piece of work
+  of each kind typically costs (cost / time / tokens per session) plus a
+  consistency signal (the coefficient of variation of per-session cost) that
+  flags inconsistent, re-work-prone topics. Active time also surfaces as an
+  Overview stat card, in the topic drill-in sessions table, and in the new CLI
+  `agent-roi roi` command. The Unit cost page supports topic search and
+  pagination.
+- **Session & cache insights.** New `agent-roi sessions` command and a Cached
+  tokens column in reports; small topic clusters now fold into a `misc` bucket
+  for cleaner classification.
+- A GitHub Release (with the built wheel attached) is now created automatically
+  when a version tag is pushed.
+
+### Changed
+
+- Synthetic interactions are filtered out at ingest, and ingest is resilient to
+  a single collector failing.
+
+### Removed
+
+- Dropped an 821-line imported design-analysis doc that was irrelevant to the
+  project; the design tokens remain documented in `web/src/index.css`.
+
 ## [0.3.1] - 2026-06-08
 
 ### Fixed
