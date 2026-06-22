@@ -151,7 +151,11 @@
     "output": "Output",
     "cacheRead": "Cache read",
     "cacheWrite": "Cache write",
-    "effectiveFrom": "Effective from"
+    "effectiveFrom": "Effective from",
+    "provider": "Provider",
+    "providerAny": "any",
+    "promptSize": "Prompt size",
+    "promptSizeAll": "all"
   },
   "common": {
     "loading": "Loading…",

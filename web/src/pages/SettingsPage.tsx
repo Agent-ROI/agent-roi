@@ -4,7 +4,7 @@ import { SUPPORTED_LANGS, normalizeLng } from "../i18n";
 import { api, type ConfigInfo } from "../lib/api";
 import { toolDisplayName } from "../components/ToolIcon";
 
-const ALL_COLLECTORS = ["claude_code", "codex", "copilot", "gemini", "hermes"];
+const ALL_COLLECTORS = ["claude_code", "codex", "copilot", "gemini", "hermes", "antigravity"];
 
 // "" in a budget input means "no limit" (null on the backend).
 const numOrNull = (v: string): number | null => {

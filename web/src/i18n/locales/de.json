@@ -130,7 +130,11 @@
     "output": "Ausgabe",
     "cacheRead": "Cache-Lesen",
     "cacheWrite": "Cache-Schreiben",
-    "effectiveFrom": "Gültig ab"
+    "effectiveFrom": "Gültig ab",
+    "provider": "Anbieter",
+    "providerAny": "beliebig",
+    "promptSize": "Prompt-Größe",
+    "promptSizeAll": "alle"
   },
   "common": {
     "loading": "Laden…",

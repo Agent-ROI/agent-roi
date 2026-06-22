@@ -27,32 +27,44 @@ export function PricingPage() {
       {loading ? (
         <p className="muted">{t("common.loading")}</p>
       ) : (
-        <section className="card">
-          <table>
-            <thead>
-              <tr>
-                <th>{t("pricing.model")}</th>
-                <th>{t("pricing.effectiveFrom")}</th>
-                <th className="num">{t("pricing.input")}</th>
-                <th className="num">{t("pricing.output")}</th>
-                <th className="num">{t("pricing.cacheRead")}</th>
-                <th className="num">{t("pricing.cacheWrite")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((p) => (
-                <tr key={`${p.model}-${p.effective_from}`}>
-                  <td>{p.model}</td>
-                  <td className="muted small">{p.effective_from}</td>
-                  <td className="num">${p.input}</td>
-                  <td className="num">${p.output}</td>
-                  <td className="num">${p.cache_read}</td>
-                  <td className="num">${p.cache_write}</td>
+        Object.entries(
+          rows.reduce<Record<string, ModelPricing[]>>((acc, p) => {
+            (acc[p.vendor] ??= []).push(p);
+            return acc;
+          }, {}),
+        ).map(([vendor, group]) => (
+          <section className="card" key={vendor}>
+            <h3>{vendor}</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>{t("pricing.model")}</th>
+                  <th>{t("pricing.provider")}</th>
+                  <th>{t("pricing.promptSize")}</th>
+                  <th>{t("pricing.effectiveFrom")}</th>
+                  <th className="num">{t("pricing.input")}</th>
+                  <th className="num">{t("pricing.output")}</th>
+                  <th className="num">{t("pricing.cacheRead")}</th>
+                  <th className="num">{t("pricing.cacheWrite")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
+              </thead>
+              <tbody>
+                {group.map((p) => (
+                  <tr key={`${p.model}-${p.provider ?? "any"}-${p.effective_from}-${p.tier_label}`}>
+                    <td>{p.model}</td>
+                    <td className="muted small">{p.provider ?? t("pricing.providerAny")}</td>
+                    <td className="muted small">{p.tier_label || t("pricing.promptSizeAll")}</td>
+                    <td className="muted small">{p.effective_from}</td>
+                    <td className="num">${p.input}</td>
+                    <td className="num">${p.output}</td>
+                    <td className="num">${p.cache_read}</td>
+                    <td className="num">${p.cache_write}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        ))
       )}
     </div>
   );

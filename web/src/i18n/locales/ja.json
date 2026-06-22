@@ -130,7 +130,11 @@
     "output": "出力",
     "cacheRead": "キャッシュ読み取り",
     "cacheWrite": "キャッシュ書き込み",
-    "effectiveFrom": "適用開始日"
+    "effectiveFrom": "適用開始日",
+    "provider": "プロバイダー",
+    "providerAny": "すべて",
+    "promptSize": "プロンプトサイズ",
+    "promptSizeAll": "すべて"
   },
   "common": {
     "loading": "読み込み中…",

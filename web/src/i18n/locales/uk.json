@@ -130,7 +130,11 @@
     "output": "Вихід",
     "cacheRead": "Читання кешу",
     "cacheWrite": "Запис кешу",
-    "effectiveFrom": "Діє з"
+    "effectiveFrom": "Діє з",
+    "provider": "Постачальник",
+    "providerAny": "будь-який",
+    "promptSize": "Розмір запиту",
+    "promptSizeAll": "усі"
   },
   "common": {
     "loading": "Завантаження…",

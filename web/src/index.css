@@ -422,6 +422,21 @@ button:disabled {
   padding: 1.35rem;
   margin-bottom: 1.5rem;
   box-shadow: var(--shadow-2);
+  /* Gentle entrance: fade + rise. Pure CSS, no JS/deps. */
+  animation: card-enter 0.32s ease both;
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+  }
 }
 
 .card h2 {

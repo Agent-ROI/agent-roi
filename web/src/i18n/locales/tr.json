@@ -130,7 +130,11 @@
     "output": "Çıktı",
     "cacheRead": "Önbellek okuma",
     "cacheWrite": "Önbellek yazma",
-    "effectiveFrom": "Geçerlilik tarihi"
+    "effectiveFrom": "Geçerlilik tarihi",
+    "provider": "Sağlayıcı",
+    "providerAny": "tümü",
+    "promptSize": "İstem boyutu",
+    "promptSizeAll": "tümü"
   },
   "common": {
     "loading": "Yükleniyor…",

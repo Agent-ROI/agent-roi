@@ -1,6 +1,6 @@
 [project]
 name = "agent-roi-tracker"
-version = "0.4.0"
+version = "0.5.0"
 description = "Track the cost, usage, and ROI of your AI coding agents across every tool."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -16,7 +16,9 @@ classifiers = [
 ]
 dependencies = [
     "typer>=0.12",
-    "rich>=13.7",
+    # rich<14.2 lacks the Unicode 17 data module, so it crashes on Python 3.14
+    # (ModuleNotFoundError: rich._unicode_data.unicode17-0-0).
+    "rich>=14.2",
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
     "sqlalchemy>=2.0",

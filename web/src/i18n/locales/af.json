@@ -130,7 +130,11 @@
     "output": "Uitvoer",
     "cacheRead": "Kaslees",
     "cacheWrite": "Kasskryf",
-    "effectiveFrom": "Geldig vanaf"
+    "effectiveFrom": "Geldig vanaf",
+    "provider": "Verskaffer",
+    "providerAny": "enige",
+    "promptSize": "Vinkgrootte",
+    "promptSizeAll": "alle"
   },
   "common": {
     "loading": "Laai…",

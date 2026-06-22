@@ -38,11 +38,15 @@ export interface ActivityReport {
 
 export interface ModelPricing {
   model: string;
+  provider: string | null;
   effective_from: string;
   input: number;
   output: number;
   cache_read: number;
   cache_write: number;
+  tiered: boolean;
+  tier_label: string;
+  vendor: string;
 }
 
 export interface TokenComposition {

@@ -130,7 +130,11 @@
     "output": "Salida",
     "cacheRead": "Lectura caché",
     "cacheWrite": "Escritura caché",
-    "effectiveFrom": "Vigente desde"
+    "effectiveFrom": "Vigente desde",
+    "provider": "Proveedor",
+    "providerAny": "cualquiera",
+    "promptSize": "Tamaño del prompt",
+    "promptSizeAll": "todos"
   },
   "common": {
     "loading": "Cargando…",

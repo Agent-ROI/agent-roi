@@ -14,6 +14,8 @@ export const TOOL_COLORS: Record<string, string> = {
   copilot: "#1aae39",
   codex: "#dd5b00",
   gemini: "#0075de",
+  hermes: "#5b4be0",
+  antigravity: "#3367d6",
   cursor: "#7b3ff2",
   unknown: "#787671",
   other: "#a4a097",

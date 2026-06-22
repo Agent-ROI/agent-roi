@@ -38,7 +38,14 @@ class ClassifierConfig(BaseModel):
 
 
 class CollectorsConfig(BaseModel):
-    enabled: list[str] = ["claude_code", "codex", "copilot", "gemini", "hermes"]
+    enabled: list[str] = [
+        "claude_code",
+        "codex",
+        "copilot",
+        "gemini",
+        "hermes",
+        "antigravity",
+    ]
 
 
 class BudgetConfig(BaseModel):

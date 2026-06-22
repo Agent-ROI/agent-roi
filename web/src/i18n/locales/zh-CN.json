@@ -151,7 +151,11 @@
     "output": "输出",
     "cacheRead": "缓存读取",
     "cacheWrite": "缓存写入",
-    "effectiveFrom": "生效日期"
+    "effectiveFrom": "生效日期",
+    "provider": "供应商",
+    "providerAny": "任意",
+    "promptSize": "提示词大小",
+    "promptSizeAll": "全部"
   },
   "common": {
     "loading": "加载中…",

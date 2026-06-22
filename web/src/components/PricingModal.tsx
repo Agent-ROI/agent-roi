@@ -36,6 +36,8 @@ export function PricingModal({ onClose }: Props) {
               <thead>
                 <tr>
                   <th>{t("pricing.model")}</th>
+                  <th>{t("pricing.provider")}</th>
+                  <th>{t("pricing.promptSize")}</th>
                   <th className="num">{t("pricing.input")}</th>
                   <th className="num">{t("pricing.output")}</th>
                   <th className="num">{t("pricing.cacheRead")}</th>
@@ -44,8 +46,10 @@ export function PricingModal({ onClose }: Props) {
               </thead>
               <tbody>
                 {prices.map((p) => (
-                  <tr key={p.model}>
+                  <tr key={`${p.model}-${p.provider ?? "any"}-${p.effective_from}-${p.tier_label}`}>
                     <td>{p.model}</td>
+                    <td className="muted small">{p.provider ?? t("pricing.providerAny")}</td>
+                    <td className="muted small">{p.tier_label || t("pricing.promptSizeAll")}</td>
                     <td className="num">${p.input}</td>
                     <td className="num">${p.output}</td>
                     <td className="num">${p.cache_read}</td>

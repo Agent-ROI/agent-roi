@@ -14,6 +14,7 @@ from rich.console import Console
 from rich.table import Table
 
 from agent_roi import __version__
+from agent_roi.core.models import ModelPricing
 from agent_roi.core.platform import platform_label
 from agent_roi.core.service import Service
 from agent_roi.core.timeframe import parse_since
@@ -299,24 +300,44 @@ def roi(
 def pricing() -> None:
     """Show the pricing table behind every cost figure (USD per 1M tokens)."""
     service = Service()
-    table = Table(title="Model Pricing (USD per 1M tokens)")
-    table.add_column("Model", style="cyan")
-    table.add_column("From", justify="right", style="dim")
-    table.add_column("Input", justify="right")
-    table.add_column("Output", justify="right")
-    table.add_column("Cache Read", justify="right")
-    table.add_column("Cache Write", justify="right")
-    for p in service.pricing():
-        table.add_row(
-            p.model,
-            p.effective_from,
-            f"${p.input}",
-            f"${p.output}",
-            f"${p.cache_read}",
-            f"${p.cache_write}",
-        )
-    console.print(table)
+    prices = service.pricing()
+    has_tiered = any(p.tiered for p in prices)
+    by_vendor: dict[str, list[ModelPricing]] = {}
+    for p in prices:
+        by_vendor.setdefault(p.vendor, []).append(p)
+
+    for vendor, rows in by_vendor.items():
+        table = Table(title=f"{vendor} — Model Pricing (USD per 1M tokens)")
+        table.add_column("Model", style="cyan")
+        table.add_column("Provider", style="magenta")
+        table.add_column("Prompt size", style="yellow")
+        table.add_column("From", justify="right", style="dim")
+        table.add_column("Input", justify="right")
+        table.add_column("Output", justify="right")
+        table.add_column("Cache Read", justify="right")
+        table.add_column("Cache Write", justify="right")
+        for p in rows:
+            table.add_row(
+                p.model,
+                p.provider or "[dim]any[/dim]",
+                p.tier_label or "[dim]all[/dim]",
+                p.effective_from,
+                f"${p.input}",
+                f"${p.output}",
+                f"${p.cache_read}",
+                f"${p.cache_write}",
+            )
+        console.print(table)
+
     console.print("[dim]cost = (input x in + output x out + cache_read x cr + ...) / 1e6[/dim]")
+    console.print(
+        "[dim]Provider 'any' = generic list price; a tool name overrides it for that tool.[/dim]"
+    )
+    if has_tiered:
+        console.print(
+            "[dim]Prompt size: rate depends on the prompt's input-token count "
+            "(e.g. Gemini Pro doubles input over 200k).[/dim]"
+        )
 
 
 @app.command()

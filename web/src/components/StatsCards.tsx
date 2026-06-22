@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { Rollup } from "../lib/api";
 import { fmtTokens, fmtUsd, fmtDuration } from "../lib/format";
+import { useCountUp } from "../lib/useCountUp";
 
 interface Props {
   rows: Rollup[];
@@ -20,11 +21,16 @@ export function StatsCards({ rows, extraLabel, activeSeconds }: Props) {
   const hasTime = activeSeconds != null && activeSeconds > 0;
   const blendedRate = hasTime ? totalCost / (activeSeconds! / 3600) : null;
 
+  // Count-up the numeric stats (time stays as-is — duration formatting can't lerp).
+  const costAnim = useCountUp(totalCost);
+  const tokensAnim = useCountUp(totalTokens);
+  const interactionsAnim = useCountUp(totalInteractions);
+
   return (
     <section className="stats">
       <div className="stat">
         <div className="stat-label">{t("stats.totalCost")}</div>
-        <div className="stat-value">{fmtUsd(totalCost)}</div>
+        <div className="stat-value">{fmtUsd(costAnim)}</div>
         {anyEstimated && (
           <div className="stat-foot est">{t("stats.includesEstimates")}</div>
         )}
@@ -40,11 +46,11 @@ export function StatsCards({ rows, extraLabel, activeSeconds }: Props) {
       )}
       <div className="stat">
         <div className="stat-label">{t("stats.totalTokens")}</div>
-        <div className="stat-value">{fmtTokens(totalTokens)}</div>
+        <div className="stat-value">{fmtTokens(tokensAnim)}</div>
       </div>
       <div className="stat">
         <div className="stat-label">{t("stats.interactions")}</div>
-        <div className="stat-value">{fmtTokens(totalInteractions)}</div>
+        <div className="stat-value">{fmtTokens(interactionsAnim)}</div>
       </div>
       {extraLabel && (
         <div className="stat">

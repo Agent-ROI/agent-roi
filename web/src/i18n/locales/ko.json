@@ -130,7 +130,11 @@
     "output": "출력",
     "cacheRead": "캐시 읽기",
     "cacheWrite": "캐시 쓰기",
-    "effectiveFrom": "적용 시작일"
+    "effectiveFrom": "적용 시작일",
+    "provider": "공급자",
+    "providerAny": "모두",
+    "promptSize": "프롬프트 크기",
+    "promptSizeAll": "전체"
   },
   "common": {
     "loading": "로드 중…",

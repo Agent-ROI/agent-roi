@@ -17,6 +17,7 @@ class Tool(str, Enum):
     GEMINI = "gemini"
     HERMES = "hermes"
     CURSOR = "cursor"
+    ANTIGRAVITY = "antigravity"
     UNKNOWN = "unknown"
 
 
@@ -301,11 +302,33 @@ class ModelPricing(BaseModel):
     that cost = usage x these numbers."""
 
     model: str
+    # Tool this price is specific to (e.g. a resold model), or None for the
+    # generic list price that applies to any provider.
+    provider: str | None = None
     effective_from: str  # ISO-8601 date; the first day this price was active
     input: float
     output: float
     cache_read: float
     cache_write: float
+    # True when this model is priced by prompt size; each size band is emitted
+    # as its own row, distinguished by ``tier_label``.
+    tiered: bool = False
+    # Human-readable size band this row's prices apply to (e.g. "≤200k",
+    # ">200k"). Empty for flat (non-tiered) models.
+    tier_label: str = ""
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def vendor(self) -> str:
+        """Brand the model belongs to, for grouping the pricing view."""
+        m = self.model.lower()
+        if m.startswith("claude"):
+            return "Anthropic"
+        if m.startswith("gpt"):
+            return "OpenAI"
+        if m.startswith("gemini"):
+            return "Google"
+        return "Other"
 
 
 class SessionSummary(BaseModel):

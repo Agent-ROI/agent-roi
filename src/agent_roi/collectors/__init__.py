@@ -5,6 +5,7 @@ New collectors register here so the CLI and config can refer to them by name.
 
 from __future__ import annotations
 
+from agent_roi.collectors.antigravity import AntigravityCollector
 from agent_roi.collectors.base import Collector
 from agent_roi.collectors.claude_code import ClaudeCodeCollector
 from agent_roi.collectors.codex import CodexCollector
@@ -18,6 +19,7 @@ _REGISTRY: dict[str, type[Collector]] = {
     CopilotCollector.name: CopilotCollector,
     GeminiCollector.name: GeminiCollector,
     HermesCollector.name: HermesCollector,
+    AntigravityCollector.name: AntigravityCollector,
 }
 
 

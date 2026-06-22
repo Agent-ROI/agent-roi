@@ -151,7 +151,11 @@
     "output": "輸出",
     "cacheRead": "快取讀取",
     "cacheWrite": "快取寫入",
-    "effectiveFrom": "生效日期"
+    "effectiveFrom": "生效日期",
+    "provider": "供應商",
+    "providerAny": "任意",
+    "promptSize": "提示詞大小",
+    "promptSizeAll": "全部"
   },
   "common": {
     "loading": "載入中…",

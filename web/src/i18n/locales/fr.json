@@ -130,7 +130,11 @@
     "output": "Sortie",
     "cacheRead": "Lecture cache",
     "cacheWrite": "Écriture cache",
-    "effectiveFrom": "En vigueur depuis"
+    "effectiveFrom": "En vigueur depuis",
+    "provider": "Fournisseur",
+    "providerAny": "tous",
+    "promptSize": "Taille du prompt",
+    "promptSizeAll": "toutes"
   },
   "common": {
     "loading": "Chargement…",
